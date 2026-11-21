@@ -20,12 +20,6 @@ export const filtrosQuerySchema = {
   },
 };
 
-export const erroSchema = {
-  type: 'object', additionalProperties: false, required: ['erro', 'mensagem'],
-  properties: { erro: { type: 'string' }, mensagem: { type: 'string' } },
-  example: { erro: 'GOLD_INDISPONIVEL', mensagem: 'Camada Gold indisponível. Tente novamente após a carga ou verifique a conexão.' },
-};
-
 export const resumoSchema = {
   type: 'object', additionalProperties: false,
   example: {
@@ -65,27 +59,5 @@ export const resumoSchema = {
         flag_grupo_pequeno: { type: 'boolean', nullable: true, description: 'Base agregada menor que 30; null se não calculável.' },
       },
     },
-  },
-};
-
-const opcoesCodigo = {
-  type: 'array', items: {
-    type: 'object', additionalProperties: false, required: ['codigo', 'nome'],
-    properties: { codigo: { type: 'string' }, nome: { type: 'string', nullable: true } },
-  },
-};
-const opcoesTexto = { type: 'array', items: { type: 'string' } };
-export const catalogoSchema = {
-  type: 'object', additionalProperties: false,
-  required: ['anos', 'cursos', 'areas_gerais', 'municipios_oferta', 'municipios_sede', 'modalidades', 'categorias_administrativas', 'organizacoes_academicas'],
-  properties: {
-    anos: { type: 'array', items: { type: 'integer' } },
-    cursos: opcoesCodigo,
-    areas_gerais: opcoesCodigo,
-    municipios_oferta: opcoesCodigo,
-    municipios_sede: opcoesCodigo,
-    modalidades: opcoesTexto,
-    categorias_administrativas: opcoesTexto,
-    organizacoes_academicas: opcoesTexto,
   },
 };

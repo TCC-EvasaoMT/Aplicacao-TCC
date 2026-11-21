@@ -7,14 +7,17 @@ Monorepo com React, TypeScript e Fastify. O frontend consulta a API, e o backend
 ```text
 frontend/              React e Vite; tela inicial com resumo por ano
 backend/               API Fastify, regras de cálculo e acesso à Gold
-backend/src/indicadores/ Módulo de indicadores com entrada pública em index.ts
-docs/                  Documentação acadêmica
+backend/src/modules/   Módulos de catálogos e indicadores
+backend/src/plugins/   Recursos compartilhados e saúde da API
+docs/                  Documentação da aplicação e da arquitetura
 .github/               CI e modelo de pull request
 pnpm-workspace.yaml    Pacotes do workspace
 pnpm-lock.yaml         Único lockfile da aplicação
 ```
 
-O backend é um monólito modular: os endpoints de indicadores são registrados em um plugin encapsulado do Fastify. O arquivo `indicadores/index.ts` é a interface de entrada do módulo. Novos módulos serão adicionados quando houver funcionalidades que justifiquem a separação.
+O backend é um monólito modular: catálogos e indicadores são plugins encapsulados do Fastify, cada um com entrada pública em `index.ts`. O catálogo continua acessível em `/api/v1/filtros`. Novos módulos serão adicionados quando houver funcionalidades que justifiquem a separação.
+
+Leia a [arquitetura da aplicação](docs/ARQUITETURA.md) e os [módulos e contratos do backend](docs/MODULOS_BACKEND.md). A pasta local `docs-codex/` permanece ignorada pelo Git.
 
 O frontend não importa arquivos internos do backend e não acessa o banco. Ele usa HTTP/JSON em `/api/v1`. As fórmulas de evasão continuam no backend; a interface apenas formata os resultados.
 

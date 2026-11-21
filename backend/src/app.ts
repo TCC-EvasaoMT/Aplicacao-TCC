@@ -1,10 +1,18 @@
 import Fastify, { type FastifyError } from 'fastify';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
-import { indicadores, type Consultas } from './indicadores/index.js';
+import { indicadores, type ConsultasIndicadores } from './modules/indicadores/index.js';
+import { catalogos, type ConsultasCatalogos } from './modules/catalogos/index.js';
+import { health } from './plugins/health.js';
 import { registrarFrontend } from './frontend.js';
 
-export async function buildApp(consultas: Consultas, options: { docs?: boolean; logger?: boolean; frontendDir?: string } = {}) {
+export interface Dependencias {
+  indicadores: ConsultasIndicadores;
+  catalogos: ConsultasCatalogos;
+  health: () => Promise<void>;
+}
+
+export async function buildApp(dependencias: Dependencias, options: { docs?: boolean; logger?: boolean; frontendDir?: string } = {}) {
   const app = Fastify({
     logger: options.logger ?? false,
     ajv: { customOptions: { removeAdditional: false, coerceTypes: true } },
@@ -27,12 +35,14 @@ export async function buildApp(consultas: Consultas, options: { docs?: boolean; 
     await app.register(swagger, {
       openapi: {
         info: { title: 'Evasão no ensino superior público de MT', version: '0.1.0', description: 'API de consulta à Gold da pipeline SEDAP+. Indicadores agregados por vínculo aluno–curso.' },
-        tags: [{ name: 'Indicadores' }, { name: 'Operação' }],
+        tags: [{ name: 'Indicadores' }, { name: 'Catálogos' }, { name: 'Operação' }],
       },
     });
     await app.register(swaggerUi, { routePrefix: '/docs' });
   }
-  await app.register(indicadores, { consultas });
+  await app.register(health, { consultar: dependencias.health });
+  await app.register(catalogos, { consultas: dependencias.catalogos });
+  await app.register(indicadores, { consultas: dependencias.indicadores });
   if (options.frontendDir) await registrarFrontend(app, options.frontendDir);
   return app;
 }
