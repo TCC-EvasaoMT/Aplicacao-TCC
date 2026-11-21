@@ -51,6 +51,7 @@ O futuro módulo `analises` concentrará evolução temporal e comparações ent
 ## Documentação relacionada
 
 - [Módulos e contratos do backend](MODULOS_BACKEND.md)
+- [Filtros e fluxo da interface](FRONTEND_FILTROS.md)
 - [Execução, permissões e fórmulas](../backend/README.md)
 - [Comandos do monorepo](../README.md)
 - [Branches, commits e revisões](../CONTRIBUTING.md)
