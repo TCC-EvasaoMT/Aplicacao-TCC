@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.cache/
+.pnpm-store/
+coverage/
+*.tsbuildinfo
+*.log
+.env
+.env.*
+!.env.example
+dados/
+/docs-codex/
+.DS_Store
+Thumbs.db
