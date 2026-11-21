@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { calcularResumo, medidas, type Agregado } from '../src/indicadores/calculos.js';
+import { calcularResumo, medidas, type Agregado } from '../src/modules/indicadores/calculos.js';
 
 function agregado(changes: Partial<Agregado> = {}): Agregado {
   return {

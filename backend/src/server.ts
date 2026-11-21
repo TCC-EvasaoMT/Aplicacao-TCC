@@ -1,8 +1,10 @@
 import { Pool } from 'pg';
 import { fileURLToPath } from 'node:url';
 import { buildApp } from './app.js';
-import { readConfig } from './config.js';
-import { criarConsultas } from './indicadores/index.js';
+import { readConfig } from './config/index.js';
+import { criarConsultasIndicadores } from './modules/indicadores/index.js';
+import { criarConsultasCatalogos } from './modules/catalogos/index.js';
+import { criarHealth } from './plugins/health.js';
 
 const config = readConfig();
 const pool = new Pool({
@@ -13,7 +15,11 @@ const pool = new Pool({
   statement_timeout: 2500,
   application_name: 'tcc-evasao-api',
 });
-const app = await buildApp(criarConsultas(pool), {
+const app = await buildApp({
+  indicadores: criarConsultasIndicadores(pool),
+  catalogos: criarConsultasCatalogos(pool),
+  health: criarHealth(pool),
+}, {
   docs: config.docs,
   logger: true,
   frontendDir: process.argv.includes('--serve-frontend')

@@ -1,30 +1,30 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { buildApp } from '../src/app.js';
-import { readConfig } from '../src/config.js';
-import { medidas, type Agregado } from '../src/indicadores/calculos.js';
-import { consultaResumo, type Consultas, type Filtros } from '../src/indicadores/consultas.js';
+import { buildApp, type Dependencias } from '../src/app.js';
+import { readConfig } from '../src/config/index.js';
+import { medidas, type Agregado } from '../src/modules/indicadores/calculos.js';
+import { consultaResumo, type Filtros } from '../src/modules/indicadores/consultas.js';
 
 const catalogo = {
   anos: [2023], cursos: [], areas_gerais: [], municipios_oferta: [], municipios_sede: [],
   modalidades: [], categorias_administrativas: [], organizacoes_academicas: [],
 };
-function fakeConsultas(): Consultas {
+function fakeConsultas(): Dependencias {
   return {
     async health() {},
-    async filtros() { return catalogo; },
-    async resumo() {
+    catalogos: { async filtros() { return catalogo; } },
+    indicadores: { async resumo() {
       return { ...Object.fromEntries(medidas.map(m => [m, null])), registros_com_alunos: 0,
         registros_sem_alunos: 0, flag_valor_negativo: null, dados_incompletos: null } as Agregado;
-    },
+    } },
   };
 }
 
 test('API valida parâmetros e preserva códigos como texto', async t => {
   let received: Filtros | undefined;
   const consultas = fakeConsultas();
-  const original = consultas.resumo;
-  consultas.resumo = async filtros => { received = filtros; return original(filtros); };
+  const original = consultas.indicadores.resumo;
+  consultas.indicadores.resumo = async filtros => { received = filtros; return original(filtros); };
   const app = await buildApp(consultas);
   t.after(() => app.close());
   const result = await app.inject('/api/v1/indicadores/resumo?ano=2023&codigo_curso=001&codigo_area_geral=01');
@@ -55,7 +55,7 @@ test('consultas usam parâmetros para todos os filtros, inclusive texto arbitrá
 
 test('health e endpoints retornam 503 sem vazar erro do banco', async t => {
   const fail = async (): Promise<never> => { throw new Error('postgresql://admin:segredo@host/base SELECT confidencial'); };
-  const app = await buildApp({ health: fail, filtros: fail, resumo: fail });
+  const app = await buildApp({ health: fail, catalogos: { filtros: fail }, indicadores: { resumo: fail } });
   t.after(() => app.close());
   for (const route of ['/health', '/api/v1/filtros', '/api/v1/indicadores/resumo?ano=2023']) {
     const result = await app.inject(route);
@@ -72,6 +72,7 @@ test('Swagger documenta contratos e fica ausente quando desativado', async t => 
   assert.equal((await dev.inject('/docs/')).statusCode, 200);
   const spec = (await dev.inject('/docs/json')).json();
   const resumo = spec.paths['/api/v1/indicadores/resumo'].get;
+  assert.deepEqual(spec.paths['/api/v1/filtros'].get.tags, ['Catálogos']);
   assert.equal(resumo.parameters.find((p: { name: string }) => p.name === 'ano').required, true);
   assert.ok(resumo.responses['200']);
   assert.ok(resumo.responses['503']);

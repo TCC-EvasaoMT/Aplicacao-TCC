@@ -1,6 +1,4 @@
-export interface Catalogo {
-  anos: number[];
-}
+import { consultar } from '../../lib/http';
 
 export interface Resumo {
   totais: {
@@ -18,8 +16,7 @@ export interface Resumo {
   };
 }
 
-export async function consultar<T>(path: string, signal: AbortSignal): Promise<T> {
-  const response = await fetch(path, { signal, headers: { Accept: 'application/json' } });
-  if (!response.ok) throw new Error('Não foi possível carregar os dados. Tente novamente.');
-  return response.json() as Promise<T>;
+
+export function consultarResumo(query: string, signal: AbortSignal) {
+  return consultar<Resumo>(`/api/v1/indicadores/resumo?${query}`, signal);
 }

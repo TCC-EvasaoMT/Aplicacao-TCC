@@ -3,16 +3,15 @@ import { mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
-import { buildApp } from '../src/app.js';
-import type { Consultas } from '../src/indicadores/index.js';
+import { buildApp, type Dependencias } from '../src/app.js';
 
-const consultas: Consultas = {
+const consultas: Dependencias = {
   async health() {},
-  async filtros() {
+  catalogos: { async filtros() {
     return { anos: [], cursos: [], areas_gerais: [], municipios_oferta: [], municipios_sede: [],
       modalidades: [], categorias_administrativas: [], organizacoes_academicas: [] };
-  },
-  async resumo() { throw new Error('indisponível'); },
+  } },
+  indicadores: { async resumo() { throw new Error('indisponível'); } },
 };
 
 test('Fastify serve a SPA sem mascarar erros da API, do Swagger ou de assets', async t => {

@@ -4,6 +4,8 @@ API local em TypeScript/Fastify para consultar a camada Gold da [Pipeline-TCC](h
 
 ## Preparar e iniciar
 
+O código está organizado em `src/modules/catalogos` e `src/modules/indicadores`, com plugins compartilhados em `src/plugins` e configuração em `src/config`. Veja a [arquitetura](../docs/ARQUITETURA.md) e os [contratos dos módulos](../docs/MODULOS_BACKEND.md). A extração do catálogo preserva `GET /api/v1/filtros` e sua resposta.
+
 Requisitos: Node.js 22.13 ou superior, pnpm 11.25.0 e PostgreSQL 17 com a Gold carregada pela pipeline. O banco não é criado ou migrado pela API. Se o pnpm ainda não estiver instalado, depois de instalar o Node.js execute `npm install --global pnpm@11.25.0`.
 
 O backend agora faz parte do workspace da raiz. Para instalar dependências, execute na raiz do repositório:

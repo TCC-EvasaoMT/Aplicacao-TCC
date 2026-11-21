@@ -5,7 +5,9 @@ import { performance } from 'node:perf_hooks';
 import { test } from 'node:test';
 import { Pool } from 'pg';
 import { buildApp } from '../../src/app.js';
-import { criarConsultas } from '../../src/indicadores/consultas.js';
+import { criarConsultasIndicadores } from '../../src/modules/indicadores/index.js';
+import { criarConsultasCatalogos } from '../../src/modules/catalogos/index.js';
+import { criarHealth } from '../../src/plugins/health.js';
 
 test('API integrada ao PostgreSQL e a um usuário exclusivo de leitura', {
   skip: !process.env.TEST_DATABASE_URL && 'Defina TEST_DATABASE_URL para executar em PostgreSQL 17.',
@@ -47,7 +49,11 @@ test('API integrada ao PostgreSQL e a um usuário exclusivo de leitura', {
   dbUrl.username = name;
   dbUrl.password = password;
   reader = new Pool({ connectionString: dbUrl.toString(), max: 2, statement_timeout: 2500, connectionTimeoutMillis: 2000 });
-  app = await buildApp(criarConsultas(reader), { docs: true });
+  app = await buildApp({
+    indicadores: criarConsultasIndicadores(reader),
+    catalogos: criarConsultasCatalogos(reader),
+    health: criarHealth(reader),
+  }, { docs: true });
   const server = app;
   const db = owner;
   const apiUser = reader;
