@@ -18,6 +18,8 @@ O catálogo é global, não recebe filtros e não é reduzido conforme a seleç�
 
 As taxas usam os totais agregados, nunca a média das taxas dos cursos. Valores ausentes não viram zero, e ruído negativo ou decimal é preservado. Consulte as fórmulas e regras completas no [README do backend](../backend/README.md#cálculos-e-qualidade).
 
+O `index.ts` também expõe o contrato de cálculo, os schemas de recorte e resultado, a projeção de agregação SQL e a parametrização dos filtros. Análises derivadas devem usar essa entrada pública para manter as mesmas fórmulas e regras de qualidade, sem importar arquivos internos de indicadores. Os fragmentos SQL pressupõem os aliases das junções definidas em `plugins/gold.ts`; os módulos consumidores definem o agrupamento e o período.
+
 ## Operação e composição
 
 `GET /health` pertence a `plugins/health.ts` e verifica a leitura da fato e das seis dimensões. `plugins/gold.ts` converte falhas de consulta em `GOLD_INDISPONIVEL`; o tratamento global responde `503` sem expor credenciais ou SQL. Validações inválidas retornam `400`.

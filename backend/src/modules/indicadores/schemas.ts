@@ -61,3 +61,7 @@ export const resumoSchema = {
     },
   },
 };
+
+const { ano: anoSchema, ...filtrosRecorteProperties } = filtrosQuerySchema.properties;
+const { filtros: _filtros, ...resultadoResumoProperties } = resumoSchema.properties;
+export { anoSchema, filtrosRecorteProperties, resultadoResumoProperties };
