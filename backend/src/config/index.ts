@@ -1,3 +1,5 @@
+import { configurarAutenticacao } from './autenticacao.js'
+
 export function readConfig(env: NodeJS.ProcessEnv = process.env) {
 	function required(name: string): string {
 		const value = env[name]
@@ -24,6 +26,7 @@ export function readConfig(env: NodeJS.ProcessEnv = process.env) {
 		throw new Error('NODE_ENV deve ser development, test ou production')
 	}
 	return {
+		autenticacao: configurarAutenticacao(env),
 		port: port('PORT', 3000),
 		maxRequisicoes: Number(maxRequisicoes),
 		docs: environment === 'development',

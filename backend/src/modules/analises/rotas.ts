@@ -12,6 +12,7 @@ export function registrarRotas(
 	app.get<{ Querystring: FiltrosEvolucao }>(
 		'/api/v1/analises/evolucao-temporal',
 		{
+			config: { acesso: 'publico' },
 			schema: {
 				tags: ['Análises'],
 				summary: 'Consulta a evolução anual de um recorte.',
