@@ -1,6 +1,6 @@
 # Proteção da API pública
 
-O painel e as consultas continuam públicos. Os controles desta entrega protegem o transporte HTTP da aplicação; login, sessão e permissões administrativas permanecem planejados em [AUTORIZACAO.md](AUTORIZACAO.md).
+O painel e as consultas continuam públicos. Este documento descreve a proteção HTTP compartilhada. Login, sessão e permissões do backend administrativo estão implementados e descritos em [AUTORIZACAO.md](AUTORIZACAO.md).
 
 ## Organização
 
@@ -35,7 +35,7 @@ O Fastify aceita corpos de até **16 KiB** nas rotas que processam corpo e confi
 
 Excesso de corpo retorna `413`, tipo de conteúdo não suportado retorna `415`, e erros HTTP reconhecidos preservam `400`, `401`, `403`, `404`, `408` e `429` com mensagens controladas. O `408` gerado diretamente pelo servidor HTTP pode ter formato próprio, antes do handler. Suportar `401`/`403` no tratamento de erros não implementa autenticação. Falhas da Gold continuam como `503`; erros inesperados retornam `500` sem detalhes internos.
 
-O pool mantém cinco conexões, espera de conexão de dois segundos e timeout SQL de 2,5 segundos. Nenhum desses limites comprova a meta de resposta com dados reais.
+O pool de leitura da Gold mantém cinco conexões, espera de conexão de dois segundos e timeout SQL de 2,5 segundos. Autenticação habilitada adiciona outro pool, restrito ao schema `app`, com até três conexões e os mesmos timeouts. Nenhum desses limites comprova a meta de resposta com dados reais.
 
 ## Cabeçalhos e política de conteúdo
 

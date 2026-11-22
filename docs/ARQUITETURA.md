@@ -8,7 +8,7 @@ No frontend, Bootstrap 5.3 fornece estilos de formulários, botões, grade respo
 
 **Monólito modular, organizado por funcionalidade, com separação entre HTTP, acesso a dados e regras de negócio e injeção de dependências manual.** Essa é a descrição da implementação atual.
 
-O termo **monólito** significa que todos os módulos do backend são executados por uma única aplicação Fastify. Eles compartilham o pool de conexões com PostgreSQL e são compilados e implantados juntos. Não existe um servidor independente para catálogos, outro para indicadores e outro para análises.
+O termo **monólito** significa que todos os módulos do backend são executados por uma única aplicação Fastify e são compilados e implantados juntos. Catálogos, indicadores e análises compartilham um pool de leitura da Gold. Autenticação usa um segundo pool no mesmo PostgreSQL, com credenciais restritas ao schema `app`. Não existe um servidor independente para cada módulo.
 
 O termo **modular** significa que o código está dividido por responsabilidades do negócio. Cada módulo concentra suas rotas, contratos, consultas e regras específicas, expondo uma entrada pública em `index.ts`. Uma mudança na evolução temporal, por exemplo, começa em `modules/analises`, sem precisar reunir arquivos espalhados em pastas globais de controllers, services e repositories.
 
@@ -28,6 +28,7 @@ flowchart LR
   P --> G[(PostgreSQL / Gold)]
   G --> B[API Fastify / leitura]
   B --> F[Interface React]
+  B <--> A[(PostgreSQL / app: contas e sessões)]
 ```
 
 ## Execução
@@ -42,17 +43,19 @@ Em desenvolvimento, `pnpm dev` inicia Fastify na porta 3000 e Vite na 5173. O na
 - A API valida os parâmetros, agrega medidas em SQL e calcula taxas sobre os totais.
 - O frontend consulta HTTP/JSON e formata os resultados. Não importa código do backend, não acessa o PostgreSQL e não recalcula taxas.
 - Cada módulo do backend expõe um `index.ts`. A composição da aplicação usa essas entradas; módulos não importam arquivos internos uns dos outros.
-- `plugins/` reúne acesso compartilhado à Gold, saúde e contratos de erro. `config/` valida o ambiente. O pool e seu encerramento são coordenados em `server.ts`.
+- `plugins/` reúne acesso compartilhado à Gold, saúde, proteção HTTP e logs. `config/` valida o ambiente. Os pools e seu encerramento são coordenados em `server.ts`.
+- O backend mantém migrações próprias somente de `app`, executadas por comando de manutenção. A pipeline não cria contas administrativas; a API não migra as camadas analíticas.
 
 ## Módulos existentes
 
-| Módulo        | Responsabilidade                                                   | Entrada HTTP                             |
-| ------------- | ------------------------------------------------------------------ | ---------------------------------------- |
-| `catalogos`   | Listar opções disponíveis para filtros                             | `GET /api/v1/filtros`                    |
-| `indicadores` | Agregar um recorte anual e calcular seus totais, taxas e qualidade | `GET /api/v1/indicadores/resumo`         |
-| `analises`    | Consultar a série anual de um recorte, preservando lacunas         | `GET /api/v1/analises/evolucao-temporal` |
+| Módulo         | Responsabilidade                                                   | Entrada HTTP                             |
+| -------------- | ------------------------------------------------------------------ | ---------------------------------------- |
+| `catalogos`    | Listar opções disponíveis para filtros                             | `GET /api/v1/filtros`                    |
+| `indicadores`  | Agregar um recorte anual e calcular seus totais, taxas e qualidade | `GET /api/v1/indicadores/resumo`         |
+| `analises`     | Consultar a série anual de um recorte, preservando lacunas         | `GET /api/v1/analises/evolucao-temporal` |
+| `autenticacao` | Autenticar, renovar/revogar sessões e aplicar permissões           | `/api/v1/autenticacao/*`                 |
 
-Saúde da aplicação, tratamento de erros e documentação da API são recursos transversais. `GET /health` pertence a `plugins/health.ts`; não é uma responsabilidade do módulo de indicadores. As regras futuras de autorização também serão transversais, conforme o [modelo de acesso](AUTORIZACAO.md).
+Saúde da aplicação, tratamento de erros e documentação da API são recursos transversais. `GET /health` pertence a `plugins/health.ts`; não é uma responsabilidade do módulo de indicadores. O controle de acesso é instalado na raiz do Fastify pelo módulo de autenticação, antes das rotas, conforme o [modelo de acesso](AUTORIZACAO.md).
 
 ## Organização do backend
 
@@ -62,6 +65,8 @@ backend/src/
     catalogos/       Opções disponíveis para filtros
     indicadores/    Resumo, agregações e taxas
     analises/       Evolução temporal por ano e recorte
+    autenticacao/   Login, JWT, sessões e permissões
+  database/         Migrações de app e provisionamento por CLI
   plugins/
     gold.ts         Junções da Gold e tratamento de falhas de consulta
     health.ts       Verificação de acesso às tabelas utilizadas
@@ -70,7 +75,7 @@ backend/src/
     index.ts        Leitura e validação de variáveis de ambiente
   app.ts            Composição dos plugins e tratamento HTTP de erros
   frontend.ts       Serviço de arquivos estáticos e navegação da SPA
-  server.ts         Pool, inicialização e encerramento do processo
+  server.ts         Pools, inicialização e encerramento do processo
 ```
 
 O fragmento SQL em `plugins/gold.ts` define as junções comuns com a fato e as seis dimensões consumidas. Os módulos continuam responsáveis por suas seleções, filtros e agregações. Alterações nesse fragmento afetam catálogo, resumo, evolução temporal e saúde e devem passar pelos testes de integração.
@@ -123,7 +128,7 @@ Se os parâmetros forem inválidos, a consulta é rejeitada com `400`. Falhas de
 
 ## Comunicação e dependências entre módulos
 
-A composição em `app.ts` registra cada módulo usando `app.register`. Os módulos são plugins encapsulados do Fastify: seus hooks e configurações locais podem ter escopo próprio, herdando o contexto de seus pais. Esse encapsulamento organiza a aplicação; não representa isolamento de processos nem substitui autorização.
+A composição em `app.ts` registra os módulos de consulta usando `app.register`. Seus hooks e configurações locais podem ter escopo próprio, herdando o contexto de seus pais. Autenticação instala o controle de acesso na raiz, para alcançar todas as rotas protegidas, e depois registra seus endpoints. O encapsulamento organiza a aplicação; não representa isolamento de processos nem substitui autorização.
 
 Quando um módulo precisa reutilizar regras de outro, importa sua **entrada pública**:
 
@@ -151,9 +156,9 @@ Essas fronteiras são convenções de organização e revisão do código. Ainda
 
 ## Injeção de dependências manual
 
-O ponto de composição da infraestrutura é `server.ts`. Ele lê a configuração, cria **um pool PostgreSQL por processo**, constrói as consultas e entrega essas dependências a `buildApp`. Em seguida, inicia a escuta HTTP e configura o encerramento do pool.
+O ponto de composição da infraestrutura é `server.ts`. Ele lê a configuração, cria **um pool de leitura da Gold e um pool opcional de autenticação por processo**, constrói as consultas e entrega essas dependências a `buildApp`. O primeiro tem até cinco conexões; o segundo, três, com as credenciais `APP_POSTGRES_*`. Ambos usam o mesmo host, porta e banco. Em seguida, inicia a escuta HTTP e configura o encerramento dos pools. A credencial de migração não é usada pelo servidor.
 
-Trecho simplificado da composição, após a criação de `config` e `pool`:
+Trecho simplificado da composição das consultas públicas, após a criação de `config` e `pool`:
 
 ```typescript
 const app = await buildApp(
@@ -187,7 +192,7 @@ Comparações entre cursos e grupos institucionais são os próximos incrementos
 
 ## Documentação relacionada
 
-O [modelo de autorização](AUTORIZACAO.md) prevê painel público e administração autenticada. A decisão de acesso foi definida, mas o controle de sessão e permissões ainda será implementado.
+O [modelo de autorização](AUTORIZACAO.md) mantém painel público e administração autenticada. O backend implementa JWT/Bearer, renovação por cookie e consulta de sessão/permissões a cada chamada protegida. Tela de login e operações de ETL permanecem para próximos incrementos. A [preparação do schema app](BANCO_APLICACAO.md) usa migrações e roles distintas das camadas analíticas.
 
 - [Módulos e contratos do backend](MODULOS_BACKEND.md)
 - [Filtros e fluxo da interface](FRONTEND_FILTROS.md)

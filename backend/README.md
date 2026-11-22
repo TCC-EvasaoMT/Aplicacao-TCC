@@ -4,9 +4,9 @@ API local em TypeScript/Fastify para consultar a camada Gold da [Pipeline-TCC](h
 
 ## Preparar e iniciar
 
-O código está organizado em `src/modules/catalogos`, `src/modules/indicadores` e `src/modules/analises`, com plugins compartilhados em `src/plugins` e configuração em `src/config`. Veja a [arquitetura](../docs/ARQUITETURA.md) e os [contratos dos módulos](../docs/MODULOS_BACKEND.md). A extração do catálogo preserva `GET /api/v1/filtros` e sua resposta.
+O código está organizado em `src/modules/catalogos`, `src/modules/indicadores`, `src/modules/analises` e `src/modules/autenticacao`, com plugins compartilhados em `src/plugins` e configuração em `src/config`. Veja a [arquitetura](../docs/ARQUITETURA.md) e os [contratos dos módulos](../docs/MODULOS_BACKEND.md). A extração do catálogo preserva `GET /api/v1/filtros` e sua resposta.
 
-Requisitos: Node.js 22.13 ou superior, pnpm 11.25.0 e PostgreSQL 17 com a Gold carregada pela pipeline. O banco não é criado ou migrado pela API. Se o pnpm ainda não estiver instalado, depois de instalar o Node.js execute `npm install --global pnpm@11.25.0`.
+Requisitos: Node.js 22.13 ou superior, pnpm 11.25.0 e PostgreSQL 17 com a Gold carregada pela pipeline. O servidor não cria o banco nem executa migrações na inicialização; o comando de manutenção migra somente o schema `app`. Se o pnpm ainda não estiver instalado, depois de instalar o Node.js execute `npm install --global pnpm@11.25.0`.
 
 O backend agora faz parte do workspace da raiz. Para instalar dependências, execute na raiz do repositório:
 
@@ -29,7 +29,7 @@ pnpm build
 pnpm start
 ```
 
-O servidor escuta exclusivamente em `127.0.0.1`. `pnpm start` serve também `frontend/dist` em `/`. Swagger só é registrado com `NODE_ENV=development`, inclusive na versão compilada. `NODE_ENV=production` desativa `/docs`. Esta entrega não inclui autenticação nem implantação pública.
+O servidor escuta exclusivamente em `127.0.0.1`. `pnpm start` serve também `frontend/dist` em `/`. Swagger só é registrado com `NODE_ENV=development`, inclusive na versão compilada. `NODE_ENV=production` desativa `/docs`. A autenticação administrativa pode ser habilitada; a tela de login e a implantação pública permanecem pendentes.
 
 | Variável              | Uso                                                                                 |
 | --------------------- | ----------------------------------------------------------------------------------- |
@@ -44,7 +44,17 @@ O servidor escuta exclusivamente em `127.0.0.1`. `pnpm start` serve também `fro
 
 Credenciais ausentes ou portas inválidas impedem a inicialização. Uma conexão indisponível mantém o HTTP ativo, mas as consultas respondem `503`. O pool tem até cinco conexões, espera de conexão de dois segundos e limite SQL de 2,5 segundos. Esses limites não substituem a medição de desempenho com a carga real.
 
-Consulte a [proteção da API pública](../docs/SEGURANCA_API.md) para limites HTTP, respostas `429`, cabeçalhos e cuidados com proxy. O painel continua sem login; autenticação administrativa é uma entrega futura.
+Consulte a [proteção da API pública](../docs/SEGURANCA_API.md) para limites HTTP, respostas `429`, cabeçalhos e cuidados com proxy. O painel continua sem login. Para habilitar o backend administrativo, siga [autenticação e autorização](../docs/AUTORIZACAO.md) e [preparação do schema app](../docs/BANCO_APLICACAO.md).
+
+Após criar as roles e o schema e configurar as credenciais de manutenção, execute na raiz:
+
+```sh
+pnpm --filter tcc-evasao-backend db:migrate
+# Aplique sql/permissoes-app.sql como descrito no guia do banco.
+pnpm --filter tcc-evasao-backend auth:criar-admin admin@example.com
+```
+
+Depois configure `AUTH_ENABLED=true`, `AUTH_JWT_SECRET`, `AUTH_ORIGIN` e `APP_POSTGRES_USER`/`APP_POSTGRES_PASSWORD` conforme `.env.example`, e reinicie o backend. Não use as credenciais de manutenção no servidor. O pool de autenticação tem até três conexões e não modifica a Gold. `pnpm dev:demo` continua preparando apenas a Gold sintética; não cria administrador nem habilita autenticação automaticamente.
 
 ## Preparar o acesso ao PostgreSQL
 
@@ -81,6 +91,10 @@ Sem cliente local, abra o `psql` dentro do container e execute o conteúdo de `s
 | `GET /api/v1/indicadores/resumo`         | Totais, base de risco, taxas e qualidade; exige `ano`.                                                                    |
 | `GET /api/v1/analises/evolucao-temporal` | Série anual com os mesmos indicadores e filtros; exige `ano_inicial` e `ano_final`, até 30 anos inclusivos.               |
 | `GET /docs/`                             | Swagger UI em desenvolvimento. A especificação fica em `/docs/json`.                                                      |
+| `POST /api/v1/autenticacao/login`        | Inicia sessão; retorna JWT e cookie de renovação. Exige proteção CSRF.                                                    |
+| `POST /api/v1/autenticacao/renovar`      | Rotaciona o cookie e emite novo JWT. Exige proteção CSRF.                                                                 |
+| `POST /api/v1/autenticacao/logout`       | Revoga a sessão do cookie. Exige proteção CSRF.                                                                           |
+| `GET /api/v1/autenticacao/me`            | Identidade e permissões atuais; exige Bearer.                                                                             |
 
 Exemplo no PowerShell:
 
@@ -167,6 +181,6 @@ Registrar na próxima revisão do Word:
 | Evasão operacional = desvinculados / matrículas | Evasão do curso e da IES sobre vínculos menos falecidos, conforme a modelagem Gold.    |
 | Infraestrutura AWS                              | Esta entrega executa localmente; nuvem fica para etapa posterior.                      |
 
-A stack TypeScript/Fastify/pg e a finalidade de apoiar a análise da evasão são mantidas. A API de evolução temporal está implementada; sua visualização, perfis, coortes, administração da pipeline, autenticação e implantação ficam para outras entregas. A API não acessa a Bronze para deduzir status de execução ou datas de atualização.
+A stack TypeScript/Fastify/pg e a finalidade de apoiar a análise da evasão são mantidas. A evolução temporal tem API e visualização; a autenticação está implementada no backend. Perfis, coortes, tela de login, administração da pipeline e implantação ficam para outras entregas. A API não acessa a Bronze para deduzir status de execução ou datas de atualização.
 
 Referências técnicas: [validação do Fastify](https://fastify.dev/docs/latest/Reference/Validation-and-Serialization/), [consultas parametrizadas do pg](https://node-postgres.com/features/queries) e [schema Gold da pipeline](https://github.com/TCC-EvasaoMT/Pipeline-TCC/blob/ff66b7d44306a257fedde422a771848cc9a7899f/sql/gold.sql).
