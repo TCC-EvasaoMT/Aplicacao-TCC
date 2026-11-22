@@ -1,5 +1,7 @@
 # Módulos e contratos do backend
 
+O backend usa um **monólito modular com organização por funcionalidade**, separando HTTP, acesso a dados e regras de negócio. Para entender o motivo dessa escolha, o fluxo de uma requisição, o papel de cada arquivo, a comunicação entre módulos e a injeção de dependências, consulte a [explicação da arquitetura](ARQUITETURA.md#arquitetura-adotada-no-backend). Este documento detalha os contratos e as responsabilidades de cada módulo.
+
 ## Catálogos
 
 `backend/src/modules/catalogos` fornece `GET /api/v1/filtros`. A URL e o formato da resposta foram preservados na separação do módulo; no Swagger, a rota aparece em **Catálogos**.
