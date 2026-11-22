@@ -3,4 +3,5 @@ packages:
   - frontend
 storeDir: .cache/pnpm-store
 allowBuilds:
+  argon2: true
   esbuild: true
