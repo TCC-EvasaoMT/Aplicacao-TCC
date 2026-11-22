@@ -30,13 +30,22 @@ try {
 		await migrarApp(pool)
 		console.log('Migrações do schema app aplicadas.')
 	} else if (process.argv[2] === 'criar-admin' && process.argv[3]) {
-		const senha = await senhaOculta(
-			'Senha (15 a 128 caracteres, entrada oculta): '
-		)
-		if (senha !== (await senhaOculta('Confirme a senha: ')))
-			throw new Error('As senhas não conferem')
-		await criarAdministrador(pool, process.argv[3], senha)
-		console.log('Administrador criado. Nenhuma conta existente foi alterada.')
+		const email = process.argv[3].trim().toLowerCase()
+		const existente =
+			process.argv.includes('--se-ausente') &&
+			(await pool.query('SELECT 1 FROM app.usuarios WHERE email = $1', [email]))
+				.rowCount
+		if (existente) {
+			console.log('Conta já existe. Senha, estado e permissões preservados.')
+		} else {
+			const senha = await senhaOculta(
+				'Senha (15 a 128 caracteres, entrada oculta): '
+			)
+			if (senha !== (await senhaOculta('Confirme a senha: ')))
+				throw new Error('As senhas não conferem')
+			await criarAdministrador(pool, email, senha)
+			console.log('Administrador criado. Nenhuma conta existente foi alterada.')
+		}
 	} else {
 		throw new Error('Use migrar ou criar-admin <email>')
 	}

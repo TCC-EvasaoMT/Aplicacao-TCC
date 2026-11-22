@@ -2,6 +2,9 @@ import assert from 'node:assert/strict'
 import { createHmac, randomUUID } from 'node:crypto'
 import { readFile } from 'node:fs/promises'
 import { test } from 'node:test'
+import { execFile } from 'node:child_process'
+import { promisify } from 'node:util'
+import { fileURLToPath } from 'node:url'
 import { Pool } from 'pg'
 import { migrarApp } from '../../src/database/migracoes.js'
 import { criarAdministrador } from '../../src/database/administradores.js'
@@ -120,6 +123,71 @@ test(
 				assert.equal(
 					(await runtime.query('SELECT * FROM app.usuarios')).rowCount,
 					1
+				)
+			}
+		)
+		await t.test(
+			'provisionamento repetido pela CLI preserva senha, bloqueio e permissões',
+			async () => {
+				const antes = (
+					await db.query(
+						'SELECT id, senha_hash FROM app.usuarios WHERE email = $1',
+						[email]
+					)
+				).rows[0]
+				await db.query('UPDATE app.usuarios SET ativo = false WHERE id = $1', [
+					antes.id
+				])
+				await db.query(
+					'DELETE FROM app.usuario_permissoes WHERE usuario_id = $1',
+					[antes.id]
+				)
+				const env = {
+					...process.env,
+					POSTGRES_HOST: url.hostname,
+					POSTGRES_PORT: url.port || '5432',
+					POSTGRES_DB: nome,
+					APP_MIGRATION_USER: ownerRole,
+					APP_MIGRATION_PASSWORD: password
+				}
+				const cli = ['--import', 'tsx', 'src/database/cli.ts', 'criar-admin']
+				const options = {
+					cwd: fileURLToPath(new URL('../../', import.meta.url)),
+					env
+				}
+				const result = await promisify(execFile)(
+					process.execPath,
+					[...cli, email.toUpperCase(), '--se-ausente'],
+					options
+				)
+				assert.match(result.stdout, /Conta já existe/)
+				assert.ok(!result.stdout.includes(antes.senha_hash))
+				const depois = (
+					await db.query(
+						'SELECT id, senha_hash, ativo FROM app.usuarios WHERE email = $1',
+						[email]
+					)
+				).rows[0]
+				assert.deepEqual(depois, { ...antes, ativo: false })
+				assert.equal(
+					(await db.query('SELECT * FROM app.usuario_permissoes')).rowCount,
+					0
+				)
+				// Sem terminal e sem conta, deve falhar em vez de criar senha padrão.
+				await assert.rejects(
+					promisify(execFile)(
+						process.execPath,
+						[...cli, 'nova@example.com', '--se-ausente'],
+						options
+					)
+				)
+				assert.equal((await db.query('SELECT * FROM app.usuarios')).rowCount, 1)
+				await db.query('UPDATE app.usuarios SET ativo = true WHERE id = $1', [
+					antes.id
+				])
+				await db.query(
+					"INSERT INTO app.usuario_permissoes (usuario_id, permissao) VALUES ($1, 'etl:consultar'), ($1, 'etl:reprocessar')",
+					[antes.id]
 				)
 			}
 		)
