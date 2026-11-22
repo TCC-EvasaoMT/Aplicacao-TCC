@@ -1,4 +1,4 @@
-import Fastify, { type FastifyError } from 'fastify'
+import Fastify, { LogController, type FastifyError } from 'fastify'
 import swagger from '@fastify/swagger'
 import swaggerUi from '@fastify/swagger-ui'
 import {
@@ -13,6 +13,12 @@ import { health } from './plugins/health.js'
 import { analises, type ConsultasAnalises } from './modules/analises/index.js'
 import { registrarFrontend } from './frontend.js'
 import { registrarSeguranca } from './plugins/seguranca.js'
+import { randomUUID } from 'node:crypto'
+import {
+	codigoErroSeguro,
+	configurarLogger,
+	registrarLogs
+} from './plugins/logs.js'
 
 export interface Dependencias {
 	indicadores: ConsultasIndicadores
@@ -26,12 +32,16 @@ export async function buildApp(
 	options: {
 		docs?: boolean
 		logger?: boolean
+		logStream?: { write(message: string): void }
 		frontendDir?: string
 		maxRequisicoes?: number
 	} = {}
 ) {
 	const app = Fastify({
-		logger: options.logger ?? false,
+		logger: options.logger ? configurarLogger(options.logStream) : false,
+		logController: new LogController({ disableRequestLogging: true }),
+		requestIdHeader: false,
+		genReqId: () => randomUUID(),
 		trustProxy: false,
 		bodyLimit: 16 * 1024,
 		requestTimeout: 10_000,
@@ -66,12 +76,13 @@ export async function buildApp(
 				.code(error.statusCode!)
 				.send({ erro: erroHttp[0], mensagem: erroHttp[1] })
 		}
-		request.log.error({ code: error.code ?? 'INTERNAL_ERROR' }, 'Erro interno')
+		request.log.error({ code: codigoErroSeguro(error) }, 'Erro interno')
 		return reply.code(500).send({
 			erro: 'ERRO_INTERNO',
 			mensagem: 'Não foi possível processar a solicitação.'
 		})
 	})
+	registrarLogs(app)
 	await registrarSeguranca(app, options.maxRequisicoes)
 	if (!options.frontendDir) {
 		app.setNotFoundHandler((_request, reply) =>

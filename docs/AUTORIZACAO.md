@@ -4,6 +4,8 @@ Decisão de produto confirmada em **22/11/2026**: o painel será público; a adm
 
 ## Quem pode fazer o quê
 
+A proteção das consultas públicas já inclui cabeçalhos HTTP, limite de requisições e logs com campos controlados. Veja [proteção da API pública](SEGURANCA_API.md). Esses controles não identificam usuários nem concedem permissões administrativas; a implementação de login e sessão descrita abaixo permanece pendente.
+
 | Recurso                                        | Visitante sem login | Administrador autenticado       |
 | ---------------------------------------------- | ------------------- | ------------------------------- |
 | Consultar catálogo, resumo e evolução temporal | Permitido           | Permitido                       |

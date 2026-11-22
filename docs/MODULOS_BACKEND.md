@@ -34,9 +34,11 @@ O `index.ts` também expõe o contrato de cálculo, os schemas de recorte e resu
 
 `server.ts` cria um único pool PostgreSQL e injeta dependências separadas em `buildApp`: `catalogos`, `indicadores`, `analises` e `health`. Os testes HTTP podem substituir cada dependência sem conectar um banco. `app.ts` registra os plugins encapsulados e a documentação. Nenhum módulo importa arquivos internos de outro; análises usa o contrato público de indicadores.
 
-## Como adicionar um módulo
-
 `plugins/seguranca.ts` registra cabeçalhos de segurança e uma cota compartilhada pelas rotas `/api`, antes de executar os módulos. O limite retorna `429` com `Retry-After`, também documentado no Swagger. `app.ts` preserva erros HTTP conhecidos e aplica limites de corpo e recebimento. Veja [configuração e limites da proteção HTTP](SEGURANCA_API.md).
+
+`plugins/logs.ts` restringe os campos dos logs e correlaciona resposta e evento pelo `X-Request-Id` gerado no servidor. Os eventos de conclusão incluem rota, status e duração, sem URLs completas ou credenciais. Logs de falhas da Gold passam pela mesma normalização de códigos.
+
+## Como adicionar um módulo
 
 1. Crie a pasta em `modules/` quando houver uma funcionalidade concreta.
 2. Mantenha rotas, schemas, consultas e regras específicas dentro dela.

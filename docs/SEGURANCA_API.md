@@ -47,9 +47,19 @@ Somente as rotas do Swagger recebem a CSP estática fornecida por seu plugin, co
 
 HSTS e a diretiva de atualização automática para HTTPS ficam desativados neste servidor local HTTP. TLS, redirecionamento para HTTPS e HSTS precisam ser definidos no ingresso da implantação. Não foi adicionado CORS: o frontend usa a mesma origem, pelo proxy Vite no desenvolvimento e pelo Fastify na versão compilada. A página servida diretamente pelo Vite não recebe os cabeçalhos HTML do Fastify.
 
-## Verificação
+## Logs e correlação
+
+`plugins/logs.ts` configura o logger JSON e registra o término das requisições com método, modelo da rota, status e duração. O backend gera um UUID e o devolve em `X-Request-Id`; o mesmo valor aparece em `reqId` nos logs. Um `X-Request-Id` enviado pelo cliente é ignorado. Caminhos desconhecidos recebem um marcador fixo e rotas de arquivos usam o modelo da rota, sem registrar o caminho fornecido pelo visitante.
+
+Os logs automáticos de requisição do Fastify são substituídos pelo evento controlado. URLs completas, query strings, IP, host, headers e corpos não entram nesse evento. Serializadores de `req`, `res` e `err` restringem o conteúdo, e os campos estruturados de credenciais previstos na configuração são removidos. Falhas registram somente códigos reconhecidos de PostgreSQL, conexão ou Fastify; códigos arbitrários viram `INTERNAL_ERROR`. Mensagens originais, SQL e stack traces não são registrados.
+
+Essa configuração não remove segredos de textos arbitrários escritos por código futuro. Novos logs devem usar mensagens constantes e campos explicitamente revisados, sem interpolar tokens, senhas ou objetos do banco. A perda de stack traces é uma escolha para evitar vazamento; use `reqId`, rota e código para correlacionar falhas. Auditoria administrativa, retenção e envio para um serviço de monitoramento ficam para entregas posteriores.
+
+## Verificação dos controles
 
 `pnpm check` inclui testes de acesso público, cabeçalhos, limite compartilhado, rejeição de IP forjado em cabeçalhos, renovação da janela, independência entre instâncias, corpo excessivo, tipos de conteúdo, erros controlados, configuração inválida e Swagger desativado em produção. Os testes da SPA verificam a coexistência dos arquivos e da API.
+
+A entrega foi validada no Windows com 37 testes de frontend/backend, tipos e build, além dos onze cenários de integração PostgreSQL sintética. O navegador confirmou filtros, resumo, gráfico e consulta pelo Swagger na versão compilada sem erros de CSP. O teste de logs cobre credenciais em headers, query, corpo, erro e caminho desconhecido, além da correlação de respostas `503` e `429`. `pnpm format` e `pnpm format:check` foram executados. Permanece o aviso anterior de tamanho do bundle Recharts; não houve validação com dados reais, proxy de produção ou teste de carga distribuída.
 
 Para testar manualmente, inicie o backend com `HTTP_RATE_LIMIT_MAX=3` em um ambiente local de teste e faça quatro chamadas a `/api/v1/filtros` dentro de um minuto. A quarta deve retornar `429` com `Retry-After`; depois da janela, a consulta volta a funcionar. Restaure o limite normal ao encerrar o teste. A carga sintética é suficiente para essa verificação; desempenho real e configuração de infraestrutura são validações separadas.
 

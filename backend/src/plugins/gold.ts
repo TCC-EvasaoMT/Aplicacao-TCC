@@ -1,4 +1,5 @@
 import type { FastifyRequest } from 'fastify'
+import { codigoErroSeguro } from './logs.js'
 
 export const origem = `
   FROM gold.fato_evasao_curso f
@@ -16,10 +17,7 @@ export async function consultarGold<T>(
 	try {
 		return await tarefa()
 	} catch (error) {
-		const code =
-			error instanceof Error && 'code' in error
-				? String(error.code)
-				: 'DB_ERROR'
+		const code = codigoErroSeguro(error)
 		request.log.error({ code }, 'Falha na consulta à Gold')
 		throw Object.assign(
 			new Error(
