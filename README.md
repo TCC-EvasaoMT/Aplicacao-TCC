@@ -120,4 +120,6 @@ O GitHub Actions executará `pnpm check` e a integração com PostgreSQL 17 em P
 
 ## Colaboração
 
+A [proteção da API pública](docs/SEGURANCA_API.md) documenta cabeçalhos de segurança, limites HTTP e a cota de consultas configurável por `HTTP_RATE_LIMIT_MAX`. O painel permanece público; o [acesso administrativo](docs/AUTORIZACAO.md) será implementado separadamente.
+
 Use uma branch curta por tarefa, PR para `main` e Conventional Commits em português. O [guia de contribuição](CONTRIBUTING.md) explica nomes de branches, commits, revisão e a primeira publicação. Frontend e backend pertencem ao mesmo repositório; a pipeline permanece separada.

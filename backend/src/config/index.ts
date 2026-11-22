@@ -12,11 +12,20 @@ export function readConfig(env: NodeJS.ProcessEnv = process.env) {
 		return Number(value)
 	}
 	const environment = env.NODE_ENV ?? 'development'
+	const maxRequisicoes = env.HTTP_RATE_LIMIT_MAX ?? '120'
+	if (
+		!/^\d+$/.test(maxRequisicoes) ||
+		Number(maxRequisicoes) < 1 ||
+		Number(maxRequisicoes) > 10000
+	) {
+		throw new Error('HTTP_RATE_LIMIT_MAX deve ser um inteiro entre 1 e 10000')
+	}
 	if (!['development', 'test', 'production'].includes(environment)) {
 		throw new Error('NODE_ENV deve ser development, test ou production')
 	}
 	return {
 		port: port('PORT', 3000),
+		maxRequisicoes: Number(maxRequisicoes),
 		docs: environment === 'development',
 		database: {
 			host: env.POSTGRES_HOST ?? '127.0.0.1',

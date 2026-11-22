@@ -25,6 +25,7 @@ const app = await buildApp(
 	},
 	{
 		docs: config.docs,
+		maxRequisicoes: config.maxRequisicoes,
 		logger: true,
 		frontendDir: process.argv.includes('--serve-frontend')
 			? fileURLToPath(new URL('../../frontend/dist/', import.meta.url))

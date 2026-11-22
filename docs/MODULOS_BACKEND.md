@@ -36,6 +36,8 @@ O `index.ts` também expõe o contrato de cálculo, os schemas de recorte e resu
 
 ## Como adicionar um módulo
 
+`plugins/seguranca.ts` registra cabeçalhos de segurança e uma cota compartilhada pelas rotas `/api`, antes de executar os módulos. O limite retorna `429` com `Retry-After`, também documentado no Swagger. `app.ts` preserva erros HTTP conhecidos e aplica limites de corpo e recebimento. Veja [configuração e limites da proteção HTTP](SEGURANCA_API.md).
+
 1. Crie a pasta em `modules/` quando houver uma funcionalidade concreta.
 2. Mantenha rotas, schemas, consultas e regras específicas dentro dela.
 3. Exporte o plugin e as dependências necessárias pelo `index.ts`.
