@@ -54,7 +54,9 @@ pnpm --filter tcc-evasao-backend db:migrate
 pnpm --filter tcc-evasao-backend auth:criar-admin admin@example.com
 ```
 
-Depois configure `AUTH_ENABLED=true`, `AUTH_JWT_SECRET`, `AUTH_ORIGIN` e `APP_POSTGRES_USER`/`APP_POSTGRES_PASSWORD` conforme `.env.example`, e reinicie o backend. Não use as credenciais de manutenção no servidor. O pool de autenticação tem até três conexões e não modifica a Gold. `pnpm dev:demo` continua preparando apenas a Gold sintética; não cria administrador nem habilita autenticação automaticamente.
+Depois configure `AUTH_ENABLED=true`, `AUTH_JWT_SECRET`, `AUTH_ORIGIN` e `APP_POSTGRES_USER`/`APP_POSTGRES_PASSWORD` conforme `.env.example`, e reinicie o backend. Não use as credenciais de manutenção no servidor. O pool de autenticação tem até três conexões e não modifica a Gold.
+
+Para testar somente na base sintética, use **`pnpm dev:demo:auth` na raiz**. Ele prepara Gold, roles, schema `app`, migrações e permissões, pede uma senha para `admin@demo.local` se a conta não existir e inicia a aplicação com autenticação. Acesse o Swagger em `http://127.0.0.1:5173/docs/`. Não modifica `.env` nem o banco da pipeline; os dados de `app` permanecem nas próximas preparações enquanto o contêiner estiver rodando. `pnpm db:demo:auth` apenas prepara a base. Veja o [passo a passo da demonstração](../README.md#testar-a-autenticação-na-demonstração). O comando anterior `pnpm dev:demo` mantém a autenticação desabilitada.
 
 ## Preparar o acesso ao PostgreSQL
 

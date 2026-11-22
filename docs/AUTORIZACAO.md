@@ -97,6 +97,8 @@ Remover uma permissão de `app.usuario_permissoes` passa a valer na próxima req
 
 ## Testar no Swagger
 
+Na base sintética, execute `pnpm dev:demo:auth` e defina a senha de `admin@demo.local` quando solicitado. O comando prepara o banco e a configuração; abra `http://127.0.0.1:5173/docs/` e siga a partir do passo 2 abaixo. A conta é preservada ao repetir o comando enquanto o contêiner estiver rodando. Veja [o roteiro completo da demonstração](../README.md#testar-a-autenticação-na-demonstração).
+
 1. Prepare o schema e o administrador; habilite `AUTH_ENABLED=true` e reinicie a API.
 2. Abra `/docs/` pela origem configurada. Execute `/login`, informando e-mail, senha e `X-CSRF-Protection: 1`. O navegador controla o header `Origin`.
 3. Copie `access_token` para **Authorize**, apenas o token; Swagger acrescenta `Bearer`. Execute `/me`.

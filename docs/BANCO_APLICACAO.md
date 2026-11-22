@@ -2,6 +2,8 @@
 
 A aplicação usa o mesmo PostgreSQL 17 e o mesmo banco das camadas da pipeline, mas mantém usuários, permissões e sessões no schema `app`. Somente o backend controla suas migrações, em `backend/sql/migrations`. A pipeline continua responsável por Bronze, Silver e Gold.
 
+Para a base sintética, a preparação é automática: **`pnpm dev:demo:auth`** sobe o PostgreSQL de demonstração na porta 55433, prepara roles/schema/migrações/grants, provisiona `admin@demo.local` com senha oculta e inicia os servidores. `pnpm db:demo:auth` executa apenas a preparação. Consulte [como testar no Swagger](../README.md#testar-a-autenticação-na-demonstração). As etapas manuais abaixo destinam-se ao banco compartilhado com a pipeline.
+
 ## Preparação única
 
 Não é necessário alterar o Docker Compose do PostgreSQL se o banco atual estiver acessível e houver uma conta autorizada a criar roles e schemas. Combine com o responsável pela pipeline a criação de duas roles exclusivas. Em uma sessão `psql` administrativa, conectada ao banco correto:
@@ -44,6 +46,8 @@ pnpm --filter tcc-evasao-backend auth:criar-admin admin@example.com
 ```
 
 O comando pede senha e confirmação com entrada oculta, exige entre 15 e 128 caracteres e armazena um hash Argon2id com salt individual. Concede `etl:consultar` e `etl:reprocessar` em uma transação. E-mail é normalizado para minúsculas; uma conta existente nunca é substituída. Não existe autocadastro público nem senha padrão.
+
+A opção `--se-ausente`, usada pela demonstração, verifica a existência antes de solicitar senha. Se a conta existir, encerra sem alterar senha, estado ou permissões, inclusive quando estiver desativada ou sem privilégios. Se não existir, exige o mesmo cadastro interativo; nunca inventa uma senha. Exemplo: `pnpm --filter tcc-evasao-backend auth:criar-admin admin@example.com --se-ausente`.
 
 ## Relação com a pipeline e manutenção
 

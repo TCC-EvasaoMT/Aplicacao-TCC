@@ -100,11 +100,37 @@ Abra [a interface](http://127.0.0.1:5173/) ou [o Swagger](http://127.0.0.1:5173/
 
 - `pnpm db:demo`: sobe e carrega somente a base, sem iniciar a aplicação.
 - `pnpm dev:demo`: prepara a base e inicia front e back conectados a ela.
+- `pnpm db:demo:auth`: prepara Gold, schema `app`, permissões e administrador, sem iniciar os servidores.
+- `pnpm dev:demo:auth`: faz essa preparação e inicia front e back com autenticação habilitada.
 - `pnpm db:demo:down`: encerra o banco de demonstração e descarta seus dados.
 
 **Cada execução de `db:demo` ou `dev:demo` recria a Gold sintética dessa demonstração.** Não armazene dados reais nesse container. O banco usa memória temporária; depois de encerrá-lo, os comandos acima fazem a carga novamente. `Ctrl+C` encerra a aplicação; use `db:demo:down` para encerrar também o banco.
 
 Credenciais exclusivamente locais: banco `postgres`, usuário de leitura `tcc_demo`, senha `tcc_demo_local`. O banco da pipeline e o container dos testes de integração são independentes.
+
+### Testar a autenticação na demonstração
+
+Com Docker Desktop aberto e as portas `3000` e `5173` livres, execute em um terminal interativo:
+
+```sh
+pnpm dev:demo:auth
+```
+
+O comando cria as roles técnicas de manutenção e autenticação, prepara `app`, executa as migrações reais do backend e aplica as permissões. Na primeira execução, pede senha e confirmação para **`admin@demo.local`** (15 a 128 caracteres, entrada oculta). Não há senha padrão de administrador. Nas próximas execuções, preserva a senha, o estado e as permissões dessa conta. A Gold sintética continua sendo recarregada.
+
+1. Abra [Swagger pelo Vite](http://127.0.0.1:5173/docs/). Use esse endereço: a origem da demonstração autenticada é `http://127.0.0.1:5173`.
+2. Em **Autenticação → POST /api/v1/autenticacao/login**, envie `email: admin@demo.local`, a senha cadastrada e `X-CSRF-Protection: 1`. O navegador envia `Origin` automaticamente.
+3. Copie o `access_token` retornado para **Authorize**, sem escrever `Bearer`. Consulte **GET /api/v1/autenticacao/me**: deve retornar o e-mail e as duas permissões de ETL.
+4. Execute **POST /api/v1/autenticacao/renovar** com `X-CSRF-Protection: 1`. O navegador envia o cookie; copie o novo JWT para **Authorize**.
+5. Execute **POST /api/v1/autenticacao/logout** com o mesmo header. Uma nova chamada a `/me` deve receber `401`, inclusive usando o último JWT.
+
+A tela React permanece pública e ainda não possui formulário de login. As consultas de filtros, resumo e evolução temporal continuam disponíveis sem autenticação.
+
+Não é necessário editar `.env`, instalar `psql` localmente ou alterar o Compose da pipeline. O destino é fixo: projeto Docker `tcc-demo`, banco `postgres`, porta `55433`. O segredo JWT é aleatório e existe somente no processo iniciado; ao reiniciar o comando, JWTs anteriores deixam de valer. Faça login novamente ou renove a sessão pelo cookie ainda válido. `pnpm dev:demo` continua iniciando somente o painel público, com autenticação desabilitada, independentemente do `.env`.
+
+`Ctrl+C` encerra os servidores e preserva o banco enquanto o contêiner continuar rodando. **`pnpm db:demo:down` ou parar o contêiner apaga o armazenamento temporário, incluindo o administrador.** Execute `pnpm dev:demo:auth` novamente para recriar tudo e definir uma nova senha. Isso também permite reiniciar a demonstração se esquecer a senha, descartando somente seus dados sintéticos.
+
+As roles `tcc_demo_owner` e `tcc_demo_auth` usam credenciais técnicas fixas exclusivamente para esse banco local descartável. O backend usa a role restrita de autenticação, nunca a de manutenção. Para o banco compartilhado com a pipeline, siga o [procedimento de preparação do schema app](docs/BANCO_APLICACAO.md), com credenciais próprias.
 
 ### Testes automatizados
 

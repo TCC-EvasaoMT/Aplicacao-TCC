@@ -37,6 +37,8 @@ Em desenvolvimento, `pnpm dev` inicia Fastify na porta 3000 e Vite na 5173. O na
 
 `pnpm dev:demo` prepara um PostgreSQL separado na porta 55433, carrega as fixtures e inicia os dois pacotes usando um login de leitura. Cada execução recria a Gold sintética desse container. O comando não altera o `.env` nem prepara o banco da pipeline.
 
+`pnpm dev:demo:auth` acrescenta a preparação de `app` usando as mesmas migrações e grants do backend e provisiona o administrador se ausente. Preserva contas e permissões ao repetir a preparação. Inicia os servidores com autenticação habilitada e origem `http://127.0.0.1:5173`; o segredo JWT é gerado em memória a cada execução. `pnpm db:demo:auth` faz a preparação sem iniciar os servidores. O banco temporário e as credenciais técnicas de demonstração são exclusivos do projeto Docker `tcc-demo`.
+
 ## Limites de responsabilidade
 
 - A pipeline extrai, transforma e grava dados; a API não executa essas etapas.
