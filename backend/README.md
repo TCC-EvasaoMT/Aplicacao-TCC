@@ -74,20 +74,24 @@ Sem cliente local, abra o `psql` dentro do container e execute o conteúdo de `s
 
 ## Rotas e filtros
 
-| Método e rota                            | Resultado                                                                                                                 |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `GET /health`                            | Testa a leitura da fato e das dimensões. `200` com `{"status":"ok"}` ou `503`. Uma Gold vazia, mas acessível, é saudável. |
-| `GET /api/v1/filtros`                    | Catálogo de todos os anos e opções presentes na fato de cursos. Não recebe parâmetros.                                    |
-| `GET /api/v1/indicadores/resumo`         | Totais, base de risco, taxas e qualidade; exige `ano`.                                                                    |
-| `GET /api/v1/analises/evolucao-temporal` | Série anual com os mesmos indicadores e filtros; exige `ano_inicial` e `ano_final`, até 30 anos inclusivos.               |
-| `GET /docs/`                             | Swagger UI em desenvolvimento. A especificação fica em `/docs/json`.                                                      |
+| Método e rota                            | Resultado                                                                                                                                  |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `GET /health`                            | Testa a leitura da fato e das dimensões. `200` com `{"status":"ok"}` ou `503`. Uma Gold vazia, mas acessível, é saudável.                  |
+| `GET /api/v1/filtros`                    | Catálogo de todos os anos e opções presentes na fato de cursos. Não recebe parâmetros.                                                     |
+| `GET /api/v1/indicadores/resumo`         | Totais, base de risco, taxas e qualidade; exige `ano`.                                                                                     |
+| `GET /api/v1/analises/evolucao-temporal` | Série anual com os mesmos indicadores e filtros; exige `ano_inicial` e `ano_final`, até 30 anos inclusivos.                                |
+| `GET /api/v1/analises/comparacoes`       | Totais, taxas e qualidade por grupo no mesmo ano; exige `ano` e `agrupar_por`. Até 20 grupos, com seleção opcional e aviso de truncamento. |
+| `GET /docs/`                             | Swagger UI em desenvolvimento. A especificação fica em `/docs/json`.                                                                       |
 
 Exemplo no PowerShell:
 
 ```powershell
 Invoke-RestMethod 'http://127.0.0.1:3000/api/v1/filtros'
 Invoke-RestMethod 'http://127.0.0.1:3000/api/v1/indicadores/resumo?ano=2023&codigo_area_geral=01'
+Invoke-RestMethod 'http://127.0.0.1:3000/api/v1/analises/comparacoes?ano=2023&agrupar_por=curso&grupos=001&grupos=002'
 ```
+
+A comparação é pública e reaproveita a conexão de leitura. Consulte [dimensões, seleção de grupos, regras de ausência e truncamento](../docs/COMPARACOES.md). A seleção `grupos` é o único parâmetro que aceita repetição nessa rota; os filtros de recorte continuam aceitando um valor cada. O frontend comparativo fica para a próxima entrega.
 
 | Parâmetro                  | Tipo e significado                                            |
 | -------------------------- | ------------------------------------------------------------- |
@@ -167,6 +171,6 @@ Registrar na próxima revisão do Word:
 | Evasão operacional = desvinculados / matrículas | Evasão do curso e da IES sobre vínculos menos falecidos, conforme a modelagem Gold.    |
 | Infraestrutura AWS                              | Esta entrega executa localmente; nuvem fica para etapa posterior.                      |
 
-A stack TypeScript/Fastify/pg e a finalidade de apoiar a análise da evasão são mantidas. A API de evolução temporal está implementada; sua visualização, perfis, coortes, administração da pipeline, autenticação e implantação ficam para outras entregas. A API não acessa a Bronze para deduzir status de execução ou datas de atualização.
+A stack TypeScript/Fastify/pg e a finalidade de apoiar a análise da evasão são mantidas. A evolução temporal tem API e visualização; as comparações estão disponíveis na API. Frontend comparativo, rankings, perfis, coortes, administração da pipeline e implantação ficam para outras entregas. A autenticação está adiada, preservada em branches separadas. A API não acessa a Bronze para deduzir status de execução ou datas de atualização.
 
 Referências técnicas: [validação do Fastify](https://fastify.dev/docs/latest/Reference/Validation-and-Serialization/), [consultas parametrizadas do pg](https://node-postgres.com/features/queries) e [schema Gold da pipeline](https://github.com/TCC-EvasaoMT/Pipeline-TCC/blob/ff66b7d44306a257fedde422a771848cc9a7899f/sql/gold.sql).

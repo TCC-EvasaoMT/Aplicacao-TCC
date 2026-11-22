@@ -26,7 +26,9 @@ O `index.ts` também expõe o contrato de cálculo, os schemas de recorte e resu
 
 `backend/src/modules/analises` fornece `GET /api/v1/analises/evolucao-temporal`, com `ano_inicial`, `ano_final` e os mesmos sete filtros opcionais do resumo. Retorna uma série crescente de até 30 anos, incluindo lacunas com medidas `null`.
 
-`index.ts` exporta o plugin `analises`, a fábrica `criarConsultasAnalises` e o tipo de consultas. `consultas.ts` agrega por ano; `evolucao.ts` completa lacunas e usa as regras públicas de indicadores; `rotas.ts` e `schemas.ts` definem o contrato HTTP. Veja [contrato, exemplos e validação da evolução temporal](ANALISES_TEMPORAIS.md). Comparações e rankings ainda não estão implementados.
+O módulo também fornece `GET /api/v1/analises/comparacoes`, com `ano` e `agrupar_por` obrigatórios. Compara até 20 grupos por curso, área geral CINE, municípios de oferta/sede, modalidade, categoria administrativa ou organização acadêmica. Aceita os sete filtros opcionais e seleção de grupos por códigos/textos. Retorna totais, taxas e qualidade por grupo, quantidade total de grupos e indicação de truncamento. Veja [contrato e exemplos das comparações](COMPARACOES.md).
+
+`index.ts` exporta o plugin `analises`, a fábrica `criarConsultasAnalises` e o tipo de consultas, agora com as operações `evolucao` e `comparacao`. `consultas.ts` agrega por ano ou grupo; `evolucao.ts` completa lacunas; `comparacoes.ts` define as dimensões permitidas e monta resultados por grupo. Ambos reutilizam o cálculo público de indicadores. `rotas.ts` e `schemas.ts` definem os contratos HTTP. Veja também [contrato, exemplos e validação da evolução temporal](ANALISES_TEMPORAIS.md). O frontend comparativo e os rankings ainda não estão implementados. As rotas permanecem públicas, sem autenticação.
 
 ## Operação e composição
 
