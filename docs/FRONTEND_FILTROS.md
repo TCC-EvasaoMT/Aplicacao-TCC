@@ -6,7 +6,7 @@ Execute `pnpm dev:demo` na raiz, com Docker Desktop aberto, e acesse `http://127
 
 O painel permite selecionar um ano e sete filtros opcionais: curso, área geral CINE, modalidade, categoria administrativa, organização acadêmica, município de oferta e município da sede. **Todos** significa ausência de restrição naquele campo. Os códigos aparecem junto dos nomes e são enviados como texto, preservando zeros iniciais.
 
-Os filtros combinam por **E**. Cada alteração consulta o resumo automaticamente. **Limpar filtros** remove apenas os sete filtros opcionais e mantém o ano. **Atualizar dados** recarrega catálogo e resumo, preservando as seleções que ainda existem. Se uma opção selecionada sair da base, ela é removida e a tela avisa; um ano removido é substituído pelo mais recente disponível.
+Os filtros combinam por **E**. Os sete filtros opcionais atualizam automaticamente o resumo e a [evolução temporal](FRONTEND_ANALISES.md). **Ano do resumo** afeta apenas os indicadores anuais; o gráfico possui seu próprio intervalo. **Limpar filtros** remove apenas os sete filtros opcionais e mantém ano e período. **Atualizar dados** recarrega catálogo, resumo e série, preservando as seleções que ainda existem e o intervalo aplicado. Se uma opção selecionada sair da base, ela é removida e a tela avisa; um ano removido é substituído pelo mais recente disponível.
 
 O catálogo contém opções de toda a base, não apenas do ano ou recorte selecionado. Por isso, combinações sem registros são esperadas. A tela mostra ausência de dados, em vez de inventar totais iguais a zero. Em caso de falha de consulta, use **Atualizar dados** para tentar novamente.
 
@@ -18,6 +18,7 @@ Município de oferta e município da sede são conceitos diferentes. Uma sede in
 frontend/src/
   App.tsx                                  Estrutura geral e texto de apresentação
   modules/
+    analises/                              Evolução temporal: consulta, período, gráfico e tabela
     catalogos/
       index.ts                             Entrada pública
       api.ts                               Contrato e consulta a /api/v1/filtros
@@ -32,7 +33,7 @@ frontend/src/
   styles.css                               Estilos e layout responsivo
 ```
 
-O módulo de indicadores consome o catálogo pela entrada pública de `catalogos`. Os contratos são tipos do cliente HTTP; não há importação de código interno do backend.
+O painel de indicadores compõe o catálogo e a evolução temporal pelas entradas públicas de `catalogos` e `analises`. O módulo de análises reutiliza apenas os tipos públicos de indicadores. Os contratos são tipos do cliente HTTP; não há importação de código interno do backend.
 
 ## Ciclo da consulta
 

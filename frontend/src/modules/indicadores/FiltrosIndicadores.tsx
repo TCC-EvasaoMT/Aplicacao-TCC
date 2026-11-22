@@ -40,11 +40,13 @@ export function FiltrosIndicadores({
 			</div>
 			<p className="filter-help" id="filtros-ajuda">
 				As seleções são combinadas: o resultado atende a todos os filtros. As
-				alterações são aplicadas automaticamente.
+				alterações são aplicadas automaticamente ao resumo e à evolução
+				temporal. O ano abaixo vale apenas para o resumo; o gráfico possui seu
+				próprio período.
 			</p>
 			<div className="filter-grid" aria-describedby="filtros-ajuda">
 				<div className="filter-field">
-					<label htmlFor="ano">Ano do censo</label>
+					<label htmlFor="ano">Ano do resumo</label>
 					<select
 						id="ano"
 						value={selecao.ano}
@@ -106,7 +108,7 @@ export function FiltrosIndicadores({
 			</p>
 			<p className="filter-count">
 				{quantidade === 0
-					? 'Todos os registros do ano selecionado.'
+					? 'Sem restrições de curso, área, modalidade, instituição ou município.'
 					: `${quantidade} filtro(s) adicional(is) selecionado(s).`}
 			</p>
 		</section>

@@ -5,7 +5,7 @@ Monorepo com React, TypeScript e Fastify. O frontend consulta a API, e o backend
 ## Organização
 
 ```text
-frontend/              React e Vite; painel com resumo e filtros combinados
+frontend/              React e Vite; resumo, filtros e gráfico de evolução temporal
 backend/               API Fastify, regras de cálculo e acesso à Gold
 backend/src/modules/   Módulos de catálogos, indicadores e análises
 backend/src/plugins/   Recursos compartilhados e saúde da API
@@ -21,7 +21,7 @@ Leia a [arquitetura da aplicação](docs/ARQUITETURA.md), os [módulos e contrat
 
 O frontend não importa arquivos internos do backend e não acessa o banco. Ele usa HTTP/JSON em `/api/v1`. As fórmulas de evasão continuam no backend; a interface apenas formata os resultados.
 
-A [API de evolução temporal](docs/ANALISES_TEMPORAIS.md) já permite consultar séries anuais em `/api/v1/analises/evolucao-temporal`, com intervalo inclusivo de até 30 anos e os mesmos filtros de recorte. A visualização da série no frontend será implementada em uma próxima entrega.
+A [API de evolução temporal](docs/ANALISES_TEMPORAIS.md) permite consultar séries anuais em `/api/v1/analises/evolucao-temporal`, com intervalo inclusivo de até 30 anos e os mesmos filtros de recorte. O [módulo de análises do frontend](docs/FRONTEND_ANALISES.md) apresenta as duas taxas em um gráfico Recharts e uma tabela de valores e qualidade por ano. A estilização continua em CSS próprio; Bootstrap ainda não foi adotado e Tailwind não foi adicionado.
 
 ## Executar em desenvolvimento
 
@@ -47,7 +47,7 @@ pnpm dev
 
 O comando inicia os dois pacotes. O Vite encaminha `/api`, `/health` e `/docs` para o Fastify, usando a porta `PORT` de `backend/.env` ou do terminal. Apenas a porta é lida pela configuração do Vite; credenciais do banco não são expostas ao navegador. A interface e a API escutam somente em `127.0.0.1`.
 
-A tela inicial exibe vínculos, matrículas, ingressantes, concluintes e taxas de evasão. Permite combinar ano, curso, área CINE, modalidade, categoria administrativa, organização acadêmica e municípios de oferta e sede. Os filtros são aplicados automaticamente; limpar mantém o ano e atualizar preserva as seleções ainda disponíveis. Mostra estados de carregamento, erro, ausência de dados e qualidade. Ela utiliza a base conectada, sem injetar números fictícios no frontend. A visualização temporal, os gráficos e as comparações ficam para os próximos incrementos.
+A tela inicial exibe vínculos, matrículas, ingressantes, concluintes e taxas de evasão. Permite combinar ano, curso, área CINE, modalidade, categoria administrativa, organização acadêmica e municípios de oferta e sede. Os filtros são aplicados automaticamente; limpar mantém o ano e atualizar preserva as seleções ainda disponíveis. O gráfico temporal usa os mesmos filtros opcionais e um intervalo próprio, independente do ano do resumo. Mostra estados de carregamento, erro, ausência de dados e qualidade. Ela utiliza a base conectada, sem injetar números fictícios no frontend. Comparações entre cursos e grupos ficam para os próximos incrementos.
 
 ## Executar a versão compilada
 

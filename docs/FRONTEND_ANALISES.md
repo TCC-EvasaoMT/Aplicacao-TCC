@@ -17,6 +17,8 @@ Os tipos de seleção e resultado são compartilhados pela entrada pública de `
 
 ## Período e filtros
 
+Execute `pnpm dev:demo` e abra `http://127.0.0.1:5173/`. O gráfico aparece abaixo do resumo anual, no mesmo painel. **Atualizar dados** recarrega catálogo, resumo e evolução; **Limpar filtros** mantém o ano do resumo e o intervalo do gráfico, removendo os sete filtros opcionais.
+
 O intervalo inicial vai do menor ao maior ano do catálogo, limitado aos últimos 30 anos. Os campos aceitam anos entre 1900 e 9999, inclusive anos sem registros. **Aplicar período** valida ordem e tamanho antes de consultar; editar os campos não altera a série já aplicada. Um intervalo escolhido é preservado ao atualizar os dados.
 
 Os sete filtros de recorte são combinados por E. O parâmetro `ano` do resumo não é enviado à consulta temporal e sua alteração não dispara nova consulta da série. Os códigos permanecem como texto, inclusive zeros iniciais. O município da sede não substitui o município de oferta.
@@ -51,3 +53,7 @@ Com `pnpm dev:demo`, confira o período 2022–2024:
 | 2000–2030                 | Validação local; não enviar a consulta inválida    |
 
 Teste também um único ano, lacunas entre anos, mudança rápida de filtros, falha e recuperação da API e largura de celular. A conferência com dados reais do INEP e a medição de desempenho em volume real continuam pendentes.
+
+Na verificação desta entrega em Windows, `pnpm check` passou com 30 testes (21 do backend e 9 do frontend). No navegador, foram conferidos curso `001`, ano único, ruído negativo, base zero, somente docentes, rejeição de intervalo superior a 30 anos, apresentação em 390 px e recuperação após parar e reconstruir a Gold de demonstração com os grants reaplicados.
+
+O build emite um aviso de bundle JavaScript acima de 500 kB após incluir Recharts; a medição de carregamento em conexão real e eventual divisão do bundle permanecem pendentes. A verificação global de Prettier aponta uma pendência anterior em `scripts/demo.mjs`; os arquivos desta entrega passam na verificação de formatação.
