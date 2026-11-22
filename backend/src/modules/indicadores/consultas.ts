@@ -13,6 +13,8 @@ export interface Filtros {
   codigo_municipio_sede?: string;
 }
 
+export type FiltrosRecorte = Omit<Filtros, 'ano'>;
+
 const colunasFiltro: Record<keyof Filtros, string> = {
   ano: 't.ano_censo',
   codigo_curso: 'c.codigo_curso',
@@ -24,27 +26,35 @@ const colunasFiltro: Record<keyof Filtros, string> = {
   codigo_municipio_sede: 'i.codigo_municipio_sede',
 };
 
-export function consultaResumo(filtros: Filtros) {
+export function parametrizarFiltros(filtros: Partial<Filtros>, primeiroParametro = 1) {
   const values: (number | string)[] = [];
   const conditions: string[] = [];
   for (const chave of Object.keys(colunasFiltro) as (keyof Filtros)[]) {
     const value = filtros[chave];
     if (value !== undefined) {
       values.push(value);
-      conditions.push(`${colunasFiltro[chave]} = $${values.length}`);
+      conditions.push(`${colunasFiltro[chave]} = $${primeiroParametro + values.length - 1}`);
     }
   }
-  // Ausência parcial não pode produzir uma soma aparentemente completa.
-  const somas = medidas.map((medida) => `
-    CASE WHEN count(f.${medida}) FILTER (WHERE f.vinculos_total IS NOT NULL) = count(f.vinculos_total)
-      THEN (sum(f.${medida}) FILTER (WHERE f.vinculos_total IS NOT NULL))::text
-    END AS ${medida}`);
-  return {
-    text: `SELECT ${somas.join(',')},
+  return { values, conditions };
+}
+
+// Ausência parcial não pode produzir uma soma aparentemente completa.
+const somas = medidas.map((medida) => `
+  CASE WHEN count(f.${medida}) FILTER (WHERE f.vinculos_total IS NOT NULL) = count(f.vinculos_total)
+    THEN (sum(f.${medida}) FILTER (WHERE f.vinculos_total IS NOT NULL))::text
+  END AS ${medida}`);
+
+export const agregacaoSQL = `${somas.join(',')},
       count(f.vinculos_total)::integer AS registros_com_alunos,
       count(*) FILTER (WHERE f.vinculos_total IS NULL)::integer AS registros_sem_alunos,
       bool_or(f.flag_valor_negativo) AS flag_valor_negativo,
-      bool_or(f.vinculos_total IS NOT NULL AND num_nonnulls(${medidas.map(m => `f.${m}`).join(',')}) < ${medidas.length}) AS dados_incompletos
+      bool_or(f.vinculos_total IS NOT NULL AND num_nonnulls(${medidas.map(m => `f.${m}`).join(',')}) < ${medidas.length}) AS dados_incompletos`;
+
+export function consultaResumo(filtros: Filtros) {
+  const { values, conditions } = parametrizarFiltros(filtros);
+  return {
+    text: `SELECT ${agregacaoSQL}
       ${origem}
       WHERE ${conditions.join(' AND ')}`,
     values,

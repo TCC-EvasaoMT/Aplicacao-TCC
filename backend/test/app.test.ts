@@ -12,6 +12,7 @@ const catalogo = {
 function fakeConsultas(): Dependencias {
   return {
     async health() {},
+    analises: { async evolucao() { return []; } },
     catalogos: { async filtros() { return catalogo; } },
     indicadores: { async resumo() {
       return { ...Object.fromEntries(medidas.map(m => [m, null])), registros_com_alunos: 0,
@@ -55,9 +56,10 @@ test('consultas usam parâmetros para todos os filtros, inclusive texto arbitrá
 
 test('health e endpoints retornam 503 sem vazar erro do banco', async t => {
   const fail = async (): Promise<never> => { throw new Error('postgresql://admin:segredo@host/base SELECT confidencial'); };
-  const app = await buildApp({ health: fail, catalogos: { filtros: fail }, indicadores: { resumo: fail } });
+  const app = await buildApp({ health: fail, catalogos: { filtros: fail }, indicadores: { resumo: fail }, analises: { evolucao: fail } });
   t.after(() => app.close());
-  for (const route of ['/health', '/api/v1/filtros', '/api/v1/indicadores/resumo?ano=2023']) {
+  for (const route of ['/health', '/api/v1/filtros', '/api/v1/indicadores/resumo?ano=2023',
+    '/api/v1/analises/evolucao-temporal?ano_inicial=2022&ano_final=2024']) {
     const result = await app.inject(route);
     assert.equal(result.statusCode, 503);
     assert.equal(result.json().erro, 'GOLD_INDISPONIVEL');
@@ -73,6 +75,9 @@ test('Swagger documenta contratos e fica ausente quando desativado', async t => 
   const spec = (await dev.inject('/docs/json')).json();
   const resumo = spec.paths['/api/v1/indicadores/resumo'].get;
   assert.deepEqual(spec.paths['/api/v1/filtros'].get.tags, ['Catálogos']);
+  const evolucao = spec.paths['/api/v1/analises/evolucao-temporal'].get;
+  assert.deepEqual(evolucao.tags, ['Análises']);
+  assert.deepEqual(evolucao.parameters.filter((p: { required: boolean }) => p.required).map((p: { name: string }) => p.name), ['ano_inicial', 'ano_final']);
   assert.equal(resumo.parameters.find((p: { name: string }) => p.name === 'ano').required, true);
   assert.ok(resumo.responses['200']);
   assert.ok(resumo.responses['503']);

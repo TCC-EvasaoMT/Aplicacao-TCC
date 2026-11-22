@@ -4,7 +4,7 @@ API local em TypeScript/Fastify para consultar a camada Gold da [Pipeline-TCC](h
 
 ## Preparar e iniciar
 
-O código está organizado em `src/modules/catalogos` e `src/modules/indicadores`, com plugins compartilhados em `src/plugins` e configuração em `src/config`. Veja a [arquitetura](../docs/ARQUITETURA.md) e os [contratos dos módulos](../docs/MODULOS_BACKEND.md). A extração do catálogo preserva `GET /api/v1/filtros` e sua resposta.
+O código está organizado em `src/modules/catalogos`, `src/modules/indicadores` e `src/modules/analises`, com plugins compartilhados em `src/plugins` e configuração em `src/config`. Veja a [arquitetura](../docs/ARQUITETURA.md) e os [contratos dos módulos](../docs/MODULOS_BACKEND.md). A extração do catálogo preserva `GET /api/v1/filtros` e sua resposta.
 
 Requisitos: Node.js 22.13 ou superior, pnpm 11.25.0 e PostgreSQL 17 com a Gold carregada pela pipeline. O banco não é criado ou migrado pela API. Se o pnpm ainda não estiver instalado, depois de instalar o Node.js execute `npm install --global pnpm@11.25.0`.
 
@@ -76,6 +76,7 @@ Sem cliente local, abra o `psql` dentro do container e execute o conteúdo de `s
 | `GET /health` | Testa a leitura da fato e das dimensões. `200` com `{"status":"ok"}` ou `503`. Uma Gold vazia, mas acessível, é saudável. |
 | `GET /api/v1/filtros` | Catálogo de todos os anos e opções presentes na fato de cursos. Não recebe parâmetros. |
 | `GET /api/v1/indicadores/resumo` | Totais, base de risco, taxas e qualidade; exige `ano`. |
+| `GET /api/v1/analises/evolucao-temporal` | Série anual com os mesmos indicadores e filtros; exige `ano_inicial` e `ano_final`, até 30 anos inclusivos. |
 | `GET /docs/` | Swagger UI em desenvolvimento. A especificação fica em `/docs/json`. |
 
 Exemplo no PowerShell:
@@ -103,6 +104,8 @@ O catálogo é independente do recorte atual. Códigos vêm como `{ "codigo": "0
 Os IDs `id_*` da Gold não fazem parte do contrato: são reconstruídos pela pipeline. Instituições não são identificadas nominalmente; a combinação de filtros institucionais pode representar mais de uma IES.
 
 ## Cálculos e qualidade
+
+Na evolução temporal, as regras abaixo são aplicadas separadamente por ano. Anos sem registros aparecem com medidas `null`, e o período solicitado não é reduzido silenciosamente. Veja o [contrato e os exemplos da série temporal](../docs/ANALISES_TEMPORAIS.md).
 
 Somente `gold.fato_evasao_curso` alimenta este incremento. Nenhuma fato de perfil, coorte ou docentes é somada a ela.
 
@@ -161,6 +164,6 @@ Registrar na próxima revisão do Word:
 | Evasão operacional = desvinculados / matrículas | Evasão do curso e da IES sobre vínculos menos falecidos, conforme a modelagem Gold. |
 | Infraestrutura AWS | Esta entrega executa localmente; nuvem fica para etapa posterior. |
 
-A stack TypeScript/Fastify/pg e a finalidade de apoiar a análise da evasão são mantidas. Evolução temporal, perfis, coortes, administração da pipeline, autenticação e implantação não fazem parte deste incremento. A API não acessa a Bronze para deduzir status de execução ou datas de atualização.
+A stack TypeScript/Fastify/pg e a finalidade de apoiar a análise da evasão são mantidas. A API de evolução temporal está implementada; sua visualização, perfis, coortes, administração da pipeline, autenticação e implantação ficam para outras entregas. A API não acessa a Bronze para deduzir status de execução ou datas de atualização.
 
 Referências técnicas: [validação do Fastify](https://fastify.dev/docs/latest/Reference/Validation-and-Serialization/), [consultas parametrizadas do pg](https://node-postgres.com/features/queries) e [schema Gold da pipeline](https://github.com/TCC-EvasaoMT/Pipeline-TCC/blob/ff66b7d44306a257fedde422a771848cc9a7899f/sql/gold.sql).

@@ -8,6 +8,7 @@ import { buildApp } from '../../src/app.js';
 import { criarConsultasIndicadores } from '../../src/modules/indicadores/index.js';
 import { criarConsultasCatalogos } from '../../src/modules/catalogos/index.js';
 import { criarHealth } from '../../src/plugins/health.js';
+import { criarConsultasAnalises } from '../../src/modules/analises/index.js';
 
 test('API integrada ao PostgreSQL e a um usuário exclusivo de leitura', {
   skip: !process.env.TEST_DATABASE_URL && 'Defina TEST_DATABASE_URL para executar em PostgreSQL 17.',
@@ -52,6 +53,7 @@ test('API integrada ao PostgreSQL e a um usuário exclusivo de leitura', {
   app = await buildApp({
     indicadores: criarConsultasIndicadores(reader),
     catalogos: criarConsultasCatalogos(reader),
+    analises: criarConsultasAnalises(reader),
     health: criarHealth(reader),
   }, { docs: true });
   const server = app;
@@ -62,9 +64,15 @@ test('API integrada ao PostgreSQL e a um usuário exclusivo de leitura', {
     assert.equal(response.statusCode, 200, response.body);
     return response.json();
   };
+  const evolucao = async (params: Record<string, string> = {}) => {
+    const response = await server.inject(`/api/v1/analises/evolucao-temporal?${new URLSearchParams({ ano_inicial: '2021', ano_final: '2025', ...params })}`);
+    assert.equal(response.statusCode, 200, response.body);
+    return response.json();
+  };
 
   await t.test('sem permissões falha; com grants consulta sem permitir escrita nem acesso à Bronze', async () => {
     assert.equal((await server.inject('/health')).statusCode, 503);
+    assert.equal((await server.inject('/api/v1/analises/evolucao-temporal?ano_inicial=2022&ano_final=2024')).statusCode, 503);
     await db.query(permissions);
     assert.equal((await server.inject('/health')).statusCode, 200);
     await assert.rejects(apiUser.query('DELETE FROM gold.fato_evasao_curso'), { code: '42501' });
@@ -138,10 +146,50 @@ test('API integrada ao PostgreSQL e a um usuário exclusivo de leitura', {
     assert.equal((await resumo({ codigo_curso: '007' })).qualidade.flag_grupo_pequeno, true);
   });
 
+  await t.test('evolução equivale ao resumo de cada ano, incluindo ausências e somente docentes', async () => {
+    const recortes: Record<string, string>[] = [{}, { categoria_administrativa: 'Pública Federal' }, { codigo_curso: '005' }, { codigo_curso: '004' }];
+    for (const recorte of recortes) {
+      const result = await evolucao(recorte);
+      assert.deepEqual(result.serie.map((p: { ano: number }) => p.ano), [2021, 2022, 2023, 2024, 2025]);
+      for (const ponto of result.serie) {
+        const { filtros: _filtros, ...anual } = await resumo({ ...recorte, ano: String(ponto.ano) });
+        assert.deepEqual(ponto, { ano: ponto.ano, ...anual });
+      }
+    }
+    const federal = (await evolucao({ categoria_administrativa: 'Pública Federal' })).serie;
+    assert.equal(federal[1].taxas.evasao_curso, 0.1);
+    assert.equal(federal[2].taxas.evasao_curso, 0.24);
+    assert.equal(federal[2].taxas.evasao_ies, 0.19);
+    const geral = (await evolucao()).serie;
+    assert.equal(geral[0].totais.vinculos_total, null);
+    assert.equal(geral[3].qualidade.registros_sem_alunos, 1);
+    assert.equal(geral[3].qualidade.sem_dados, true);
+    assert.equal(geral[4].qualidade.registros_sem_alunos, 0);
+  });
+
+  await t.test('evolução combina todos os filtros, preserva códigos e distingue oferta de sede', async () => {
+    const filtros = { codigo_curso: '001', codigo_area_geral: '01', codigo_municipio_oferta: '5103403',
+      modalidade: 'Presencial', categoria_administrativa: 'Pública Federal', organizacao_academica: 'Universidade',
+      codigo_municipio_sede: '5103403' };
+    const combinado = await evolucao(filtros);
+    assert.equal(combinado.serie[1].totais.vinculos_total, 1000);
+    assert.equal(combinado.serie[2].totais.vinculos_total, 100);
+    assert.ok((await evolucao({ ...filtros, codigo_area_geral: '06' })).serie.every((p: { qualidade: { sem_dados: boolean } }) => p.qualidade.sem_dados));
+    assert.ok((await evolucao({ modalidade: "x' OR TRUE --" })).serie.every((p: { qualidade: { sem_dados: boolean } }) => p.qualidade.sem_dados));
+    const ead = { codigo_curso: '002', codigo_municipio_sede: '5103403' };
+    assert.equal((await evolucao(ead)).serie[2].totais.vinculos_total, 900);
+    assert.ok((await evolucao({ ...ead, codigo_municipio_oferta: '5103403' })).serie.every((p: { qualidade: { sem_dados: boolean } }) => p.qualidade.sem_dados));
+    const semDados = await evolucao({ ano_inicial: '2000', ano_final: '2001' });
+    assert.equal(semDados.serie.length, 2);
+    assert.ok(semDados.serie.every((p: { totais: { vinculos_total: number | null } }) => p.totais.vinculos_total === null));
+  });
+
   await t.test('reconstrução altera IDs; reaplicar grants recupera consultas por código', async () => {
     const antes = await resumo({ codigo_curso: '001' });
+    const serieAntes = await evolucao({ codigo_curso: '001' });
     await db.query(`BEGIN; DROP SCHEMA gold CASCADE; ${schema} ${dados} COMMIT;`);
     assert.equal((await server.inject('/health')).statusCode, 503);
+    assert.equal((await server.inject('/api/v1/analises/evolucao-temporal?ano_inicial=2022&ano_final=2024')).statusCode, 503);
     await db.query(permissions);
     await db.query(`BEGIN;
       INSERT INTO gold.dim_curso (id_curso, codigo_curso, nome_curso) VALUES (101, 'temporario', 'Pedagogia');
@@ -151,6 +199,7 @@ test('API integrada ao PostgreSQL e a um usuário exclusivo de leitura', {
       COMMIT;`);
     assert.equal((await server.inject('/health')).statusCode, 200);
     assert.deepEqual(await resumo({ codigo_curso: '001' }), antes);
+    assert.deepEqual(await evolucao({ codigo_curso: '001' }), serieAntes);
   });
 
   await t.test('consulta sintética responde dentro de três segundos', async () => {
@@ -159,5 +208,10 @@ test('API integrada ao PostgreSQL e a um usuário exclusivo de leitura', {
     const duration = performance.now() - start;
     t.diagnostic(`Resumo com dados sintéticos: ${duration.toFixed(1)} ms; não representa o volume real.`);
     assert.ok(duration < 3000, `${duration.toFixed(1)} ms`);
+    const serieStart = performance.now();
+    await evolucao({ ano_inicial: '2000', ano_final: '2029' });
+    const serieDuration = performance.now() - serieStart;
+    t.diagnostic(`Série de 30 anos com dados sintéticos: ${serieDuration.toFixed(1)} ms.`);
+    assert.ok(serieDuration < 3000, `${serieDuration.toFixed(1)} ms`);
   });
 });
