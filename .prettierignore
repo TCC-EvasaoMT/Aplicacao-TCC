@@ -1,0 +1,12 @@
+node_modules/
+dist/
+coverage/
+.cache/
+.pnpm-store/
+pnpm-lock.yaml
+docs-codex/
+dados/
+.env
+.env.*
+*.tsbuildinfo
+*.log
