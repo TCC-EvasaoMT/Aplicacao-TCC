@@ -1,6 +1,7 @@
 import { consultar } from '../../lib/http'
 
 export interface Resumo {
+	base_risco: number | null
 	totais: {
 		vinculos_total: number | null
 		matriculas_total: number | null
@@ -9,6 +10,8 @@ export interface Resumo {
 	}
 	taxas: { evasao_curso: number | null; evasao_ies: number | null }
 	qualidade: {
+		registros_com_alunos: number
+		registros_sem_alunos: number
 		sem_dados: boolean
 		dados_incompletos: boolean
 		flag_valor_negativo: boolean

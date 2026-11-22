@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { PainelEvolucao } from '../analises'
 import { consultarCatalogo, type Catalogo } from '../catalogos'
 import { consultarResumo, type Resumo } from './api'
 import {
@@ -108,7 +109,7 @@ export function PainelIndicadores() {
 						Resumo {selecao.ano ? `de ${selecao.ano}` : 'do período'}
 					</h2>
 					<button
-						className="refresh"
+						className="btn btn-outline-success btn-sm"
 						disabled={carregando}
 						onClick={() => setTentativa((value) => value + 1)}
 					>
@@ -138,6 +139,12 @@ export function PainelIndicadores() {
 					<ResumoIndicadores resumo={resumo} />
 				)}
 			</section>
+			<PainelEvolucao
+				anos={catalogo?.anos ?? []}
+				selecao={selecao}
+				atualizacao={tentativa}
+				indisponivel={carregandoCatalogo || !!erroCatalogo}
+			/>
 		</>
 	)
 }

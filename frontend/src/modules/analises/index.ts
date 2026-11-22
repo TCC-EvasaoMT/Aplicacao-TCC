@@ -1,0 +1,1 @@
+export { PainelEvolucao } from './PainelEvolucao'

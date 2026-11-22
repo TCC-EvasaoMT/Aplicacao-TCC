@@ -1,6 +1,6 @@
 # API de evolução temporal
 
-O módulo `backend/src/modules/analises` consulta a evolução anual de um recorte da Gold. Esta entrega implementa a API e sua documentação no Swagger. O gráfico e os controles de intervalo no frontend ficam para o próximo incremento.
+O módulo `backend/src/modules/analises` consulta a evolução anual de um recorte da Gold. A API pode ser consultada pelo Swagger e pelo [gráfico temporal do frontend](FRONTEND_ANALISES.md), com controles de intervalo e tabela de valores anuais.
 
 ## Consulta
 
@@ -40,7 +40,7 @@ Cada entrada possui `ano`, `totais`, `base_risco`, `taxas` e `qualidade`. Os cam
 - Anos com somente docentes também têm medidas de alunos `null`, mas `registros_sem_alunos` informa a presença dessas linhas.
 - A marca de grupo pequeno é calculada sobre a base de cada ano, nunca sobre a soma de toda a série.
 
-A API não interpola lacunas. A futura visualização deve representar a ausência de informação e evitar ligar pontos como se houvesse dados intermediários. Esta série descreve censos anuais; não acompanha a trajetória de uma coorte nem atribui causas às mudanças.
+A API não interpola lacunas. A visualização representa a ausência de informação com interrupções nas linhas, sem ligar pontos como se houvesse dados intermediários. Esta série descreve censos anuais; não acompanha a trajetória de uma coorte nem atribui causas às mudanças.
 
 | HTTP  | Significado                                                                    |
 | ----- | ------------------------------------------------------------------------------ |
