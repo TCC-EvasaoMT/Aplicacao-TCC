@@ -344,6 +344,9 @@ footer {
 	.rate {
 		padding: 16px;
 	}
+	.temporal {
+		padding: 16px;
+	}
 	.project-label {
 		display: none;
 	}
