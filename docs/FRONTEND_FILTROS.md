@@ -4,7 +4,7 @@
 
 Execute `pnpm dev:demo` na raiz, com Docker Desktop aberto, e acesse `http://127.0.0.1:5173/`. A demonstração usa apenas dados sintéticos. Para usar a Gold da pipeline, configure `backend/.env` e execute `pnpm dev`.
 
-O painel permite selecionar um ano e sete filtros opcionais: curso, área geral CINE, modalidade, categoria administrativa, organização acadêmica, município de oferta e município da sede. **Todos** significa ausência de restrição naquele campo. Os códigos aparecem junto dos nomes e são enviados como texto, preservando zeros iniciais.
+O painel apresenta sete filtros compartilhados: curso, área geral CINE, modalidade, categoria administrativa, organização acadêmica, município de oferta e município da sede. O seletor **Ano do resumo** fica junto ao título **Resumo anual**. **Todos** significa ausência de restrição naquele campo. Os códigos aparecem junto dos nomes e são enviados como texto, preservando zeros iniciais.
 
 Os filtros combinam por **E**. Os sete filtros opcionais atualizam automaticamente o resumo e a [evolução temporal](FRONTEND_ANALISES.md). **Ano do resumo** afeta apenas os indicadores anuais; o gráfico possui seu próprio intervalo. **Limpar filtros** remove apenas os sete filtros opcionais e mantém ano e período. **Atualizar dados** recarrega catálogo, resumo e série, preservando as seleções que ainda existem e o intervalo aplicado. Se uma opção selecionada sair da base, ela é removida e a tela avisa; um ano removido é substituído pelo mais recente disponível.
 
@@ -45,7 +45,9 @@ O painel de indicadores compõe o catálogo e a evolução temporal pelas entrad
 
 Cada resposta é associada à seleção e à tentativa que a originaram. Ao alterar filtros ou atualizar os dados, respostas anteriores deixam de ser exibidas. Requisições anteriores são canceladas com `AbortController`; callbacks verificam o cancelamento para não sobrescrever uma seleção mais recente. Durante a consulta aparecem estados de carregamento; erros não reaproveitam os totais anteriores.
 
-Seleções usam controles nativos com rótulos e a classe `form-select` do Bootstrap. Os avisos de carregamento, erro e ausência de dados são anunciados por regiões acessíveis. A grade Bootstrap usa uma coluna abaixo de 576 px, duas de 576 a 991 px e três a partir de 992 px. Os detalhes do tema estão em [Estilização do frontend](FRONTEND_ESTILIZACAO.md).
+Seleções usam controles nativos com rótulos e a classe `form-select` do Bootstrap. Os avisos de carregamento, erro e ausência de dados são anunciados por regiões acessíveis. A grade usa uma coluna abaixo de 576 px; entre 576 e 767 px, o curso ocupa uma linha e os demais filtros usam duas colunas. A partir de 768 px, o curso ocupa meia linha e os demais campos um quarto. O ano permanece no resumo, fora dessa grade.
+
+As duas taxas aparecem antes dos totais, com igual destaque e números de largura uniforme. A explicação metodológica completa está em **Como interpretar os dados**, ao final do painel. A ajuda curta sobre oferta e sede permanece perto dos filtros. O atalho **Ir para o conteúdo** permite pular o cabeçalho pelo teclado. Os detalhes do tema estão em [Estilização do frontend](FRONTEND_ESTILIZACAO.md).
 
 ## Verificação com dados sintéticos
 

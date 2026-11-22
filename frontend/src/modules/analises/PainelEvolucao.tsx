@@ -1,9 +1,10 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import type { SelecaoFiltros } from '../indicadores'
 import { consultarEvolucao, type EvolucaoTemporal } from './api'
 import { GraficoEvolucao } from './GraficoEvolucao'
 import {
 	periodoInicial,
+	campoInvalidoPeriodo,
 	serializarEvolucao,
 	validarPeriodo,
 	type Periodo
@@ -25,6 +26,9 @@ export function PainelEvolucao({
 	const [periodo, setPeriodo] = useState<Periodo | null>(null)
 	const [rascunho, setRascunho] = useState<Periodo | null>(null)
 	const [erroPeriodo, setErroPeriodo] = useState('')
+	const camposPeriodo = useRef<
+		Partial<Record<keyof Periodo, HTMLInputElement | null>>
+	>({})
 	const [tentativa, setTentativa] = useState(0)
 	const [resposta, setResposta] = useState<{
 		chave: string
@@ -34,6 +38,7 @@ export function PainelEvolucao({
 	const padrao = periodoInicial(anos)
 	const aplicado = periodo ?? padrao
 	const campos = rascunho ?? aplicado
+	const campoComErro = erroPeriodo ? campoInvalidoPeriodo(campos) : null
 	const query = serializarEvolucao(aplicado, selecao)
 	const podeConsultar =
 		!indisponivel && anos.length > 0 && !validarPeriodo(aplicado)
@@ -64,6 +69,10 @@ export function PainelEvolucao({
 		const erro = validarPeriodo(campos)
 		setErroPeriodo(erro)
 		if (!erro) setPeriodo({ ...campos })
+		else {
+			const campo = campoInvalidoPeriodo(campos)
+			if (campo) camposPeriodo.current[campo]?.focus()
+		}
 	}
 
 	return (
@@ -74,12 +83,11 @@ export function PainelEvolucao({
 		>
 			<h2 id="evolucao-titulo">Evolução temporal</h2>
 			<p className="filter-help">
-				Compare as taxas anuais com os mesmos filtros do painel. O ano do resumo
-				não limita este gráfico. A série descreve censos anuais, não o
-				acompanhamento de uma coorte.
+				Compare as taxas no período abaixo. Os filtros são compartilhados; o ano
+				do resumo não limita este gráfico.
 			</p>
 			<form
-				className="row g-3 align-items-end mt-2"
+				className="row g-3 align-items-end"
 				onSubmit={aplicar}
 				noValidate
 				aria-describedby="periodo-ajuda"
@@ -90,8 +98,13 @@ export function PainelEvolucao({
 							{campo === 'ano_inicial' ? 'Ano inicial' : 'Ano final'}
 						</label>
 						<input
-							className={`form-control${erroPeriodo ? ' is-invalid' : ''}`}
+							className={`form-control${campoComErro === campo ? ' is-invalid' : ''}`}
 							id={campo}
+							name={campo}
+							autoComplete="off"
+							ref={(elemento) => {
+								camposPeriodo.current[campo] = elemento
+							}}
 							type="number"
 							min={1900}
 							max={9999}
@@ -99,7 +112,7 @@ export function PainelEvolucao({
 							required
 							value={campos[campo]}
 							disabled={indisponivel || !anos.length}
-							aria-invalid={!!erroPeriodo}
+							aria-invalid={campoComErro === campo}
 							aria-describedby={erroPeriodo ? 'periodo-erro' : 'periodo-ajuda'}
 							onChange={(event) => {
 								setRascunho({ ...campos, [campo]: event.target.value })

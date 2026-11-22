@@ -34,6 +34,8 @@ A resposta é associada à URL e à tentativa de atualização. Alterar o recort
 - Base não positiva é identificada na tabela. Um período sem taxas exibe uma mensagem e mantém os valores e avisos disponíveis.
 - O gráfico permite navegação pelo teclado via Recharts. A tabela usa cabeçalhos semânticos e rolagem horizontal em telas estreitas.
 
+Resumo, legenda e tabela usam os mesmos nomes: **Evasão do curso** e **Evasão da instituição**. As colunas numéricas são alinhadas à direita e os avisos de cada ano aparecem em lista. Em um período inválido, o foco vai para o primeiro campo a corrigir; erros de ordem ou de tamanho do intervalo apontam para o ano final. O período já aplicado continua visível até uma nova seleção válida.
+
 Esta é uma comparação de censos anuais, não acompanhamento de coortes nem explicação causal da evasão.
 
 ## Verificação
@@ -54,6 +56,6 @@ Com `pnpm dev:demo`, confira o período 2022–2024:
 
 Teste também um único ano, lacunas entre anos, mudança rápida de filtros, falha e recuperação da API e largura de celular. A conferência com dados reais do INEP e a medição de desempenho em volume real continuam pendentes.
 
-Na verificação desta entrega em Windows, `pnpm check` passou com 30 testes (21 do backend e 9 do frontend). No navegador, foram conferidos curso `001`, ano único, ruído negativo, base zero, somente docentes, rejeição de intervalo superior a 30 anos, apresentação em 390 px e recuperação após parar e reconstruir a Gold de demonstração com os grants reaplicados.
+Na verificação atual em Windows, `pnpm check` passou com 31 testes (21 do backend e 10 do frontend), incluindo o direcionamento de foco para correção do período. Na entrega inicial do gráfico, foram conferidos no navegador curso `001`, ano único, ruído negativo, base zero, somente docentes, rejeição de intervalo superior a 30 anos, apresentação em 390 px e recuperação após parar e reconstruir a Gold de demonstração com os grants reaplicados. A revisão de layout está descrita em [Estilização do frontend](FRONTEND_ESTILIZACAO.md).
 
 O build emite um aviso de bundle JavaScript acima de 500 kB após incluir Recharts; a medição de carregamento em conexão real e eventual divisão do bundle permanecem pendentes. A verificação global de Prettier aponta uma pendência anterior em `scripts/demo.mjs`; os arquivos desta entrega passam na verificação de formatação.

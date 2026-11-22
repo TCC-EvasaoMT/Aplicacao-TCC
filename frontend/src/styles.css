@@ -13,9 +13,6 @@
 	--bs-border-radius: 0.25rem;
 	font-synthesis: none;
 }
-body {
-	min-width: 320px;
-}
 a {
 	color: inherit;
 }
@@ -127,6 +124,26 @@ h3 {
 }
 .filters .section-heading {
 	margin-bottom: 8px;
+}
+.summary-controls {
+	display: flex;
+	align-items: end;
+	flex-wrap: wrap;
+	gap: 16px;
+}
+.summary-year {
+	min-width: 140px;
+}
+.summary-year .form-select {
+	max-width: 260px;
+}
+.annual-notes {
+	margin: 0;
+	padding-left: 16px;
+	min-width: 170px;
+}
+.annual-notes li + li {
+	margin-top: 4px;
 }
 .filter-help {
 	margin: 8px 0;
