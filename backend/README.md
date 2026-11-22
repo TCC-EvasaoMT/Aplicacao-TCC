@@ -31,17 +31,20 @@ pnpm start
 
 O servidor escuta exclusivamente em `127.0.0.1`. `pnpm start` serve também `frontend/dist` em `/`. Swagger só é registrado com `NODE_ENV=development`, inclusive na versão compilada. `NODE_ENV=production` desativa `/docs`. Esta entrega não inclui autenticação nem implantação pública.
 
-| Variável            | Uso                                                            |
-| ------------------- | -------------------------------------------------------------- |
-| `NODE_ENV`          | `development` por padrão; também aceita `test` e `production`. |
-| `PORT`              | Porta HTTP, padrão `3000`.                                     |
-| `POSTGRES_HOST`     | Host do banco, padrão `127.0.0.1`.                             |
-| `POSTGRES_PORT`     | Porta do banco, padrão `5432`.                                 |
-| `POSTGRES_DB`       | Obrigatória: nome do banco da pipeline.                        |
-| `POSTGRES_USER`     | Obrigatória: login exclusivo de leitura.                       |
-| `POSTGRES_PASSWORD` | Obrigatória: senha desse login.                                |
+| Variável              | Uso                                                                                 |
+| --------------------- | ----------------------------------------------------------------------------------- |
+| `NODE_ENV`            | `development` por padrão; também aceita `test` e `production`.                      |
+| `PORT`                | Porta HTTP, padrão `3000`.                                                          |
+| `HTTP_RATE_LIMIT_MAX` | Chamadas por minuto por IP e processo em `/api`, padrão `120`; aceita de 1 a 10000. |
+| `POSTGRES_HOST`       | Host do banco, padrão `127.0.0.1`.                                                  |
+| `POSTGRES_PORT`       | Porta do banco, padrão `5432`.                                                      |
+| `POSTGRES_DB`         | Obrigatória: nome do banco da pipeline.                                             |
+| `POSTGRES_USER`       | Obrigatória: login exclusivo de leitura.                                            |
+| `POSTGRES_PASSWORD`   | Obrigatória: senha desse login.                                                     |
 
 Credenciais ausentes ou portas inválidas impedem a inicialização. Uma conexão indisponível mantém o HTTP ativo, mas as consultas respondem `503`. O pool tem até cinco conexões, espera de conexão de dois segundos e limite SQL de 2,5 segundos. Esses limites não substituem a medição de desempenho com a carga real.
+
+Consulte a [proteção da API pública](../docs/SEGURANCA_API.md) para limites HTTP, respostas `429`, cabeçalhos e cuidados com proxy. O painel continua sem login; autenticação administrativa é uma entrega futura.
 
 ## Preparar o acesso ao PostgreSQL
 
