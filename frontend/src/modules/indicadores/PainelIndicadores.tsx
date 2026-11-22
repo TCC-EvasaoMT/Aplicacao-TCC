@@ -109,7 +109,7 @@ export function PainelIndicadores() {
 						Resumo {selecao.ano ? `de ${selecao.ano}` : 'do período'}
 					</h2>
 					<button
-						className="refresh"
+						className="btn btn-outline-success btn-sm"
 						disabled={carregando}
 						onClick={() => setTentativa((value) => value + 1)}
 					>

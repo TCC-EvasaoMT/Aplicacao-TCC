@@ -93,12 +93,12 @@ export function GraficoEvolucao({ serie }: { serie: PontoTemporal[] }) {
 				</p>
 			)}
 			<div
-				className="temporal-table"
+				className="temporal-table table-responsive"
 				role="region"
 				aria-label="Tabela da evolução temporal"
 				tabIndex={0}
 			>
-				<table>
+				<table className="table caption-top align-top">
 					<caption>Valores anuais e qualidade dos dados</caption>
 					<thead>
 						<tr>

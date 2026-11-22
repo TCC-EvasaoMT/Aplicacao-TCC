@@ -2,6 +2,8 @@
 
 A aplicação é um monorepo com dois pacotes: `frontend` (React/Vite) e `backend` (Fastify). O backend é um monólito modular: os módulos compartilham o mesmo processo e banco, mas cada um possui suas rotas, consultas e contratos. A pipeline Python tem repositório e execução independentes.
 
+No frontend, Bootstrap 5.3 fornece estilos de formulários, botões, grade responsiva e tabela; Recharts apresenta as séries temporais. O CSS do Bootstrap é importado no ponto de entrada e complementado pelo tema em `styles.css`. React mantém o controle dos componentes e eventos. Veja [Estilização do frontend](FRONTEND_ESTILIZACAO.md) para a organização e os limites dessa integração.
+
 ## Arquitetura adotada no backend
 
 **Monólito modular, organizado por funcionalidade, com separação entre HTTP, acesso a dados e regras de negócio e injeção de dependências manual.** Essa é a descrição da implementação atual.

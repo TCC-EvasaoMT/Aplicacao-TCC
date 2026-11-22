@@ -21,7 +21,7 @@ Leia a [arquitetura da aplicação](docs/ARQUITETURA.md), os [módulos e contrat
 
 O frontend não importa arquivos internos do backend e não acessa o banco. Ele usa HTTP/JSON em `/api/v1`. As fórmulas de evasão continuam no backend; a interface apenas formata os resultados.
 
-A [API de evolução temporal](docs/ANALISES_TEMPORAIS.md) permite consultar séries anuais em `/api/v1/analises/evolucao-temporal`, com intervalo inclusivo de até 30 anos e os mesmos filtros de recorte. O [módulo de análises do frontend](docs/FRONTEND_ANALISES.md) apresenta as duas taxas em um gráfico Recharts e uma tabela de valores e qualidade por ano. A estilização continua em CSS próprio; Bootstrap ainda não foi adotado e Tailwind não foi adicionado.
+A [API de evolução temporal](docs/ANALISES_TEMPORAIS.md) permite consultar séries anuais em `/api/v1/analises/evolucao-temporal`, com intervalo inclusivo de até 30 anos e os mesmos filtros de recorte. O [módulo de análises do frontend](docs/FRONTEND_ANALISES.md) apresenta as duas taxas em um gráfico Recharts e uma tabela de valores e qualidade por ano. A interface utiliza Bootstrap 5.3 para formulários, botões, grade responsiva e tabela, com CSS próprio para a identidade visual, conforme a [documentação de estilização](docs/FRONTEND_ESTILIZACAO.md).
 
 ## Executar em desenvolvimento
 

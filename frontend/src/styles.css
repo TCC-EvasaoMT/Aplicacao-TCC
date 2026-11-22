@@ -1,24 +1,16 @@
 :root {
-	font-family: Inter, 'Segoe UI', system-ui, sans-serif;
-	color: #172e29;
-	background: #f5f7f7;
+	--bs-body-font-family: Inter, 'Segoe UI', system-ui, sans-serif;
+	--bs-body-color: #172e29;
+	--bs-body-bg: #f5f7f7;
+	--bs-body-line-height: 1.55;
+	--bs-border-color: #b9cbc3;
 	font-synthesis: none;
-	line-height: 1.55;
-}
-* {
-	box-sizing: border-box;
 }
 body {
-	margin: 0;
 	min-width: 320px;
 }
 a {
 	color: inherit;
-}
-button,
-input,
-select {
-	font: inherit;
 }
 button,
 select,
@@ -102,15 +94,6 @@ h1 {
 .filters .section-heading {
 	margin-bottom: 10px;
 }
-.filter-grid {
-	display: grid;
-	grid-template-columns: repeat(3, minmax(0, 1fr));
-	gap: 18px;
-	margin: 22px 0;
-}
-.filter-field {
-	min-width: 0;
-}
 .filter-help {
 	font-size: 0.875rem;
 	color: #52675f;
@@ -121,32 +104,29 @@ h1 {
 	font-weight: 600;
 	margin: 14px 0 0;
 }
-label {
+.form-label {
 	display: block;
 	font-size: 0.875rem;
 	font-weight: 600;
-	margin-bottom: 8px;
 }
-select {
-	appearance: none;
-	background: white
-		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath d='m4 6 4 4 4-4' fill='none' stroke='%23172e29' stroke-width='1.5'/%3E%3C/svg%3E")
-		right 14px center / 16px no-repeat;
-	color: #172e29;
-	border: 1px solid #b9cbc3;
-	border-radius: 8px;
-	padding: 10px 42px 10px 14px;
-	width: 100%;
-	cursor: pointer;
+.form-select,
+.form-control {
+	background-color: white;
 }
-select:disabled {
-	color: #52675f;
-	cursor: default;
+.form-select:focus,
+.form-control:focus {
+	border-color: #168466;
+	box-shadow: 0 0 0 0.25rem rgb(22 132 102 / 20%);
+}
+.form-control.is-invalid:focus {
+	border-color: var(--bs-danger);
+	box-shadow: 0 0 0 0.25rem rgb(var(--bs-danger-rgb) / 20%);
 }
 .section-heading {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
+	flex-wrap: wrap;
 	gap: 16px;
 	margin-bottom: 20px;
 }
@@ -155,21 +135,16 @@ h2 {
 	font-weight: 600;
 	margin: 0;
 }
-.refresh {
-	border: 1px solid #becfc7;
-	color: #204e40;
-	border-radius: 8px;
-	padding: 8px 14px;
-	background: transparent;
-	font-size: 0.875rem;
-	cursor: pointer;
-}
-.refresh:hover:enabled {
-	background: #e8f0eb;
-}
-.refresh:disabled {
-	opacity: 0.55;
-	cursor: wait;
+.btn-outline-success {
+	--bs-btn-color: #204e40;
+	--bs-btn-border-color: #becfc7;
+	--bs-btn-hover-color: #204e40;
+	--bs-btn-hover-bg: #e8f0eb;
+	--bs-btn-hover-border-color: #204e40;
+	--bs-btn-active-bg: #153f35;
+	--bs-btn-active-border-color: #153f35;
+	--bs-btn-disabled-color: #52675f;
+	--bs-btn-disabled-border-color: #becfc7;
 }
 .metrics {
 	display: grid;
@@ -255,61 +230,35 @@ h3 {
 	border-radius: 12px;
 	min-width: 0;
 }
-.temporal-period {
-	display: flex;
-	align-items: end;
-	flex-wrap: wrap;
-	gap: 16px;
-	margin-top: 24px;
-}
-.temporal-period > div {
-	flex: 0 1 160px;
-	min-width: 0;
-}
-.temporal-period input {
-	width: 100%;
-	padding: 8px 12px;
-	color: #172e29;
-	background: white;
-	border: 1px solid #b9cbc3;
-	border-radius: 8px;
-}
-.temporal-period input[aria-invalid='true'] {
-	border-color: #8b2921;
-}
 .temporal-chart {
 	margin: 24px 0;
 	min-width: 0;
 	font-size: 0.875rem;
 }
 .temporal-table {
-	overflow-x: auto;
 	margin-top: 24px;
 }
 .temporal-table table {
-	width: 100%;
-	border-collapse: collapse;
-	text-align: left;
+	--bs-table-color: var(--bs-body-color);
+	--bs-table-bg: white;
 	font-size: 0.875rem;
 	font-variant-numeric: tabular-nums;
 }
 .temporal-table caption {
-	text-align: left;
+	color: var(--bs-body-color);
 	font-weight: 600;
 	margin-bottom: 12px;
 }
 .temporal-table th,
 .temporal-table td {
 	padding: 12px;
-	border-bottom: 1px solid #dce5e1;
 	min-width: 105px;
-	vertical-align: top;
 }
 .temporal-table th:first-child {
 	min-width: 65px;
 }
 .temporal-table thead {
-	background: #edf3f0;
+	--bs-table-bg: #edf3f0;
 }
 .reading-note h2 {
 	font-size: 0.95rem;
@@ -329,8 +278,7 @@ footer {
 	font-size: 0.875rem;
 }
 @media (max-width: 850px) {
-	.metrics,
-	.filter-grid {
+	.metrics {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
 	.heading {
@@ -346,17 +294,11 @@ footer {
 		gap: 24px;
 		margin-bottom: 32px;
 	}
-	.filter-grid {
-		grid-template-columns: 1fr;
-	}
 	.filters {
 		padding: 18px;
 	}
 	.temporal {
 		padding: 16px;
-	}
-	.temporal-period > div {
-		flex: 1 1 90px;
 	}
 	.project-label {
 		display: none;
@@ -375,9 +317,6 @@ footer {
 	}
 	footer {
 		flex-direction: column;
-	}
-	.refresh {
-		padding: 8px 10px;
 	}
 	h2 {
 		font-size: 1rem;

@@ -79,17 +79,18 @@ export function PainelEvolucao({
 				acompanhamento de uma coorte.
 			</p>
 			<form
-				className="temporal-period"
+				className="row g-3 align-items-end mt-2"
 				onSubmit={aplicar}
 				noValidate
 				aria-describedby="periodo-ajuda"
 			>
 				{(['ano_inicial', 'ano_final'] as const).map((campo) => (
-					<div key={campo}>
-						<label htmlFor={campo}>
+					<div className="col-6 col-sm-4 col-lg-2" key={campo}>
+						<label className="form-label" htmlFor={campo}>
 							{campo === 'ano_inicial' ? 'Ano inicial' : 'Ano final'}
 						</label>
 						<input
+							className={`form-control${erroPeriodo ? ' is-invalid' : ''}`}
 							id={campo}
 							type="number"
 							min={1900}
@@ -107,20 +108,22 @@ export function PainelEvolucao({
 						/>
 					</div>
 				))}
-				<button
-					className="refresh"
-					disabled={indisponivel || !anos.length}
-					type="submit"
-				>
-					Aplicar período
-				</button>
+				<div className="col-12 col-sm-auto">
+					<button
+						className="btn btn-outline-success"
+						disabled={indisponivel || !anos.length}
+						type="submit"
+					>
+						Aplicar período
+					</button>
+				</div>
 			</form>
 			<p id="periodo-ajuda" className="filter-help">
 				De 1 a 30 anos, incluindo os extremos. Anos sem dados permanecem como
 				lacunas.
 			</p>
 			{erroPeriodo && (
-				<p id="periodo-erro" className="error" role="alert">
+				<p id="periodo-erro" className="alert alert-danger" role="alert">
 					{erroPeriodo}
 				</p>
 			)}
@@ -136,10 +139,10 @@ export function PainelEvolucao({
 				)}
 				{carregando && <p className="state">Carregando evolução temporal…</p>}
 				{podeConsultar && atual?.erro && (
-					<div className="state error" role="alert">
+					<div className="alert alert-danger" role="alert">
 						<p>{atual.erro}</p>
 						<button
-							className="refresh"
+							className="btn btn-outline-success btn-sm"
 							onClick={() => setTentativa((valor) => valor + 1)}
 						>
 							Tentar novamente

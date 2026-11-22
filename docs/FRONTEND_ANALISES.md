@@ -13,7 +13,7 @@ O módulo `frontend/src/modules/analises` consulta a [API de evolução temporal
 | `GraficoEvolucao.tsx` | Gráfico Recharts e tabela acessível                    |
 | `apresentacao.ts`     | Formatação de taxas e avisos anuais                    |
 
-Os tipos de seleção e resultado são compartilhados pela entrada pública de `indicadores`, sem importar implementações internas. O cliente HTTP é o mesmo dos outros módulos. Recharts é a biblioteca de gráficos prevista no documento do TCC. A estilização continua em CSS próprio; a adoção de Bootstrap está pendente e Tailwind não foi adicionado.
+Os tipos de seleção e resultado são compartilhados pela entrada pública de `indicadores`, sem importar implementações internas. O cliente HTTP é o mesmo dos outros módulos. Recharts é a biblioteca de gráficos prevista no documento do TCC. Os controles de período, mensagens de erro e tabela utilizam [Bootstrap com o tema da aplicação](FRONTEND_ESTILIZACAO.md). React controla eventos, validação e carregamento.
 
 ## Período e filtros
 

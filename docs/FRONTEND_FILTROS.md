@@ -30,7 +30,8 @@ frontend/src/
       filtros.ts                           Serialização, limpeza e atualização da seleção
       api.ts                               Contrato e consulta do resumo
   lib/http.ts                              Requisições HTTP e tratamento de falha
-  styles.css                               Estilos e layout responsivo
+  main.tsx                                 Carrega Bootstrap antes do tema da aplicação
+  styles.css                               Tema e estilos específicos do painel
 ```
 
 O painel de indicadores compõe o catálogo e a evolução temporal pelas entradas públicas de `catalogos` e `analises`. O módulo de análises reutiliza apenas os tipos públicos de indicadores. Os contratos são tipos do cliente HTTP; não há importação de código interno do backend.
@@ -44,7 +45,7 @@ O painel de indicadores compõe o catálogo e a evolução temporal pelas entrad
 
 Cada resposta é associada à seleção e à tentativa que a originaram. Ao alterar filtros ou atualizar os dados, respostas anteriores deixam de ser exibidas. Requisições anteriores são canceladas com `AbortController`; callbacks verificam o cancelamento para não sobrescrever uma seleção mais recente. Durante a consulta aparecem estados de carregamento; erros não reaproveitam os totais anteriores.
 
-Seleções usam controles nativos com rótulos. Os avisos de carregamento, erro e ausência de dados são anunciados por regiões acessíveis. A grade de filtros passa de três para duas e uma coluna conforme a largura disponível.
+Seleções usam controles nativos com rótulos e a classe `form-select` do Bootstrap. Os avisos de carregamento, erro e ausência de dados são anunciados por regiões acessíveis. A grade Bootstrap usa uma coluna abaixo de 576 px, duas de 576 a 991 px e três a partir de 992 px. Os detalhes do tema estão em [Estilização do frontend](FRONTEND_ESTILIZACAO.md).
 
 ## Verificação com dados sintéticos
 
