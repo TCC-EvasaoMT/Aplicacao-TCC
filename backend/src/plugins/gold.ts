@@ -9,14 +9,21 @@ export const origem = `
   JOIN gold.dim_oferta o USING (id_oferta)
   JOIN gold.dim_instituicao i USING (id_instituicao)`;
 
-export async function consultarGold<T>(request: FastifyRequest, tarefa: () => Promise<T>): Promise<T> {
+export async function consultarGold<T>(
+  request: FastifyRequest,
+  tarefa: () => Promise<T>,
+): Promise<T> {
   try {
     return await tarefa();
   } catch (error) {
     const code = error instanceof Error && 'code' in error ? String(error.code) : 'DB_ERROR';
     request.log.error({ code }, 'Falha na consulta à Gold');
-    throw Object.assign(new Error('Camada Gold indisponível. Tente novamente após a carga ou verifique a conexão.'), {
-      statusCode: 503, code: 'GOLD_INDISPONIVEL',
-    });
+    throw Object.assign(
+      new Error('Camada Gold indisponível. Tente novamente após a carga ou verifique a conexão.'),
+      {
+        statusCode: 503,
+        code: 'GOLD_INDISPONIVEL',
+      },
+    );
   }
 }

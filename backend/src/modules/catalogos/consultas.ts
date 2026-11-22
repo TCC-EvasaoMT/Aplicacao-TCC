@@ -18,19 +18,27 @@ const catalogoSQL = `
       ['areas_gerais', 'codigo_area_geral', 'area_geral'],
       ['municipios_oferta', 'codigo_municipio_oferta', 'municipio_oferta'],
       ['municipios_sede', 'codigo_municipio_sede', 'municipio_sede'],
-    ].map(([campo, codigo, nome]) => `'${campo}', (
+    ]
+      .map(
+        ([campo, codigo, nome]) => `'${campo}', (
       SELECT coalesce(jsonb_agg(jsonb_build_object('codigo', codigo, 'nome', nome) ORDER BY nome, codigo), '[]'::jsonb)
       FROM (SELECT ${codigo} AS codigo, min(${nome}) AS nome FROM dados
             WHERE ${codigo} IS NOT NULL GROUP BY ${codigo}) x
-    )`).join(',')},
+    )`,
+      )
+      .join(',')},
     ${[
       ['modalidades', 'modalidade'],
       ['categorias_administrativas', 'categoria_administrativa'],
       ['organizacoes_academicas', 'organizacao_academica'],
-    ].map(([campo, coluna]) => `'${campo}', (
+    ]
+      .map(
+        ([campo, coluna]) => `'${campo}', (
       SELECT coalesce(jsonb_agg(valor ORDER BY valor), '[]'::jsonb)
       FROM (SELECT DISTINCT ${coluna} AS valor FROM dados WHERE ${coluna} IS NOT NULL) x
-    )`).join(',')}
+    )`,
+      )
+      .join(',')}
   ) AS filtros`;
 
 export function criarConsultasCatalogos(pool: Pool) {

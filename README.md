@@ -66,17 +66,17 @@ Distribua `backend/dist`, `frontend/dist`, os manifests e o lockfile mantendo a 
 
 ## Comandos da raiz
 
-| Comando | Resultado |
-| --- | --- |
-| `pnpm dev` | Inicia frontend e backend em desenvolvimento. |
-| `pnpm dev:frontend` | Inicia apenas o Vite. |
-| `pnpm dev:backend` | Inicia apenas a API. |
-| `pnpm typecheck` | Verifica os tipos dos dois pacotes. |
-| `pnpm test` | Executa os testes automatizados existentes. |
-| `pnpm build` | Compila React e Fastify. |
-| `pnpm check` | Verifica tipos, executa testes e compila o conjunto. |
+| Comando                 | Resultado                                                       |
+| ----------------------- | --------------------------------------------------------------- |
+| `pnpm dev`              | Inicia frontend e backend em desenvolvimento.                   |
+| `pnpm dev:frontend`     | Inicia apenas o Vite.                                           |
+| `pnpm dev:backend`      | Inicia apenas a API.                                            |
+| `pnpm typecheck`        | Verifica os tipos dos dois pacotes.                             |
+| `pnpm test`             | Executa os testes automatizados existentes.                     |
+| `pnpm build`            | Compila React e Fastify.                                        |
+| `pnpm check`            | Verifica tipos, executa testes e compila o conjunto.            |
 | `pnpm test:integration` | Executa a integração em PostgreSQL, usando `TEST_DATABASE_URL`. |
-| `pnpm start` | Serve frontend compilado e API pelo Fastify. |
+| `pnpm start`            | Serve frontend compilado e API pelo Fastify.                    |
 
 Instale dependências no pacote que as utiliza, por exemplo `pnpm --filter tcc-evasao-frontend add nome-do-pacote`. Não gere novos lockfiles dentro dos pacotes.
 

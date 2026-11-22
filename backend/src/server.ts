@@ -16,21 +16,31 @@ const pool = new Pool({
   statement_timeout: 2500,
   application_name: 'tcc-evasao-api',
 });
-const app = await buildApp({
-  indicadores: criarConsultasIndicadores(pool),
-  catalogos: criarConsultasCatalogos(pool),
-  analises: criarConsultasAnalises(pool),
-  health: criarHealth(pool),
-}, {
-  docs: config.docs,
-  logger: true,
-  frontendDir: process.argv.includes('--serve-frontend')
-    ? fileURLToPath(new URL('../../frontend/dist/', import.meta.url)) : undefined,
-});
+const app = await buildApp(
+  {
+    indicadores: criarConsultasIndicadores(pool),
+    catalogos: criarConsultasCatalogos(pool),
+    analises: criarConsultasAnalises(pool),
+    health: criarHealth(pool),
+  },
+  {
+    docs: config.docs,
+    logger: true,
+    frontendDir: process.argv.includes('--serve-frontend')
+      ? fileURLToPath(new URL('../../frontend/dist/', import.meta.url))
+      : undefined,
+  },
+);
 pool.on('error', () => app.log.error('Conexão ociosa com o PostgreSQL foi interrompida'));
-app.addHook('onClose', async () => { await pool.end(); });
+app.addHook('onClose', async () => {
+  await pool.end();
+});
 for (const signal of ['SIGINT', 'SIGTERM'] as const) {
-  process.once(signal, () => { void app.close().catch(() => { process.exitCode = 1; }); });
+  process.once(signal, () => {
+    void app.close().catch(() => {
+      process.exitCode = 1;
+    });
+  });
 }
 try {
   await app.listen({ host: '127.0.0.1', port: config.port });

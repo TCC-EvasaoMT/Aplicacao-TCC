@@ -1,5 +1,10 @@
 import type { Pool } from 'pg';
-import { agregacaoSQL, parametrizarFiltros, type Agregado, type FiltrosRecorte } from '../indicadores/index.js';
+import {
+  agregacaoSQL,
+  parametrizarFiltros,
+  type Agregado,
+  type FiltrosRecorte,
+} from '../indicadores/index.js';
 import { origem } from '../../plugins/gold.js';
 
 export interface FiltrosEvolucao extends FiltrosRecorte {

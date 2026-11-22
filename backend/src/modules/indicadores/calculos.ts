@@ -1,10 +1,16 @@
 export const medidas = [
-  'vinculos_total', 'ingressantes_total', 'matriculas_total', 'concluintes_total',
-  'alunos_cursando', 'alunos_desvinculados', 'alunos_transferidos',
-  'alunos_matricula_trancada', 'alunos_falecidos',
+  'vinculos_total',
+  'ingressantes_total',
+  'matriculas_total',
+  'concluintes_total',
+  'alunos_cursando',
+  'alunos_desvinculados',
+  'alunos_transferidos',
+  'alunos_matricula_trancada',
+  'alunos_falecidos',
 ] as const;
 
-export type Medida = typeof medidas[number];
+export type Medida = (typeof medidas)[number];
 export type Totais = Record<Medida, number | null>;
 export type Agregado = Record<Medida, string | null> & {
   registros_com_alunos: number;
@@ -14,15 +20,21 @@ export type Agregado = Record<Medida, string | null> & {
 };
 
 export function calcularResumo(agregado: Agregado) {
-  const totais = Object.fromEntries(medidas.map((medida) => {
-    const value = agregado[medida] === null ? null : Number(agregado[medida]);
-    if (value !== null && !Number.isFinite(value)) throw new Error('Medida não finita na Gold');
-    return [medida, value];
-  })) as Totais;
-  const base = totais.vinculos_total === null || totais.alunos_falecidos === null
-    ? null : totais.vinculos_total - totais.alunos_falecidos;
-  const evadidosCurso = totais.alunos_desvinculados === null || totais.alunos_transferidos === null
-    ? null : totais.alunos_desvinculados + totais.alunos_transferidos;
+  const totais = Object.fromEntries(
+    medidas.map((medida) => {
+      const value = agregado[medida] === null ? null : Number(agregado[medida]);
+      if (value !== null && !Number.isFinite(value)) throw new Error('Medida não finita na Gold');
+      return [medida, value];
+    }),
+  ) as Totais;
+  const base =
+    totais.vinculos_total === null || totais.alunos_falecidos === null
+      ? null
+      : totais.vinculos_total - totais.alunos_falecidos;
+  const evadidosCurso =
+    totais.alunos_desvinculados === null || totais.alunos_transferidos === null
+      ? null
+      : totais.alunos_desvinculados + totais.alunos_transferidos;
   const taxa = (numerador: number | null) =>
     base === null || base <= 0 || numerador === null ? null : numerador / base;
 

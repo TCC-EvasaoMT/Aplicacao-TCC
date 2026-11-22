@@ -7,6 +7,9 @@ export { agregacaoSQL, parametrizarFiltros, type FiltrosRecorte } from './consul
 export { calcularResumo, medidas, type Agregado } from './calculos.js';
 export { anoSchema, filtrosRecorteProperties, resultadoResumoProperties } from './schemas.js';
 
-export const indicadores: FastifyPluginAsync<{ consultas: ConsultasIndicadores }> = async (app, { consultas }) => {
+export const indicadores: FastifyPluginAsync<{ consultas: ConsultasIndicadores }> = async (
+  app,
+  { consultas },
+) => {
   registrarRotas(app, consultas);
 };

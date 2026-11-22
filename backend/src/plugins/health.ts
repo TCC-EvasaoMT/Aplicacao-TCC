@@ -10,18 +10,29 @@ export function criarHealth(pool: Pool) {
   };
 }
 
-export const health: FastifyPluginAsync<{ consultar: () => Promise<void> }> = async (app, { consultar }) => {
-  app.get('/health', {
-    schema: {
-      tags: ['Operação'], summary: 'Verifica o acesso à Gold e às dimensões utilizadas.',
-      response: {
-        200: { type: 'object', required: ['status'], properties: { status: { type: 'string', const: 'ok' } } },
-        503: erroSchema,
+export const health: FastifyPluginAsync<{ consultar: () => Promise<void> }> = async (
+  app,
+  { consultar },
+) => {
+  app.get(
+    '/health',
+    {
+      schema: {
+        tags: ['Operação'],
+        summary: 'Verifica o acesso à Gold e às dimensões utilizadas.',
+        response: {
+          200: {
+            type: 'object',
+            required: ['status'],
+            properties: { status: { type: 'string', const: 'ok' } },
+          },
+          503: erroSchema,
+        },
       },
     },
-  }, async (request) => {
-    await consultarGold(request, consultar);
-    return { status: 'ok' };
-  });
-
+    async (request) => {
+      await consultarGold(request, consultar);
+      return { status: 'ok' };
+    },
+  );
 };

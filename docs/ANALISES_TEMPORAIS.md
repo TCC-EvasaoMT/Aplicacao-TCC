@@ -8,17 +8,17 @@ O módulo `backend/src/modules/analises` consulta a evolução anual de um recor
 GET /api/v1/analises/evolucao-temporal?ano_inicial=2022&ano_final=2024&codigo_curso=001
 ```
 
-| Parâmetro | Regra |
-| --- | --- |
-| `ano_inicial` | Inteiro obrigatório entre 1900 e 9999 |
-| `ano_final` | Inteiro obrigatório entre 1900 e 9999, maior ou igual ao inicial |
-| `codigo_curso` | Código original como texto |
-| `codigo_area_geral` | Código CINE como texto; mantém zeros iniciais |
-| `codigo_municipio_oferta` | Código do local de oferta, sem substituição pela sede |
-| `modalidade` | Texto retornado pelo catálogo |
-| `categoria_administrativa` | Texto retornado pelo catálogo |
-| `organizacao_academica` | Texto retornado pelo catálogo |
-| `codigo_municipio_sede` | Código da sede institucional |
+| Parâmetro                  | Regra                                                            |
+| -------------------------- | ---------------------------------------------------------------- |
+| `ano_inicial`              | Inteiro obrigatório entre 1900 e 9999                            |
+| `ano_final`                | Inteiro obrigatório entre 1900 e 9999, maior ou igual ao inicial |
+| `codigo_curso`             | Código original como texto                                       |
+| `codigo_area_geral`        | Código CINE como texto; mantém zeros iniciais                    |
+| `codigo_municipio_oferta`  | Código do local de oferta, sem substituição pela sede            |
+| `modalidade`               | Texto retornado pelo catálogo                                    |
+| `categoria_administrativa` | Texto retornado pelo catálogo                                    |
+| `organizacao_academica`    | Texto retornado pelo catálogo                                    |
+| `codigo_municipio_sede`    | Código da sede institucional                                     |
 
 O intervalo é inclusivo e aceita de **1 a 30 anos**. `2000–2029` é válido; `2000–2030` excede o limite. Esse limite inicial mantém a resposta limitada e não substitui a medição com a base real. Os sete filtros opcionais combinam por **E** e aceitam um valor por parâmetro. Parâmetros desconhecidos, repetidos, vazios ou inválidos retornam `400`; o parâmetro `ano` do resumo anual não é aceito nesta rota.
 
@@ -42,12 +42,12 @@ Cada entrada possui `ano`, `totais`, `base_risco`, `taxas` e `qualidade`. Os cam
 
 A API não interpola lacunas. A futura visualização deve representar a ausência de informação e evitar ligar pontos como se houvesse dados intermediários. Esta série descreve censos anuais; não acompanha a trajetória de uma coorte nem atribui causas às mudanças.
 
-| HTTP | Significado |
-| --- | --- |
-| `200` | Série retornada, inclusive quando todo o período está sem dados |
+| HTTP  | Significado                                                                    |
+| ----- | ------------------------------------------------------------------------------ |
+| `200` | Série retornada, inclusive quando todo o período está sem dados                |
 | `400` | Parâmetros ou intervalo inválidos; consulta rejeitada antes de acessar o banco |
-| `503` | Gold indisponível, sem acesso ou sem as tabelas necessárias |
-| `500` | Falha interna não classificada como indisponibilidade da Gold |
+| `503` | Gold indisponível, sem acesso ou sem as tabelas necessárias                    |
+| `500` | Falha interna não classificada como indisponibilidade da Gold                  |
 
 ## Implementação e integração
 
@@ -67,11 +67,11 @@ Invoke-RestMethod 'http://127.0.0.1:3000/api/v1/analises/evolucao-temporal?ano_i
 
 Para o curso sintético `001`, os resultados esperados são:
 
-| Ano | Vínculos | Evasão do curso | Evasão da IES | Sem dados |
-| --- | --- | --- | --- | --- |
-| 2022 | 1000 | 0.10 | 0.09 | false |
-| 2023 | 100 | 0.15 | 0.10 | false |
-| 2024 | null | null | null | true |
+| Ano  | Vínculos | Evasão do curso | Evasão da IES | Sem dados |
+| ---- | -------- | --------------- | ------------- | --------- |
+| 2022 | 1000     | 0.10            | 0.09          | false     |
+| 2023 | 100      | 0.15            | 0.10          | false     |
+| 2024 | null     | null            | null          | true      |
 
 Sem filtro de curso, 2024 possui uma linha apenas com docentes. Com categoria `Pública Federal`, 2023 tem 1000 vínculos e taxas de `0.24` e `0.19`, calculadas sobre as somas de dois cursos de tamanhos distintos.
 

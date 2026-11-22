@@ -16,7 +16,6 @@ export interface Resumo {
   };
 }
 
-
 export function consultarResumo(query: string, signal: AbortSignal) {
   return consultar<Resumo>(`/api/v1/indicadores/resumo?${query}`, signal);
 }

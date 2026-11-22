@@ -21,10 +21,16 @@ function run(command, args, options = {}) {
 }
 
 function docker(args, input) {
-  run('docker', [...compose, ...args], input === undefined ? {} : {
-    input,
-    stdio: ['pipe', 'inherit', 'inherit'],
-  });
+  run(
+    'docker',
+    [...compose, ...args],
+    input === undefined
+      ? {}
+      : {
+          input,
+          stdio: ['pipe', 'inherit', 'inherit'],
+        },
+  );
 }
 
 try {
@@ -46,9 +52,26 @@ ${read('backend/test/fixtures/dados.sql')}
 COMMIT;
 ${read('backend/sql/permissoes.sql')}
 `;
-    docker(['exec', '-T', 'postgres', 'psql', '-U', 'postgres', '-d', 'postgres',
-      '-v', 'ON_ERROR_STOP=1', '-v', 'api_role=tcc_demo'], sql);
-    console.log('Base sintética pronta em 127.0.0.1:55433. Use pnpm dev:demo para abrir a aplicação.');
+    docker(
+      [
+        'exec',
+        '-T',
+        'postgres',
+        'psql',
+        '-U',
+        'postgres',
+        '-d',
+        'postgres',
+        '-v',
+        'ON_ERROR_STOP=1',
+        '-v',
+        'api_role=tcc_demo',
+      ],
+      sql,
+    );
+    console.log(
+      'Base sintética pronta em 127.0.0.1:55433. Use pnpm dev:demo para abrir a aplicação.',
+    );
 
     if (action === 'dev') {
       if (!process.env.npm_execpath) throw new Error('Inicie com pnpm dev:demo.');
