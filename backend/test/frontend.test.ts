@@ -6,6 +6,7 @@ import { test } from 'node:test';
 import { buildApp, type Dependencias } from '../src/app.js';
 
 const consultas: Dependencias = {
+  analises: { async evolucao() { return []; } },
   async health() {},
   catalogos: { async filtros() {
     return { anos: [], cursos: [], areas_gerais: [], municipios_oferta: [], municipios_sede: [],

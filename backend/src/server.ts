@@ -5,6 +5,7 @@ import { readConfig } from './config/index.js';
 import { criarConsultasIndicadores } from './modules/indicadores/index.js';
 import { criarConsultasCatalogos } from './modules/catalogos/index.js';
 import { criarHealth } from './plugins/health.js';
+import { criarConsultasAnalises } from './modules/analises/index.js';
 
 const config = readConfig();
 const pool = new Pool({
@@ -18,6 +19,7 @@ const pool = new Pool({
 const app = await buildApp({
   indicadores: criarConsultasIndicadores(pool),
   catalogos: criarConsultasCatalogos(pool),
+  analises: criarConsultasAnalises(pool),
   health: criarHealth(pool),
 }, {
   docs: config.docs,

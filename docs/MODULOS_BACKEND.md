@@ -20,11 +20,17 @@ As taxas usam os totais agregados, nunca a média das taxas dos cursos. Valores 
 
 O `index.ts` também expõe o contrato de cálculo, os schemas de recorte e resultado, a projeção de agregação SQL e a parametrização dos filtros. Análises derivadas devem usar essa entrada pública para manter as mesmas fórmulas e regras de qualidade, sem importar arquivos internos de indicadores. Os fragmentos SQL pressupõem os aliases das junções definidas em `plugins/gold.ts`; os módulos consumidores definem o agrupamento e o período.
 
+## Análises
+
+`backend/src/modules/analises` fornece `GET /api/v1/analises/evolucao-temporal`, com `ano_inicial`, `ano_final` e os mesmos sete filtros opcionais do resumo. Retorna uma série crescente de até 30 anos, incluindo lacunas com medidas `null`.
+
+`index.ts` exporta o plugin `analises`, a fábrica `criarConsultasAnalises` e o tipo de consultas. `consultas.ts` agrega por ano; `evolucao.ts` completa lacunas e usa as regras públicas de indicadores; `rotas.ts` e `schemas.ts` definem o contrato HTTP. Veja [contrato, exemplos e validação da evolução temporal](ANALISES_TEMPORAIS.md). Comparações e rankings ainda não estão implementados.
+
 ## Operação e composição
 
 `GET /health` pertence a `plugins/health.ts` e verifica a leitura da fato e das seis dimensões. `plugins/gold.ts` converte falhas de consulta em `GOLD_INDISPONIVEL`; o tratamento global responde `503` sem expor credenciais ou SQL. Validações inválidas retornam `400`.
 
-`server.ts` cria um único pool PostgreSQL e injeta dependências separadas em `buildApp`: `catalogos`, `indicadores` e `health`. Os testes HTTP podem substituir cada dependência sem conectar um banco. `app.ts` registra os plugins encapsulados e a documentação. Nenhum módulo depende das consultas internas de outro.
+`server.ts` cria um único pool PostgreSQL e injeta dependências separadas em `buildApp`: `catalogos`, `indicadores`, `analises` e `health`. Os testes HTTP podem substituir cada dependência sem conectar um banco. `app.ts` registra os plugins encapsulados e a documentação. Nenhum módulo importa arquivos internos de outro; análises usa o contrato público de indicadores.
 
 ## Como adicionar um módulo
 

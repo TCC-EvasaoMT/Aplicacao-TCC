@@ -7,7 +7,7 @@ Monorepo com React, TypeScript e Fastify. O frontend consulta a API, e o backend
 ```text
 frontend/              React e Vite; painel com resumo e filtros combinados
 backend/               API Fastify, regras de cálculo e acesso à Gold
-backend/src/modules/   Módulos de catálogos e indicadores
+backend/src/modules/   Módulos de catálogos, indicadores e análises
 backend/src/plugins/   Recursos compartilhados e saúde da API
 docs/                  Documentação da aplicação e da arquitetura
 .github/               CI e modelo de pull request
@@ -15,11 +15,13 @@ pnpm-workspace.yaml    Pacotes do workspace
 pnpm-lock.yaml         Único lockfile da aplicação
 ```
 
-O backend é um monólito modular: catálogos e indicadores são plugins encapsulados do Fastify, cada um com entrada pública em `index.ts`. O catálogo continua acessível em `/api/v1/filtros`. Novos módulos serão adicionados quando houver funcionalidades que justifiquem a separação.
+O backend é um monólito modular: catálogos, indicadores e análises são plugins encapsulados do Fastify, cada um com entrada pública em `index.ts`. O catálogo continua acessível em `/api/v1/filtros`. Novos módulos serão adicionados quando houver funcionalidades que justifiquem a separação.
 
 Leia a [arquitetura da aplicação](docs/ARQUITETURA.md), os [módulos e contratos do backend](docs/MODULOS_BACKEND.md) e os [filtros e fluxo da interface](docs/FRONTEND_FILTROS.md). A pasta local `docs-codex/` permanece ignorada pelo Git.
 
 O frontend não importa arquivos internos do backend e não acessa o banco. Ele usa HTTP/JSON em `/api/v1`. As fórmulas de evasão continuam no backend; a interface apenas formata os resultados.
+
+A [API de evolução temporal](docs/ANALISES_TEMPORAIS.md) já permite consultar séries anuais em `/api/v1/analises/evolucao-temporal`, com intervalo inclusivo de até 30 anos e os mesmos filtros de recorte. A visualização da série no frontend será implementada em uma próxima entrega.
 
 ## Executar em desenvolvimento
 
@@ -45,7 +47,7 @@ pnpm dev
 
 O comando inicia os dois pacotes. O Vite encaminha `/api`, `/health` e `/docs` para o Fastify, usando a porta `PORT` de `backend/.env` ou do terminal. Apenas a porta é lida pela configuração do Vite; credenciais do banco não são expostas ao navegador. A interface e a API escutam somente em `127.0.0.1`.
 
-A tela inicial exibe vínculos, matrículas, ingressantes, concluintes e taxas de evasão. Permite combinar ano, curso, área CINE, modalidade, categoria administrativa, organização acadêmica e municípios de oferta e sede. Os filtros são aplicados automaticamente; limpar mantém o ano e atualizar preserva as seleções ainda disponíveis. Mostra estados de carregamento, erro, ausência de dados e qualidade. Ela utiliza a base conectada, sem injetar números fictícios no frontend. Evolução temporal, gráficos e comparações ficam para os próximos incrementos.
+A tela inicial exibe vínculos, matrículas, ingressantes, concluintes e taxas de evasão. Permite combinar ano, curso, área CINE, modalidade, categoria administrativa, organização acadêmica e municípios de oferta e sede. Os filtros são aplicados automaticamente; limpar mantém o ano e atualizar preserva as seleções ainda disponíveis. Mostra estados de carregamento, erro, ausência de dados e qualidade. Ela utiliza a base conectada, sem injetar números fictícios no frontend. A visualização temporal, os gráficos e as comparações ficam para os próximos incrementos.
 
 ## Executar a versão compilada
 

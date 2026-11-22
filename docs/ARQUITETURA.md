@@ -31,6 +31,7 @@ backend/src/
   modules/
     catalogos/       Opções disponíveis para filtros
     indicadores/    Resumo, agregações e taxas
+    analises/       Evolução temporal por ano e recorte
   plugins/
     gold.ts         Junções da Gold e tratamento de falhas de consulta
     health.ts       Verificação de acesso às tabelas utilizadas
@@ -46,12 +47,13 @@ O fragmento SQL em `plugins/gold.ts` define as junções comuns com a fato e as 
 
 ## Evolução prevista
 
-O futuro módulo `analises` concentrará evolução temporal e comparações entre cursos e grupos institucionais. A Gold atual não fornece nomes ou siglas de IES nem identificadores institucionais permanentes para comparação individual. Administração do ETL depende de um contrato externo para execuções e reprocessamentos. Autorização e monitoramento serão recursos transversais; ainda não estão implementados. Pastas vazias desses módulos não são criadas antecipadamente.
+O módulo `analises` já oferece a API de evolução temporal e utiliza o contrato público de indicadores para manter as mesmas regras de agregação e cálculo. A visualização temporal no frontend e as comparações entre cursos e grupos institucionais são os próximos incrementos. A Gold atual não fornece nomes ou siglas de IES nem identificadores institucionais permanentes para comparação individual. Administração do ETL depende de um contrato externo para execuções e reprocessamentos. Autorização e monitoramento serão recursos transversais; ainda não estão implementados. Pastas vazias desses módulos não são criadas antecipadamente.
 
 ## Documentação relacionada
 
 - [Módulos e contratos do backend](MODULOS_BACKEND.md)
 - [Filtros e fluxo da interface](FRONTEND_FILTROS.md)
+- [API de evolução temporal](ANALISES_TEMPORAIS.md)
 - [Execução, permissões e fórmulas](../backend/README.md)
 - [Comandos do monorepo](../README.md)
 - [Branches, commits e revisões](../CONTRIBUTING.md)
