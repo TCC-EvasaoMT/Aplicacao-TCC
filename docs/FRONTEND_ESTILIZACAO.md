@@ -6,6 +6,23 @@ A interface utiliza React, Bootstrap 5.3 e Recharts, alinhando a estilização e
 
 `frontend/src/main.tsx` importa `bootstrap/dist/css/bootstrap.min.css` antes de `styles.css`. O Vite inclui ambos no build. Utilizamos o CSS já compilado, sem configuração de Sass.
 
+A fonte **Source Sans 3** é fornecida pelo pacote `@fontsource/source-sans-3`, com os pesos 400, 600 e 700 e o subconjunto latino. Os arquivos acompanham o build e usam `font-display: swap`, sem requisições a serviços externos de fontes. Segoe UI e a fonte do sistema são alternativas de carregamento.
+
+## Identidade visual
+
+O painel prioriza consulta e comparação. O cabeçalho apresenta “Evasão no ensino superior” e o contexto institucional; os dados ocupam o espaço antes reservado à abertura de apresentação. O link “Ir para o conteúdo” aparece ao receber foco de teclado. Explicações metodológicas ficam em “Como interpretar os dados”, um elemento nativo `details`.
+
+| Token                | Valor     | Uso                                |
+| -------------------- | --------- | ---------------------------------- |
+| `--panel-green`      | `#153F35` | Marca, ações, foco e primeira taxa |
+| `--panel-ink`        | `#172E29` | Texto principal                    |
+| `--panel-muted`      | `#52675F` | Rótulos e informações auxiliares   |
+| `--panel-background` | `#F5F7F7` | Fundo da aplicação                 |
+| `--panel-surface`    | `#FFFFFF` | Áreas de leitura e controles       |
+| `--panel-secondary`  | `#805128` | Segunda taxa e série               |
+
+A escala tipográfica usa título de 28–32 px, seções de 20 px, texto de 16 px e informações auxiliares de 14 px. Espaçamentos seguem 4, 8, 12, 16, 24 e 32 px. Números de indicadores e tabela usam algarismos de largura uniforme. As duas taxas têm o mesmo peso visual, diferenciadas por cor e nome; os totais usam uma faixa com divisórias. Controles têm cantos de 4 px e painéis de 8 px.
+
 | Camada       | Responsabilidade                                                                                   |
 | ------------ | -------------------------------------------------------------------------------------------------- |
 | Bootstrap    | Reset, formulários, botões, validação visual, alertas, grade de filtros e tabela responsiva        |
