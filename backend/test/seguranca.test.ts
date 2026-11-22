@@ -32,6 +32,7 @@ const consultas: Dependencias = {
 		}
 	},
 	analises: {
+		comparacao: async () => [],
 		async evolucao() {
 			return []
 		}
@@ -45,7 +46,8 @@ test('consultas públicas mantêm acesso sem login e cabeçalhos de proteção',
 		'/health',
 		'/api/v1/filtros',
 		'/api/v1/indicadores/resumo?ano=2023',
-		'/api/v1/analises/evolucao-temporal?ano_inicial=2022&ano_final=2023'
+		'/api/v1/analises/evolucao-temporal?ano_inicial=2022&ano_final=2023',
+		'/api/v1/analises/comparacoes?ano=2023&agrupar_por=modalidade'
 	]) {
 		const res = await app.inject(url)
 		assert.equal(res.statusCode, 200, url)

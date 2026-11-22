@@ -15,7 +15,7 @@ test('logs mantêm correlação e resultado sem expor credenciais ou URLs recebi
 			health: fail,
 			catalogos: { filtros: fail },
 			indicadores: { resumo: fail },
-			analises: { evolucao: fail }
+			analises: { evolucao: fail, comparacao: fail }
 		},
 		{
 			logger: true,

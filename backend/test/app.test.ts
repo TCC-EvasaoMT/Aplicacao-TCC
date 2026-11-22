@@ -22,6 +22,7 @@ function fakeConsultas(): Dependencias {
 	return {
 		async health() {},
 		analises: {
+			comparacao: async () => [],
 			async evolucao() {
 				return []
 			}
@@ -109,7 +110,7 @@ test('health e endpoints retornam 503 sem vazar erro do banco', async (t) => {
 		health: fail,
 		catalogos: { filtros: fail },
 		indicadores: { resumo: fail },
-		analises: { evolucao: fail }
+		analises: { evolucao: fail, comparacao: fail }
 	})
 	t.after(() => app.close())
 	for (const route of [
