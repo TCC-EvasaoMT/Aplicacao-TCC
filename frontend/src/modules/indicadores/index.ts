@@ -1,1 +1,1 @@
-export { PainelIndicadores } from './PainelIndicadores';
+export { PainelIndicadores } from './PainelIndicadores'
