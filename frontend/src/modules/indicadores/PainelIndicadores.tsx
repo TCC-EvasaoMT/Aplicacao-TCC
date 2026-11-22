@@ -105,16 +105,44 @@ export function PainelIndicadores() {
 			)}
 			<section aria-labelledby="resumo-titulo" aria-busy={carregando}>
 				<div className="section-heading">
-					<h2 id="resumo-titulo">
-						Resumo {selecao.ano ? `de ${selecao.ano}` : 'do período'}
-					</h2>
-					<button
-						className="btn btn-outline-success btn-sm"
-						disabled={carregando}
-						onClick={() => setTentativa((value) => value + 1)}
-					>
-						Atualizar dados
-					</button>
+					<h2 id="resumo-titulo">Resumo anual</h2>
+					<div className="summary-controls">
+						<div className="summary-year">
+							<label className="form-label" htmlFor="ano">
+								Ano do resumo
+							</label>
+							<select
+								className="form-select"
+								id="ano"
+								name="ano"
+								value={selecao.ano}
+								disabled={
+									carregandoCatalogo || !!erroCatalogo || !catalogo?.anos.length
+								}
+								onChange={(event) => alterar('ano', event.target.value)}
+							>
+								{!catalogo?.anos.length && (
+									<option value="">
+										{carregandoCatalogo
+											? 'Carregando…'
+											: 'Sem anos disponíveis'}
+									</option>
+								)}
+								{catalogo?.anos.map((ano) => (
+									<option key={ano} value={ano}>
+										{ano}
+									</option>
+								))}
+							</select>
+						</div>
+						<button
+							className="btn btn-outline-success btn-sm"
+							disabled={carregando}
+							onClick={() => setTentativa((value) => value + 1)}
+						>
+							Atualizar dados
+						</button>
+					</div>
 				</div>
 				<div aria-live="polite">
 					{carregando && <p className="state">Carregando indicadores…</p>}

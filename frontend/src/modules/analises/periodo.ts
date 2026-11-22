@@ -26,6 +26,16 @@ export function validarPeriodo(periodo: Periodo): string {
 	return ''
 }
 
+export function campoInvalidoPeriodo(periodo: Periodo): keyof Periodo | null {
+	if (!validarPeriodo(periodo)) return null
+	return validarPeriodo({
+		ano_inicial: periodo.ano_inicial,
+		ano_final: periodo.ano_inicial
+	})
+		? 'ano_inicial'
+		: 'ano_final'
+}
+
 export function serializarEvolucao(periodo: Periodo, selecao: SelecaoFiltros) {
 	const { ano: _anoResumo, ...recorte } = selecao
 	return new URLSearchParams(

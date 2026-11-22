@@ -29,7 +29,7 @@ export function FiltrosIndicadores({
 			aria-busy={carregando}
 		>
 			<div className="section-heading">
-				<h2 id="filtros-titulo">Filtros do painel</h2>
+				<h2 id="filtros-titulo">Filtros compartilhados</h2>
 				<button
 					className="btn btn-outline-success btn-sm"
 					disabled={desabilitado || quantidade === 0}
@@ -39,45 +39,28 @@ export function FiltrosIndicadores({
 				</button>
 			</div>
 			<p className="filter-help" id="filtros-ajuda">
-				As seleções são combinadas: o resultado atende a todos os filtros. As
-				alterações são aplicadas automaticamente ao resumo e à evolução
-				temporal. O ano abaixo vale apenas para o resumo; o gráfico possui seu
-				próprio período.
+				Aplicados automaticamente ao resumo e à evolução temporal. Os resultados
+				atendem a todos os filtros selecionados.
 			</p>
-			<div className="row g-3 my-2" aria-describedby="filtros-ajuda">
-				<div className="col-12 col-sm-6 col-lg-4">
-					<label className="form-label" htmlFor="ano">
-						Ano do resumo
-					</label>
-					<select
-						className="form-select"
-						id="ano"
-						value={selecao.ano}
-						disabled={desabilitado}
-						onChange={(event) => onChange('ano', event.target.value)}
-					>
-						{!catalogo?.anos.length && (
-							<option value="">
-								{carregando ? 'Carregando…' : 'Sem anos disponíveis'}
-							</option>
-						)}
-						{catalogo?.anos.map((ano) => (
-							<option key={ano} value={ano}>
-								{ano}
-							</option>
-						))}
-					</select>
-				</div>
+			<div className="row g-3 align-items-end" aria-describedby="filtros-ajuda">
 				{camposFiltro.map((campo) => {
 					const opcoes = catalogo?.[campo.catalogo] ?? []
 					return (
-						<div className="col-12 col-sm-6 col-lg-4" key={campo.chave}>
+						<div
+							className={
+								campo.chave === 'codigo_curso'
+									? 'col-12 col-md-6'
+									: 'col-12 col-sm-6 col-md-3'
+							}
+							key={campo.chave}
+						>
 							<label className="form-label" htmlFor={campo.chave}>
 								{campo.rotulo}
 							</label>
 							<select
 								className="form-select"
 								id={campo.chave}
+								name={campo.chave}
 								value={selecao[campo.chave]}
 								disabled={desabilitado || !opcoes.length}
 								aria-describedby={
@@ -108,14 +91,15 @@ export function FiltrosIndicadores({
 				})}
 			</div>
 			<p className="filter-help" id="municipios-ajuda">
-				Município de oferta é o local do curso; município da sede é o da
-				instituição. Em EaD, a sede não substitui um local de oferta ausente. As
-				características institucionais podem representar mais de uma IES.
+				Oferta é o local do curso; sede é o local da instituição. Em EaD, a sede
+				não substitui a oferta ausente.
 			</p>
 			<p className="filter-count">
 				{quantidade === 0
-					? 'Sem restrições de curso, área, modalidade, instituição ou município.'
-					: `${quantidade} filtro(s) adicional(is) selecionado(s).`}
+					? 'Todos os recortes disponíveis.'
+					: quantidade === 1
+						? '1 filtro aplicado.'
+						: `${quantidade} filtros aplicados.`}
 			</p>
 		</section>
 	)

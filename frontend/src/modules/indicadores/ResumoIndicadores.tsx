@@ -11,19 +11,6 @@ const formatar = (value: number | null, taxa = false) =>
 export function ResumoIndicadores({ resumo }: { resumo: Resumo }) {
 	return (
 		<>
-			<div className="metrics">
-				{[
-					['Vínculos aluno–curso', resumo.totais.vinculos_total],
-					['Matrículas', resumo.totais.matriculas_total],
-					['Ingressantes', resumo.totais.ingressantes_total],
-					['Concluintes', resumo.totais.concluintes_total]
-				].map(([label, value]) => (
-					<article className="metric" key={String(label)}>
-						<h3>{label}</h3>
-						<p className="metric-value">{formatar(value as number | null)}</p>
-					</article>
-				))}
-			</div>
 			<div className="rates">
 				<article className="rate">
 					<h3>Evasão do curso</h3>
@@ -39,6 +26,19 @@ export function ResumoIndicadores({ resumo }: { resumo: Resumo }) {
 					</p>
 					<p>Desvinculados, em relação à base de risco.</p>
 				</article>
+			</div>
+			<div className="metrics">
+				{[
+					['Vínculos aluno–curso', resumo.totais.vinculos_total],
+					['Matrículas', resumo.totais.matriculas_total],
+					['Ingressantes', resumo.totais.ingressantes_total],
+					['Concluintes', resumo.totais.concluintes_total]
+				].map(([label, value]) => (
+					<article className="metric" key={String(label)}>
+						<h3>{label}</h3>
+						<p className="metric-value">{formatar(value as number | null)}</p>
+					</article>
+				))}
 			</div>
 			{(resumo.qualidade.flag_valor_negativo ||
 				resumo.qualidade.flag_grupo_pequeno ||

@@ -61,20 +61,20 @@ export function GraficoEvolucao({ serie }: { serie: PontoTemporal[] }) {
 								name="Evasão do curso"
 								dataKey="taxas.evasao_curso"
 								type="linear"
-								stroke="#17634e"
+								stroke="var(--panel-green)"
 								strokeWidth={3}
 								dot={{ r: 4 }}
 								connectNulls={false}
 								isAnimationActive={false}
 							/>
 							<Line
-								name="Evasão da IES"
+								name="Evasão da instituição"
 								dataKey="taxas.evasao_ies"
 								type="linear"
-								stroke="#805128"
+								stroke="var(--panel-secondary)"
 								strokeWidth={3}
 								strokeDasharray="6 4"
-								dot={{ r: 4 }}
+								dot={{ r: 4, strokeDasharray: '0' }}
 								connectNulls={false}
 								isAnimationActive={false}
 							/>
@@ -103,26 +103,49 @@ export function GraficoEvolucao({ serie }: { serie: PontoTemporal[] }) {
 					<thead>
 						<tr>
 							<th scope="col">Ano</th>
-							<th scope="col">Base de risco</th>
-							<th scope="col">Evasão do curso</th>
-							<th scope="col">Evasão da IES</th>
+							<th scope="col" className="text-end">
+								Base de risco
+							</th>
+							<th scope="col" className="text-end">
+								Evasão do curso
+							</th>
+							<th scope="col" className="text-end">
+								Evasão da instituição
+							</th>
 							<th scope="col">Qualidade</th>
 						</tr>
 					</thead>
 					<tbody>
-						{serie.map((ponto) => (
-							<tr key={ponto.ano}>
-								<th scope="row">{ponto.ano}</th>
-								<td>
-									{ponto.base_risco === null
-										? 'Não disponível'
-										: numero.format(ponto.base_risco)}
-								</td>
-								<td>{formatarTaxa(ponto.taxas.evasao_curso)}</td>
-								<td>{formatarTaxa(ponto.taxas.evasao_ies)}</td>
-								<td>{avisosDoAno(ponto).join('; ') || 'Sem sinalizações'}</td>
-							</tr>
-						))}
+						{serie.map((ponto) => {
+							const avisos = avisosDoAno(ponto)
+							return (
+								<tr key={ponto.ano}>
+									<th scope="row">{ponto.ano}</th>
+									<td className="text-end">
+										{ponto.base_risco === null
+											? 'Não disponível'
+											: numero.format(ponto.base_risco)}
+									</td>
+									<td className="text-end">
+										{formatarTaxa(ponto.taxas.evasao_curso)}
+									</td>
+									<td className="text-end">
+										{formatarTaxa(ponto.taxas.evasao_ies)}
+									</td>
+									<td>
+										{avisos.length ? (
+											<ul className="annual-notes">
+												{avisos.map((aviso) => (
+													<li key={aviso}>{aviso}</li>
+												))}
+											</ul>
+										) : (
+											'Sem sinalizações'
+										)}
+									</td>
+								</tr>
+							)
+						})}
 					</tbody>
 				</table>
 			</div>

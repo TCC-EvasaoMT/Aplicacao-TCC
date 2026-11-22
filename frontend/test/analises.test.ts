@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import {
+	campoInvalidoPeriodo,
 	periodoInicial,
 	serializarEvolucao,
 	validarPeriodo
@@ -11,6 +12,25 @@ import {
 } from '../src/modules/analises/apresentacao.ts'
 import type { PontoTemporal } from '../src/modules/analises/api.ts'
 import { limparFiltros } from '../src/modules/indicadores/filtros.ts'
+
+test('direciona a correção ao primeiro campo inválido ou ao ano final para erros de intervalo', () => {
+	for (const [inicio, fim, esperado] of [
+		['', '', 'ano_inicial'],
+		['1899', '2024', 'ano_inicial'],
+		['2022', '', 'ano_final'],
+		['2022', '10000', 'ano_final'],
+		['2022', '2e3', 'ano_final'],
+		['2024', '2022', 'ano_final'],
+		['2000', '2030', 'ano_final'],
+		['2000', '2029', null],
+		['2024', '2024', null]
+	] as const) {
+		assert.equal(
+			campoInvalidoPeriodo({ ano_inicial: inicio, ano_final: fim }),
+			esperado
+		)
+	}
+})
 
 test('período inicial usa extremos do catálogo e limita a 30 anos inclusivos', () => {
 	assert.deepEqual(periodoInicial([]), { ano_inicial: '', ano_final: '' })
