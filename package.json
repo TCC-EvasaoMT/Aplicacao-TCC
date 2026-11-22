@@ -1,21 +1,28 @@
 {
-  "name": "tcc-evasao",
-  "version": "0.1.0",
-  "private": true,
-  "packageManager": "pnpm@11.25.0",
-  "engines": { "node": ">=22.13.0" },
-  "scripts": {
-    "dev": "pnpm --parallel --filter tcc-evasao-backend --filter tcc-evasao-frontend run dev",
-    "dev:backend": "pnpm --filter tcc-evasao-backend dev",
-    "dev:frontend": "pnpm --filter tcc-evasao-frontend dev",
-    "dev:demo": "node scripts/demo.mjs dev",
-    "db:demo": "node scripts/demo.mjs up",
-    "db:demo:down": "node scripts/demo.mjs down",
-    "build": "pnpm -r build",
-    "start": "pnpm --filter tcc-evasao-backend start",
-    "typecheck": "pnpm -r typecheck",
-    "test": "pnpm -r --if-present test",
-    "test:integration": "pnpm --filter tcc-evasao-backend test:integration",
-    "check": "pnpm typecheck && pnpm test && pnpm build"
-  }
+	"name": "tcc-evasao",
+	"version": "0.1.0",
+	"private": true,
+	"packageManager": "pnpm@11.25.0",
+	"engines": {
+		"node": ">=22.13.0"
+	},
+	"scripts": {
+		"dev": "pnpm --parallel --filter tcc-evasao-backend --filter tcc-evasao-frontend run dev",
+		"dev:backend": "pnpm --filter tcc-evasao-backend dev",
+		"dev:frontend": "pnpm --filter tcc-evasao-frontend dev",
+		"dev:demo": "node scripts/demo.mjs dev",
+		"db:demo": "node scripts/demo.mjs up",
+		"db:demo:down": "node scripts/demo.mjs down",
+		"build": "pnpm -r build",
+		"start": "pnpm --filter tcc-evasao-backend start",
+		"typecheck": "pnpm -r typecheck",
+		"format": "prettier --write .",
+		"format:check": "prettier --check .",
+		"test": "pnpm -r --if-present test",
+		"test:integration": "pnpm --filter tcc-evasao-backend test:integration",
+		"check": "pnpm typecheck && pnpm test && pnpm build"
+	},
+	"devDependencies": {
+		"prettier": "3.9.6"
+	}
 }

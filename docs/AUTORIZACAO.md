@@ -4,13 +4,13 @@ Decisão de produto confirmada em **22/11/2026**: o painel será público; a adm
 
 ## Quem pode fazer o quê
 
-| Recurso | Visitante sem login | Administrador autenticado |
-| --- | --- | --- |
-| Consultar catálogo, resumo e evolução temporal | Permitido | Permitido |
-| Acessar o painel e seus arquivos públicos | Permitido | Permitido |
-| Consultar o estado mínimo em `/health` | Permitido | Permitido |
-| Consultar histórico e detalhes do ETL | Negado | Permitido com `etl:consultar` |
-| Solicitar reprocessamento do ETL | Negado | Permitido com `etl:reprocessar` |
+| Recurso                                        | Visitante sem login | Administrador autenticado       |
+| ---------------------------------------------- | ------------------- | ------------------------------- |
+| Consultar catálogo, resumo e evolução temporal | Permitido           | Permitido                       |
+| Acessar o painel e seus arquivos públicos      | Permitido           | Permitido                       |
+| Consultar o estado mínimo em `/health`         | Permitido           | Permitido                       |
+| Consultar histórico e detalhes do ETL          | Negado              | Permitido com `etl:consultar`   |
+| Solicitar reprocessamento do ETL               | Negado              | Permitido com `etl:reprocessar` |
 
 As duas últimas linhas são funcionalidades planejadas. O Swagger continua disponível apenas em desenvolvimento. O fato de o painel ser público não concede acesso direto ao PostgreSQL, aos arquivos da pipeline ou às credenciais de carga.
 

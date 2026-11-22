@@ -34,6 +34,23 @@ git push -u origin feat/filtro-por-curso
 
 Abra um pull request para `main`. Use uma descrição que explique o comportamento e como foi testado. Peça revisão de outro integrante, corrija o que for necessário e faça **Squash and merge**, com o título no formato de commit abaixo. Apague a branch remota depois do merge. O PR pode ter vários commits de trabalho; o squash registra a entrega como uma mudança coesa em `main`.
 
+## Formatação
+
+Frontend e backend usam a mesma configuração do Prettier, em `.prettierrc.json` na raiz: dois espaços, aspas simples em JavaScript/TypeScript, ponto e vírgula, vírgula final quando permitida e finais de linha LF. A largura de referência é de 100 caracteres; o Prettier decide as quebras conforme a sintaxe.
+
+Execute na raiz:
+
+```powershell
+pnpm format        # Formata os arquivos compatíveis do projeto
+pnpm format:check  # Verifica a formatação sem alterar arquivos
+```
+
+Para formatar somente os arquivos de uma tarefa, use, por exemplo, `pnpm exec prettier --write backend/src/modules/analises/evolucao.ts`. A versão do Prettier fica fixada no `package.json`; instale as dependências com pnpm antes de usar a integração do editor. O editor deve usar essa instalação local e a configuração da raiz.
+
+`.prettierignore` exclui builds, dependências, caches, lockfile, dados, configurações de ambiente e a documentação local em `docs-codex`. O Prettier também respeita o `.gitignore` ao ser executado pela raiz. SQL não tem formatador incluído nesta configuração.
+
+A adoção inicial adiciona a ferramenta; os arquivos existentes ainda podem precisar de formatação. Mantenha formatações gerais em commits próprios, separados de mudanças funcionais. `format:check` ainda não integra `pnpm check` nem a CI; essa exigência pode ser adicionada após a aplicação do padrão ao código existente.
+
 ## Commits
 
 Seguimos [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/):
@@ -42,16 +59,16 @@ Seguimos [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.
 tipo(escopo): descrição
 ```
 
-| Tipo | Quando usar | Exemplo |
-| --- | --- | --- |
-| `feat` | Funcionalidade nova | `feat(frontend): adiciona seleção de ano` |
-| `fix` | Correção de comportamento | `fix(backend): preserva valores ausentes no resumo` |
-| `refactor` | Organização do código sem mudar comportamento | `refactor(backend): encapsula módulo de indicadores` |
-| `test` | Testes | `test(backend): verifica permissões após reconstruir a Gold` |
-| `docs` | Documentação | `docs: explica como executar o monorepo` |
-| `build` | Dependências e compilação | `build: configura workspace pnpm` |
-| `ci` | Automação no GitHub | `ci: valida aplicação com PostgreSQL` |
-| `chore` | Manutenção sem encaixe mais específico | `chore: ajusta arquivos ignorados pelo Git` |
+| Tipo       | Quando usar                                   | Exemplo                                                      |
+| ---------- | --------------------------------------------- | ------------------------------------------------------------ |
+| `feat`     | Funcionalidade nova                           | `feat(frontend): adiciona seleção de ano`                    |
+| `fix`      | Correção de comportamento                     | `fix(backend): preserva valores ausentes no resumo`          |
+| `refactor` | Organização do código sem mudar comportamento | `refactor(backend): encapsula módulo de indicadores`         |
+| `test`     | Testes                                        | `test(backend): verifica permissões após reconstruir a Gold` |
+| `docs`     | Documentação                                  | `docs: explica como executar o monorepo`                     |
+| `build`    | Dependências e compilação                     | `build: configura workspace pnpm`                            |
+| `ci`       | Automação no GitHub                           | `ci: valida aplicação com PostgreSQL`                        |
+| `chore`    | Manutenção sem encaixe mais específico        | `chore: ajusta arquivos ignorados pelo Git`                  |
 
 Use `frontend` e `backend` quando isso ajudar. O escopo é opcional; mudanças que atravessam a aplicação podem omiti-lo. Escreva a descrição em português, explicando a mudança, e mantenha cada commit focado em uma intenção. Alterações independentes devem ficar em commits separados. Alterações de front e back necessárias para a mesma funcionalidade podem ficar juntas.
 

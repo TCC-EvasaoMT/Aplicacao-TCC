@@ -47,16 +47,16 @@ Seleções usam controles nativos com rótulos. Os avisos de carregamento, erro 
 
 ## Verificação com dados sintéticos
 
-| Seleção | Resultado esperado |
-| --- | --- |
-| 2022, sem filtros opcionais | 1.000 vínculos; evasão do curso 10%; evasão da IES 9% |
-| 2023, curso `001`, área `01` | 100 vínculos; evasão do curso 15%; evasão da IES 10% |
-| 2023, categoria Pública Federal | 1.000 vínculos; evasão do curso 24%; evasão da IES 19% |
-| 2023, curso `001`, área `06` | Sem dados para a combinação |
-| 2023, curso `002`, sede Cuiabá | 900 vínculos |
-| Seleção anterior e oferta Cuiabá | Sem dados; a sede não substitui a oferta ausente |
-| 2023, curso `005` | Preserva decimais e exibe avisos de valor negativo e grupo pequeno |
-| 2024 | Sem dados de alunos; existem somente docentes |
+| Seleção                          | Resultado esperado                                                 |
+| -------------------------------- | ------------------------------------------------------------------ |
+| 2022, sem filtros opcionais      | 1.000 vínculos; evasão do curso 10%; evasão da IES 9%              |
+| 2023, curso `001`, área `01`     | 100 vínculos; evasão do curso 15%; evasão da IES 10%               |
+| 2023, categoria Pública Federal  | 1.000 vínculos; evasão do curso 24%; evasão da IES 19%             |
+| 2023, curso `001`, área `06`     | Sem dados para a combinação                                        |
+| 2023, curso `002`, sede Cuiabá   | 900 vínculos                                                       |
+| Seleção anterior e oferta Cuiabá | Sem dados; a sede não substitui a oferta ausente                   |
+| 2023, curso `005`                | Preserva decimais e exibe avisos de valor negativo e grupo pequeno |
+| 2024                             | Sem dados de alunos; existem somente docentes                      |
 
 Confira também: limpar mantém o ano; atualizar mantém filtros válidos; trocar rapidamente os filtros apresenta apenas o último recorte; parar a API exibe um erro recuperável; a tela funciona em largura de celular.
 

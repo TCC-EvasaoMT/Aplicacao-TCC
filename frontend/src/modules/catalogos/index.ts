@@ -1,1 +1,1 @@
-export { consultarCatalogo, type Catalogo, type OpcaoCodigo } from './api';
+export { consultarCatalogo, type Catalogo, type OpcaoCodigo } from './api'
