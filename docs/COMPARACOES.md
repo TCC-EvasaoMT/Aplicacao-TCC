@@ -88,3 +88,11 @@ Resultados esperados com as fixtures:
 | Categoria `Pública Federal`, reunindo os dois cursos | 1000     | 0.24            | 0.19          |
 
 `agrupar_por=curso&limite=2` retorna os cursos `001` e `002`, `total_grupos=8` e `truncado=true`. `grupos=007&grupos=008` seleciona diretamente esses dois cursos. Com `agrupar_por=municipio_oferta`, o grupo nulo contém os 900 vínculos do curso EaD e um registro apenas de docentes. Em 2024, a comparação por curso retorna somente o grupo `003`, sem medidas de alunos; em 1999, retorna lista vazia.
+
+## Validação automatizada
+
+`test/comparacoes.test.ts` cobre entradas inválidas, seleção única/múltipla, códigos com zeros, erros controlados, contrato Swagger e parametrização. A suíte de segurança inclui a nova rota na verificação de acesso público e cabeçalhos.
+
+`test/integration/comparacoes.ts`, executado pela suíte PostgreSQL existente, compara as sete dimensões com os resumos anuais equivalentes. Também verifica taxas sobre somas, qualidade, seleção de grupos, filtros combinados, EaD, identificadores nulos, rótulos divergentes/ausentes e truncamento com 33 grupos sintéticos. O teste de reconstrução da Gold confere a recuperação da comparação após reaplicar grants e mudar IDs internos.
+
+Execute `pnpm test:integration` com `TEST_DATABASE_URL` apontando para o banco isolado de testes. A suíte eleva somente sua cota HTTP para comportar os recortes comparados em sequência; o padrão da aplicação continua em 120 chamadas/minuto. A medição da comparação sintética ficou abaixo de três segundos, mas desempenho e resultados reais ainda precisam ser validados com a Gold da pipeline.
