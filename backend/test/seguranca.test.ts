@@ -174,6 +174,12 @@ test('Swagger restringe scripts, documenta 429 e fica ausente em produção', as
 	)
 	const spec = (await dev.inject('/docs/json')).json()
 	assert.ok(spec.paths['/api/v1/filtros'].get.responses['429'])
+	assert.equal(
+		spec.paths['/api/v1/filtros'].get.responses['429'].content[
+			'application/json'
+		].schema.example.erro,
+		'LIMITE_REQUISICOES'
+	)
 	for (const value of ['0', '-1', 'abc', '1.5', '10001', '']) {
 		assert.throws(
 			() => readConfig({ ...env, HTTP_RATE_LIMIT_MAX: value }),

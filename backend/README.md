@@ -44,9 +44,9 @@ O servidor escuta exclusivamente em `127.0.0.1`. `pnpm start` serve também `fro
 
 Credenciais ausentes ou portas inválidas impedem a inicialização. Uma conexão indisponível mantém o HTTP ativo, mas as consultas respondem `503`. O pool tem até cinco conexões, espera de conexão de dois segundos e limite SQL de 2,5 segundos. Esses limites não substituem a medição de desempenho com a carga real.
 
-## Preparar o acesso ao PostgreSQL
-
 Consulte a [proteção da API pública](../docs/SEGURANCA_API.md) para limites HTTP, respostas `429`, cabeçalhos e cuidados com proxy. O painel continua sem login; autenticação administrativa é uma entrega futura.
+
+## Preparar o acesso ao PostgreSQL
 
 Depois de executar `python -m pipeline transformar` no projeto da pipeline, conecte-se ao banco como administrador usando `psql`. Se o banco estiver em Docker, o cliente pode ser aberto dentro do container da pipeline com `docker compose --env-file .env -f infra/docker-compose.yml exec postgres psql -U SEU_USUARIO -d SEU_BANCO`.
 

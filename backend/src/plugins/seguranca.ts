@@ -45,7 +45,16 @@ export async function registrarSeguranca(
 				...route.schema,
 				response: {
 					...(route.schema?.response as Record<string, unknown>),
-					429: erroSchema
+					429: {
+						...erroSchema,
+						description:
+							'Limite de requisições atingido. Consulte Retry-After (segundos).',
+						example: {
+							erro: 'LIMITE_REQUISICOES',
+							mensagem:
+								'Limite de requisições atingido. Aguarde o tempo indicado em Retry-After.'
+						}
+					}
 				}
 			}
 		}
