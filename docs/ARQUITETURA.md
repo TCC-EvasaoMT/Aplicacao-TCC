@@ -51,9 +51,12 @@ O módulo `analises` já oferece a API de evolução temporal e utiliza o contra
 
 ## Documentação relacionada
 
+O [modelo de autorização](AUTORIZACAO.md) prevê painel público e administração autenticada. A decisão de acesso foi definida, mas o controle de sessão e permissões ainda será implementado.
+
 - [Módulos e contratos do backend](MODULOS_BACKEND.md)
 - [Filtros e fluxo da interface](FRONTEND_FILTROS.md)
 - [API de evolução temporal](ANALISES_TEMPORAIS.md)
+- [Acesso ao painel e à administração](AUTORIZACAO.md)
 - [Execução, permissões e fórmulas](../backend/README.md)
 - [Comandos do monorepo](../README.md)
 - [Branches, commits e revisões](../CONTRIBUTING.md)
