@@ -1,6 +1,6 @@
 # API de comparações
 
-`GET /api/v1/analises/comparacoes` compara totais e taxas entre grupos de um mesmo ano. Pertence ao módulo `analises`, é pública e usa a Gold existente. O frontend comparativo será implementado em outro incremento; resumo, filtros e evolução temporal mantêm seus contratos.
+`GET /api/v1/analises/comparacoes` compara totais e taxas entre grupos de um mesmo ano. Pertence ao módulo `analises`, é pública e usa a Gold existente. O [frontend comparativo](FRONTEND_COMPARACOES.md) apresenta seleção, gráfico e tabela no painel público. Resumo, filtros e evolução temporal mantêm seus contratos.
 
 ## Consulta
 

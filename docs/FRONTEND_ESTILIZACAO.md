@@ -35,7 +35,7 @@ Os plugins JavaScript do Bootstrap não são importados: os componentes atuais f
 ## Uso nos módulos
 
 - **Indicadores:** a grade `row` reserva meia linha ao curso e um quarto aos demais filtros a partir de 768 px. Em telas menores, usa uma ou duas colunas. O seletor de ano fica no cabeçalho do resumo. `form-label` e `form-select` estilizam os controles; `btn btn-outline-success` estiliza as ações.
-- **Análises:** a grade distribui os campos de período e o botão de aplicação. `form-control`, `is-invalid` e `alert alert-danger` apresentam validação e falhas. `table` e `table-responsive` permitem consultar a série em telas estreitas; `caption-top` mantém o título antes dos dados.
+- **Análises:** a grade distribui os campos de período e o botão de aplicação. `form-control`, `is-invalid` e `alert alert-danger` apresentam validação e falhas. `table` e `table-responsive` permitem consultar as séries e comparações em telas estreitas; `caption-top` mantém o título antes dos dados. A comparação usa `details` para a seleção opcional, checkboxes nativos com `form-check-input` e barras horizontais nas mesmas cores das taxas. O eixo inclui zero; gráfico e tabela possuem rolagem horizontal própria, sem ampliar a página. Veja [Comparações na interface](FRONTEND_COMPARACOES.md).
 - **Tema:** variáveis `--bs-body-*` preservam fonte, fundo e cor do texto. Variáveis `--bs-btn-*` personalizam os botões; variáveis `--bs-table-*` mantêm as cores da tabela. Regras duplicadas de select, botão e grade foram removidas do CSS próprio.
 
 O framework não altera os contratos HTTP, os cálculos, o comportamento dos filtros ou as responsabilidades dos módulos. Não há configuração adicional no backend ou na pipeline.

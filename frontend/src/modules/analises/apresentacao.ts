@@ -1,4 +1,4 @@
-import type { PontoTemporal } from './api'
+import type { Resumo } from '../indicadores'
 
 const percentual = new Intl.NumberFormat('pt-BR', {
 	style: 'percent',
@@ -9,7 +9,9 @@ export function formatarTaxa(valor: number | null): string {
 	return valor === null ? 'Não disponível' : percentual.format(valor)
 }
 
-export function avisosDoAno(ponto: PontoTemporal): string[] {
+export function avisosDoRecorte(
+	ponto: Pick<Resumo, 'base_risco' | 'qualidade'>
+): string[] {
 	const avisos: string[] = []
 	const qualidade = ponto.qualidade
 	if (qualidade.sem_dados) avisos.push('Sem dados de alunos')

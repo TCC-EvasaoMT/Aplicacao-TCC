@@ -39,8 +39,8 @@ export function FiltrosIndicadores({
 				</button>
 			</div>
 			<p className="filter-help" id="filtros-ajuda">
-				Aplicados automaticamente ao resumo e à evolução temporal. Os resultados
-				atendem a todos os filtros selecionados.
+				Aplicados automaticamente ao resumo, à evolução temporal e às
+				comparações. Os resultados atendem a todos os filtros selecionados.
 			</p>
 			<div className="row g-3 align-items-end" aria-describedby="filtros-ajuda">
 				{camposFiltro.map((campo) => {

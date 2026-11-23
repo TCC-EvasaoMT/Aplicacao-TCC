@@ -2,7 +2,7 @@
 
 A aplicação é um monorepo com dois pacotes: `frontend` (React/Vite) e `backend` (Fastify). O backend é um monólito modular: os módulos compartilham o mesmo processo e banco, mas cada um possui suas rotas, consultas e contratos. A pipeline Python tem repositório e execução independentes.
 
-No frontend, Bootstrap 5.3 fornece estilos de formulários, botões, grade responsiva e tabela; Recharts apresenta as séries temporais. O CSS do Bootstrap é importado no ponto de entrada e complementado pelo tema em `styles.css`. React mantém o controle dos componentes e eventos. Veja [Estilização do frontend](FRONTEND_ESTILIZACAO.md) para a organização e os limites dessa integração.
+No frontend, Bootstrap 5.3 fornece estilos de formulários, botões, grade responsiva e tabela; Recharts apresenta as séries temporais e as comparações entre grupos. O CSS do Bootstrap é importado no ponto de entrada e complementado pelo tema em `styles.css`. React mantém o controle dos componentes e eventos. Veja [Estilização do frontend](FRONTEND_ESTILIZACAO.md) para a organização e os limites dessa integração.
 
 ## Arquitetura adotada no backend
 
@@ -185,7 +185,7 @@ A integração também testa a recuperação após reconstrução da Gold e reap
 
 O módulo `analises` oferece a API de evolução temporal e utiliza o contrato público de indicadores para manter as mesmas regras de agregação e cálculo. No frontend, `modules/analises` consulta essa API e apresenta gráfico Recharts e tabela acessível; o painel de indicadores compõe sua entrada pública e compartilha os sete filtros de recorte. Apenas tipos públicos de indicadores são importados por análises. O intervalo temporal é independente do ano do resumo e as taxas não são recalculadas no cliente.
 
-Comparações entre cursos e grupos institucionais são os próximos incrementos. A Gold atual não fornece nomes ou siglas de IES nem identificadores institucionais permanentes para comparação individual. Administração do ETL depende de um contrato externo para execuções e reprocessamentos. Autorização e monitoramento serão recursos transversais; ainda não estão implementados. Pastas vazias desses módulos não são criadas antecipadamente.
+Comparações entre cursos e grupos institucionais estão implementadas no mesmo módulo de análises, na API e no frontend. `PainelComparacoes` reutiliza catálogo, filtros e ano do resumo; mantém rascunho e seleção aplicada próprios, consulta HTTP cancelável, gráfico e tabela. As taxas e agregações continuam no backend. Veja [Comparações na interface](FRONTEND_COMPARACOES.md). A Gold atual não fornece nomes ou siglas de IES nem identificadores institucionais permanentes para comparação individual. Administração do ETL depende de um contrato externo para execuções e reprocessamentos. Autorização e monitoramento serão recursos transversais; ainda não estão implementados. Pastas vazias desses módulos não são criadas antecipadamente.
 
 ## Documentação relacionada
 
@@ -195,6 +195,8 @@ O [modelo de autorização](AUTORIZACAO.md) prevê painel público e administra�
 - [Filtros e fluxo da interface](FRONTEND_FILTROS.md)
 - [API de evolução temporal](ANALISES_TEMPORAIS.md)
 - [Evolução temporal na interface](FRONTEND_ANALISES.md)
+- [API de comparações](COMPARACOES.md)
+- [Comparações na interface](FRONTEND_COMPARACOES.md)
 - [Acesso ao painel e à administração](AUTORIZACAO.md)
 - [Execução, permissões e fórmulas](../backend/README.md)
 - [Comandos do monorepo](../README.md)
