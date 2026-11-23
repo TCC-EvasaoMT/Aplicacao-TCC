@@ -13,6 +13,7 @@ import {
 import { useMedia } from '../../lib/useMedia'
 import type { GrupoComparacao } from './api'
 import { avisosDoRecorte, escalaTaxas, formatarTaxa } from './apresentacao'
+import { CelulaNumero, CelulaTaxa, NotaTabela } from './Celulas'
 import { rotuloGrupo } from './comparacoes'
 
 const encurtar = (texto: string, limite: number) =>
@@ -20,7 +21,6 @@ const encurtar = (texto: string, limite: number) =>
 const rotuloBarra = (valor: unknown) =>
 	typeof valor === 'number' ? formatarTaxa(valor) : ''
 
-const numero = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 })
 const totais = [
 	['vinculos_total', 'Vínculos'],
 	['ingressantes_total', 'Ingressantes'],
@@ -187,23 +187,11 @@ export function GraficoComparacoes({ grupos }: { grupos: GrupoComparacao[] }) {
 								<tr key={grupo.grupo.valor ?? '__sem_identificador__'}>
 									<th scope="row">{rotuloGrupo(grupo.grupo)}</th>
 									{totais.map(([chave]) => (
-										<td key={chave} className="text-end">
-											{grupo.totais[chave] === null
-												? 'Não disponível'
-												: numero.format(grupo.totais[chave])}
-										</td>
+										<CelulaNumero key={chave} valor={grupo.totais[chave]} />
 									))}
-									<td className="text-end">
-										{grupo.base_risco === null
-											? 'Não disponível'
-											: numero.format(grupo.base_risco)}
-									</td>
-									<td className="text-end">
-										{formatarTaxa(grupo.taxas.evasao_curso)}
-									</td>
-									<td className="text-end">
-										{formatarTaxa(grupo.taxas.evasao_ies)}
-									</td>
+									<CelulaNumero valor={grupo.base_risco} />
+									<CelulaTaxa valor={grupo.taxas.evasao_curso} />
+									<CelulaTaxa valor={grupo.taxas.evasao_ies} />
 									<td>
 										{avisos.length ? (
 											<ul className="annual-notes">
@@ -221,6 +209,7 @@ export function GraficoComparacoes({ grupos }: { grupos: GrupoComparacao[] }) {
 					</tbody>
 				</table>
 			</div>
+			<NotaTabela />
 		</>
 	)
 }

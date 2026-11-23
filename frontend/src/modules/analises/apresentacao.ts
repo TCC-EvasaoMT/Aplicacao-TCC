@@ -5,6 +5,16 @@ const percentual = new Intl.NumberFormat('pt-BR', {
 	maximumFractionDigits: 2
 })
 
+// Concordância simples de número: plural(2, 'grupo', 'grupos') → '2 grupos'.
+export function plural(
+	quantidade: number,
+	singular: string,
+	formaPlural: string
+) {
+	const numero = new Intl.NumberFormat('pt-BR').format(quantidade)
+	return `${numero} ${quantidade === 1 ? singular : formaPlural}`
+}
+
 export function formatarTaxa(valor: number | null): string {
 	return valor === null ? 'Não disponível' : percentual.format(valor)
 }
@@ -43,7 +53,7 @@ export function avisosDoRecorte(
 	if (qualidade.sem_dados) avisos.push('Sem dados de alunos')
 	if (qualidade.registros_sem_alunos > 0)
 		avisos.push(
-			`${qualidade.registros_sem_alunos} registro(s) sem contagens de alunos`
+			`${plural(qualidade.registros_sem_alunos, 'registro', 'registros')} sem contagens de alunos`
 		)
 	if (qualidade.dados_incompletos) avisos.push('Dados incompletos')
 	if (qualidade.flag_valor_negativo) avisos.push('Valores negativos na origem')

@@ -11,8 +11,8 @@ import {
 } from 'recharts'
 import type { PontoTemporal } from './api'
 import { avisosDoRecorte, escalaTaxas, formatarTaxa } from './apresentacao'
+import { CelulaNumero, CelulaTaxa, NotaTabela } from './Celulas'
 
-const numero = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 })
 type Taxa = keyof PontoTemporal['taxas']
 
 export function GraficoEvolucao({ serie }: { serie: PontoTemporal[] }) {
@@ -62,7 +62,7 @@ export function GraficoEvolucao({ serie }: { serie: PontoTemporal[] }) {
 						<LineChart
 							data={serie}
 							accessibilityLayer
-							margin={{ top: 16, right: 20, bottom: 12, left: 8 }}
+							margin={{ top: 24, right: 20, bottom: 12, left: 8 }}
 						>
 							<CartesianGrid strokeDasharray="3 3" vertical={false} />
 							<XAxis
@@ -163,17 +163,9 @@ export function GraficoEvolucao({ serie }: { serie: PontoTemporal[] }) {
 							return (
 								<tr key={ponto.ano}>
 									<th scope="row">{ponto.ano}</th>
-									<td className="text-end">
-										{ponto.base_risco === null
-											? 'Não disponível'
-											: numero.format(ponto.base_risco)}
-									</td>
-									<td className="text-end">
-										{formatarTaxa(ponto.taxas.evasao_curso)}
-									</td>
-									<td className="text-end">
-										{formatarTaxa(ponto.taxas.evasao_ies)}
-									</td>
+									<CelulaNumero valor={ponto.base_risco} />
+									<CelulaTaxa valor={ponto.taxas.evasao_curso} />
+									<CelulaTaxa valor={ponto.taxas.evasao_ies} />
 									<td>
 										{avisos.length ? (
 											<ul className="annual-notes">
@@ -191,6 +183,7 @@ export function GraficoEvolucao({ serie }: { serie: PontoTemporal[] }) {
 					</tbody>
 				</table>
 			</div>
+			<NotaTabela />
 		</>
 	)
 }

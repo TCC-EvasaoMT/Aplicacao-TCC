@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { plural } from './apresentacao'
 import { alternarGrupo, limiteGrupos } from './comparacoes'
 
 interface Props {
@@ -75,7 +76,9 @@ export function SeletorGrupos({ opcoes, grupos, onChange }: Props) {
 			<p id="comparacao-limite" className="filter-help" role="status">
 				{grupos.length >= limiteGrupos
 					? 'Limite de 20 grupos atingido. Desmarque um para selecionar outro.'
-					: `${grupos.length} grupo(s) selecionado(s).`}
+					: grupos.length === 0
+						? 'Nenhum grupo selecionado.'
+						: `${plural(grupos.length, 'grupo selecionado', 'grupos selecionados')}.`}
 			</p>
 			<button
 				className="btn btn-outline-success btn-sm"

@@ -277,6 +277,8 @@ h3 {
 }
 .temporal-table {
 	margin-top: 24px;
+	/* Contém os textos visually-hidden (absolutos) dentro da rolagem da tabela. */
+	position: relative;
 }
 .temporal-table table {
 	--bs-table-color: var(--panel-ink);
@@ -296,6 +298,15 @@ h3 {
 }
 .temporal-table th:first-child {
 	min-width: 65px;
+}
+.temporal-table td.text-end {
+	white-space: nowrap;
+}
+.table-note {
+	margin-top: 8px;
+}
+.table-scroll-help {
+	display: none;
 }
 .temporal-table thead {
 	--bs-table-bg: var(--panel-background);
@@ -381,6 +392,14 @@ footer {
 	}
 }
 @media (max-width: 575px) {
+	.table-scroll-help {
+		display: inline;
+	}
+	.temporal-table th,
+	.temporal-table td {
+		min-width: 80px;
+		padding: 8px;
+	}
 	main {
 		padding-top: 24px;
 	}

@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
 import { LimiteErro } from '../../lib/LimiteErro'
+import { plural } from './apresentacao'
 import type { Catalogo } from '../catalogos'
 import type { SelecaoFiltros } from '../indicadores'
 import { consultarComparacao, type Comparacao } from './api'
@@ -186,10 +187,14 @@ export function PainelComparacoes({
 				)}
 				{dados && (
 					<>
-						<p className="comparison-result">
-							{dimensao.rotulo} em {selecao.ano}: {dados.grupos.length} de{' '}
-							{dados.total_grupos} grupo(s). Ordem por código ou atributo, sem
-							ranking de evasão.
+						<h3 className="comparison-result">
+							{dimensao.rotulo} em {selecao.ano}:{' '}
+							{dados.grupos.length === dados.total_grupos
+								? plural(dados.total_grupos, 'grupo', 'grupos')
+								: `${dados.grupos.length} de ${plural(dados.total_grupos, 'grupo', 'grupos')}`}
+						</h3>
+						<p className="filter-help">
+							Ordem por código ou atributo, sem ranking de evasão.
 						</p>
 						{selecao[dimensao.filtro] && (
 							<p className="quality">

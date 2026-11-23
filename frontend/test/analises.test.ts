@@ -9,7 +9,8 @@ import {
 import {
 	avisosDoRecorte,
 	escalaTaxas,
-	formatarTaxa
+	formatarTaxa,
+	plural
 } from '../src/modules/analises/apresentacao.ts'
 import type { PontoTemporal } from '../src/modules/analises/api.ts'
 import { limparFiltros } from '../src/modules/indicadores/filtros.ts'
@@ -134,7 +135,7 @@ test('avisos distinguem ausência, somente docentes, base zero, ruído e grupos 
 			...ponto,
 			qualidade: { ...ponto.qualidade, registros_sem_alunos: 1 }
 		}),
-		['Sem dados de alunos', '1 registro(s) sem contagens de alunos']
+		['Sem dados de alunos', '1 registro sem contagens de alunos']
 	)
 	assert.deepEqual(
 		avisosDoRecorte({
@@ -177,4 +178,10 @@ test('escala das taxas inclui o zero, usa passos arredondados e acomoda negativo
 	assert.deepEqual(escalaTaxas([1.5]).dominio, [0, 1.5])
 	assert.deepEqual(escalaTaxas([null, null]).dominio, [0, 0.01])
 	assert.deepEqual(escalaTaxas([0]).dominio, [0, 0.01])
+})
+
+test('plural concorda com a quantidade e formata o número em pt-BR', () => {
+	assert.equal(plural(0, 'grupo', 'grupos'), '0 grupos')
+	assert.equal(plural(1, 'grupo', 'grupos'), '1 grupo')
+	assert.equal(plural(1200, 'registro', 'registros'), '1.200 registros')
 })
