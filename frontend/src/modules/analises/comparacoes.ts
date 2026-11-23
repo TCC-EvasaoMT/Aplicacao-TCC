@@ -43,6 +43,23 @@ export interface SelecaoComparacao {
 	grupos: string[]
 }
 
+export const comparacaoPadrao: SelecaoComparacao = {
+	agrupar_por: 'categoria_administrativa',
+	grupos: []
+}
+
+// Comparação inicial a partir da URL; dimensão desconhecida volta ao padrão.
+export function lerComparacao(parametros: URLSearchParams): SelecaoComparacao {
+	const dimensao = parametros.get('agrupar_por') ?? ''
+	if (!Object.hasOwn(dimensoesComparacao, dimensao)) return comparacaoPadrao
+	const grupos = [
+		...new Set(parametros.getAll('grupos').map((grupo) => grupo.trim()))
+	]
+		.filter(Boolean)
+		.slice(0, limiteGrupos)
+	return { agrupar_por: dimensao as DimensaoComparacao, grupos }
+}
+
 export function rotuloGrupo(grupo: {
 	valor: string | null
 	nome: string | null

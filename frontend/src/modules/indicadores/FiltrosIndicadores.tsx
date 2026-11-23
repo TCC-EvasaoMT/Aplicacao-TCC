@@ -30,6 +30,15 @@ export function FiltrosIndicadores({
 	// atrás de um botão, com os filtros ativos resumidos no cabeçalho.
 	const estreito = useMedia('(max-width: 575px)')
 	const [aberto, setAberto] = useState(false)
+	const [avisoLink, setAvisoLink] = useState('')
+	async function copiarLink() {
+		try {
+			await navigator.clipboard.writeText(window.location.href)
+			setAvisoLink('Link desta visão copiado.')
+		} catch {
+			setAvisoLink('Não foi possível copiar. Use o endereço do navegador.')
+		}
+	}
 	const mostrarCampos = !estreito || aberto
 	const desabilitado = carregando || indisponivel || !catalogo?.anos.length
 	const ativos = camposFiltro.flatMap((campo) => {
@@ -78,8 +87,19 @@ export function FiltrosIndicadores({
 					>
 						Limpar filtros
 					</button>
+					<button
+						className="btn btn-outline-success btn-sm"
+						type="button"
+						disabled={desabilitado}
+						onClick={copiarLink}
+					>
+						Copiar link
+					</button>
 				</div>
 			</div>
+			<p className="filter-help link-status" role="status">
+				{avisoLink}
+			</p>
 			{!mostrarCampos && quantidade > 0 && (
 				<ul className="active-filters">
 					{ativos.map((ativo) => (

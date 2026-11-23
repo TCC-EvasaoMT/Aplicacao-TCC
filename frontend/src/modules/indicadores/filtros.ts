@@ -48,6 +48,15 @@ export function limparFiltros(ano = ''): SelecaoFiltros {
 	}
 }
 
+// Seleção inicial a partir da URL; valores fora do catálogo são removidos
+// depois por atualizarSelecao.
+export function lerSelecao(parametros: URLSearchParams): SelecaoFiltros {
+	const selecao = limparFiltros()
+	for (const chave of Object.keys(selecao) as (keyof SelecaoFiltros)[])
+		selecao[chave] = parametros.get(chave)?.trim() ?? ''
+	return selecao
+}
+
 export function serializarFiltros(filtros: SelecaoFiltros): string {
 	return new URLSearchParams(
 		Object.entries(filtros).filter(([, valor]) => valor !== '')

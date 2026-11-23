@@ -10,7 +10,9 @@ import { Carregando, GraficoCarregando } from '../../lib/Estados'
 import { LimiteErro } from '../../lib/LimiteErro'
 import type { SelecaoFiltros } from '../indicadores'
 import { consultarEvolucao, type EvolucaoTemporal } from './api'
+import { gravarUrl, lerUrl } from '../../lib/url'
 import {
+	lerPeriodo,
 	periodoInicial,
 	campoInvalidoPeriodo,
 	serializarEvolucao,
@@ -37,7 +39,9 @@ export function PainelEvolucao({
 	atualizacao,
 	indisponivel
 }: Props) {
-	const [periodo, setPeriodo] = useState<Periodo | null>(null)
+	const [periodo, setPeriodo] = useState<Periodo | null>(() =>
+		lerPeriodo(lerUrl())
+	)
 	const [rascunho, setRascunho] = useState<Periodo | null>(null)
 	const [erroPeriodo, setErroPeriodo] = useState('')
 	const camposPeriodo = useRef<
@@ -61,6 +65,13 @@ export function PainelEvolucao({
 	useEffect(() => {
 		carregarGrafico().catch(() => {})
 	}, [])
+
+	useEffect(() => {
+		gravarUrl(
+			['ano_inicial', 'ano_final'],
+			periodo ? Object.entries(periodo) : []
+		)
+	}, [periodo])
 
 	useEffect(() => {
 		if (!podeConsultar) return

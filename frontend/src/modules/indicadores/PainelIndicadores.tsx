@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
 import { PainelComparacoes, PainelEvolucao } from '../analises'
 import { Carregando } from '../../lib/Estados'
+import { gravarUrl, lerUrl } from '../../lib/url'
 import { consultarCatalogo, type Catalogo } from '../catalogos'
 import { consultarResumo, type Resumo } from './api'
 import {
 	atualizarSelecao,
 	camposFiltro,
+	lerSelecao,
 	limparFiltros,
 	serializarFiltros,
 	type SelecaoFiltros
@@ -15,7 +17,7 @@ import { ResumoIndicadores } from './ResumoIndicadores'
 
 export function PainelIndicadores() {
 	const [catalogo, setCatalogo] = useState<Catalogo | null>(null)
-	const [selecao, setSelecao] = useState(limparFiltros)
+	const [selecao, setSelecao] = useState(() => lerSelecao(lerUrl()))
 	const [carregandoCatalogo, setCarregandoCatalogo] = useState(true)
 	const [erroCatalogo, setErroCatalogo] = useState('')
 	const [avisoSelecao, setAvisoSelecao] = useState('')
@@ -23,7 +25,7 @@ export function PainelIndicadores() {
 	// Enquanto o ano não foi escolhido pela pessoa, o painel abre no ano mais
 	// recente que tem dados de alunos (o catálogo também lista anos só com
 	// docentes). Anos pulados são informados na tela.
-	const [anoAutomatico, setAnoAutomatico] = useState(true)
+	const [anoAutomatico, setAnoAutomatico] = useState(() => !lerUrl().get('ano'))
 	const [anosPulados, setAnosPulados] = useState<string[]>([])
 	const [resposta, setResposta] = useState<{
 		chave: string
@@ -53,6 +55,10 @@ export function PainelIndicadores() {
 	}, [tentativa])
 
 	useEffect(() => {
+		gravarUrl(Object.keys(limparFiltros()), Object.entries(selecao))
+	}, [selecao])
+
+	useEffect(() => {
 		if (!catalogo) return
 		const proximo = atualizarSelecao(selecao, catalogo)
 		if (serializarFiltros(proximo) !== query) {
@@ -61,6 +67,9 @@ export function PainelIndicadores() {
 					? 'Algumas seleções não estão mais disponíveis e foram ajustadas ao catálogo atual.'
 					: ''
 			)
+			// Ano ausente ou fora do catálogo (link antigo): volta a escolher o
+			// ano mais recente com dados.
+			if (proximo.ano !== selecao.ano) setAnoAutomatico(true)
 			setSelecao(proximo)
 		}
 	}, [catalogo, selecao, query])

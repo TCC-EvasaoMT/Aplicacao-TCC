@@ -5,13 +5,15 @@ import { plural } from './apresentacao'
 import type { Catalogo } from '../catalogos'
 import type { SelecaoFiltros } from '../indicadores'
 import { consultarComparacao, type Comparacao } from './api'
+import { gravarUrl, lerUrl } from '../../lib/url'
 import {
+	comparacaoPadrao,
 	dimensoesComparacao,
 	gruposAusentes,
+	lerComparacao,
 	opcoesComparacao,
 	serializarComparacao,
-	type DimensaoComparacao,
-	type SelecaoComparacao
+	type DimensaoComparacao
 } from './comparacoes'
 import { SeletorGrupos } from './SeletorGrupos'
 
@@ -41,11 +43,6 @@ function parametrosCsv(query: string) {
 	}
 }
 
-const inicial: SelecaoComparacao = {
-	agrupar_por: 'categoria_administrativa',
-	grupos: []
-}
-
 export function PainelComparacoes({
 	catalogo,
 	selecao,
@@ -53,8 +50,8 @@ export function PainelComparacoes({
 	indisponivel,
 	onAnoChange
 }: Props) {
-	const [aplicado, setAplicado] = useState(inicial)
-	const [rascunho, setRascunho] = useState(inicial)
+	const [aplicado, setAplicado] = useState(() => lerComparacao(lerUrl()))
+	const [rascunho, setRascunho] = useState(aplicado)
 	const [tentativa, setTentativa] = useState(0)
 	const [resposta, setResposta] = useState<{
 		chave: string
@@ -76,6 +73,21 @@ export function PainelComparacoes({
 	useEffect(() => {
 		carregarGrafico().catch(() => {})
 	}, [])
+
+	useEffect(() => {
+		const padrao =
+			aplicado.agrupar_por === comparacaoPadrao.agrupar_por &&
+			!aplicado.grupos.length
+		gravarUrl(
+			['agrupar_por', 'grupos'],
+			padrao
+				? []
+				: [
+						['agrupar_por', aplicado.agrupar_por],
+						...aplicado.grupos.map((grupo) => ['grupos', grupo] as const)
+					]
+		)
+	}, [aplicado])
 
 	useEffect(() => {
 		if (!podeConsultar) return

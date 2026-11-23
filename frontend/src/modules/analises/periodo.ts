@@ -5,6 +5,15 @@ export interface Periodo {
 	ano_final: string
 }
 
+// Período aplicado vindo da URL; só vale se for um intervalo válido.
+export function lerPeriodo(parametros: URLSearchParams): Periodo | null {
+	const periodo = {
+		ano_inicial: parametros.get('ano_inicial') ?? '',
+		ano_final: parametros.get('ano_final') ?? ''
+	}
+	return validarPeriodo(periodo) ? null : periodo
+}
+
 export function periodoInicial(anos: number[]): Periodo {
 	if (!anos.length) return { ano_inicial: '', ano_final: '' }
 	const fim = Math.max(...anos)

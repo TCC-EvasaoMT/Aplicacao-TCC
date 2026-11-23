@@ -501,3 +501,6 @@ footer {
 		padding: 12px;
 	}
 }
+.link-status:empty {
+	display: none;
+}
