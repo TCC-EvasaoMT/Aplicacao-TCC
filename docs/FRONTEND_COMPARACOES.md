@@ -18,7 +18,7 @@ Ao marcar 20 opções, as demais ficam desabilitadas até que alguma seja desmar
 
 **Ano do resumo** e **Ano da comparação** controlam o mesmo estado. Alterar qualquer um atualiza imediatamente resumo e comparação, preservando o período independente da evolução temporal.
 
-Os sete filtros globais são combinados por E e se aplicam às três consultas. Mesmo que um filtro corresponda à dimensão escolhida, ele não é removido automaticamente: `codigo_curso=001` continua limitando uma comparação entre cursos. A tela avisa sobre essa restrição. Grupos selecionados dentro da comparação combinam-se por OU, respeitando esse recorte global.
+Os sete filtros globais são combinados por E e se aplicam às três consultas, com uma exceção: a comparação não envia o filtro da dimensão pela qual agrupa. Com `codigo_curso=001` e agrupamento por curso, todos os cursos seguem visíveis e o 001 fica em destaque; resumo e evolução recebem o filtro normalmente. Veja [Interatividade e filtragem cruzada](FRONTEND_INTERATIVIDADE.md). Grupos selecionados dentro da comparação combinam-se por OU, respeitando os demais filtros.
 
 Agrupamento e seleção de grupos têm um rascunho e uma configuração aplicada. Editar esses campos não dispara a consulta; a tela avisa quando existem mudanças pendentes e identifica o agrupamento aplicado junto ao resultado. Trocar de dimensão limpa a seleção do rascunho. Alterar o ano ou os filtros globais atualiza a configuração já aplicada.
 
@@ -71,7 +71,7 @@ Na base de demonstração, use 2023:
 | Curso `003`                               | Sem contagens de alunos, sem inventar zeros                                         |
 | Município de oferta, sem seleção          | Grupo sem identificador mantém os 900 vínculos EaD e o registro somente de docentes |
 | Ano 2022, grupos `001` e `002`            | Somente `001`; aviso de ausência de `002`                                           |
-| Ano 2022, filtro global curso `002`       | Lista vazia, restrição global e ausência claramente informadas                      |
+| Ano 2022, filtro global curso `002`       | Só `001` aparece; aviso de que o curso em destaque não tem registros no ano         |
 
 Na conferência local em 22/11/2026, `pnpm check` passou com 47 testes (31 backend e 16 frontend), tipos e build. O navegador foi verificado em 1280, 390 e 320 px, incluindo foco por teclado, busca sem acento, seleção máxima, docentes, base zero, ruído, ausência de grupos, filtros combinados e recuperação após reconstrução da Gold e reaplicação de permissões. Grupos sintéticos temporários permitiram conferir o aviso **20 de 33** e o bloqueio da 21ª seleção; a base original foi restaurada após a verificação.
 

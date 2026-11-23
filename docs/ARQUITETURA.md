@@ -198,6 +198,7 @@ O [modelo de autorização](AUTORIZACAO.md) prevê painel público e administra�
 - [API de comparações](COMPARACOES.md)
 - [Comparações na interface](FRONTEND_COMPARACOES.md)
 - [Finalização do frontend](FRONTEND_FINALIZACAO.md)
+- [Interatividade e filtragem cruzada](FRONTEND_INTERATIVIDADE.md)
 - [Acesso ao painel e à administração](AUTORIZACAO.md)
 - [Execução, permissões e fórmulas](../backend/README.md)
 - [Comandos do monorepo](../README.md)

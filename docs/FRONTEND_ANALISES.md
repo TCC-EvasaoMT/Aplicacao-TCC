@@ -42,7 +42,7 @@ Esta é uma comparação de censos anuais, não acompanhamento de coortes nem ex
 
 `pnpm test` cobre limites do intervalo, catálogo vazio, serialização dos sete filtros, independência do ano do resumo, códigos, percentuais e avisos anuais. `pnpm check` também verifica tipos e build.
 
-Com `pnpm dev:demo`, confira o período 2022–2024:
+Com `pnpm dev:demo`, confira o período 2022 a 2024:
 
 | Recorte                   | Resultado esperado                                 |
 | ------------------------- | -------------------------------------------------- |

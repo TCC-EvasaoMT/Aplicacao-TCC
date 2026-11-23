@@ -6,7 +6,7 @@ Este incremento fecha pendências de interface do painel público: tamanho do bu
 
 - **Primeira tela com dados.** Sem ano escolhido e sem filtros, o painel abre no ano mais recente com dados de alunos. Se o último ano do catálogo só tem docentes, a tela recua e informa o ano pulado. Escolher um ano desliga esse ajuste.
 - **Estado vazio com ação.** Um recorte sem alunos mostra título, explicação curta e os botões **Ver ano anterior** e **Limpar filtros**, quando aplicáveis.
-- **Filtros no celular.** Abaixo de 576 px, os sete filtros ficam recolhidos em **Mostrar filtros**. Com os campos recolhidos, os filtros ativos aparecem resumidos. A contagem de filtros fica no cabeçalho do bloco.
+- **Filtros no celular.** Abaixo de 576 px, os sete filtros ficam recolhidos em **Mostrar filtros**. Os filtros ativos aparecem na faixa do recorte ([Interatividade](FRONTEND_INTERATIVIDADE.md)). A contagem de filtros fica no cabeçalho do bloco.
 - **Link da visão.** Ano, filtros, período aplicado e comparação aplicada ficam na URL, com os nomes de parâmetros da API. Recarregar mantém a visão; **Copiar link** copia o endereço.
 - **Exportação.** Cada tabela tem **Baixar CSV**, gerado no navegador com os dados já carregados.
 - **Gráficos.** A escala das taxas inclui o zero e usa passos arredondados, também com valores negativos. A evolução mostra o valor ao lado de pontos isolados. A comparação mostra o valor no fim de cada barra e, abaixo de 576 px, o nome do grupo acima das barras, sem rolagem lateral.
