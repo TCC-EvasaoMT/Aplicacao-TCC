@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react'
 import { PainelComparacoes, PainelEvolucao } from '../analises'
 import { Carregando } from '../../lib/Estados'
+import { empilhar, exibicao } from '../../lib/exibicao'
+import { mensagemErro } from '../../lib/http'
 import { gravarUrl, lerUrl } from '../../lib/url'
 import { consultarCatalogo, type Catalogo } from '../catalogos'
 import { consultarResumo, type Resumo } from './api'
 import { ChipsFiltros } from './ChipsFiltros'
 import {
+	anuncioMudanca,
 	atualizarSelecao,
 	filtrosAtivos as listarFiltrosAtivos,
 	lerSelecao,
@@ -32,14 +35,19 @@ export function PainelIndicadores() {
 	const [resposta, setResposta] = useState<{
 		chave: string
 		dados?: Resumo
-		// Mesmo recorte no ano anterior; null se a consulta falhou.
-		anterior?: Resumo | null
 		erro?: string
 	} | null>(null)
+	// Mesmo recorte no ano anterior, para a variação; null se falhou.
+	const [respostaAnterior, setRespostaAnterior] = useState<{
+		chave: string
+		dados: Resumo | null
+	} | null>(null)
+	// Anúncio para leitores de tela, só para mudanças feitas pela pessoa.
+	const [anuncio, setAnuncio] = useState('')
 	// Último resumo exibido: fica na tela, esmaecido, enquanto o próximo carrega.
 	const [ultimo, setUltimo] = useState<{
 		dados: Resumo
-		anterior: Resumo | null
+		anterior: Resumo | null | undefined
 		ano: string
 	} | null>(null)
 	// Mudanças feitas pela pessoa, para desfazer a última.
@@ -89,31 +97,51 @@ export function PainelIndicadores() {
 	useEffect(() => {
 		if (!selecao.ano || carregandoCatalogo || erroCatalogo) return
 		const controller = new AbortController()
-		const anoAnterior = Number(selecao.ano) - 1
-		const queryAnterior = serializarFiltros({
-			...selecao,
-			ano: String(anoAnterior)
-		})
-		// A variação é complementar: falha no ano anterior não derruba o resumo.
-		const anterior =
-			anoAnterior >= 1900
-				? consultarResumo(queryAnterior, controller.signal).catch(() => null)
-				: Promise.resolve(null)
-		Promise.all([consultarResumo(query, controller.signal), anterior])
-			.then(([dados, dadosAnterior]) => {
-				if (controller.signal.aborted) return
-				setResposta({ chave, dados, anterior: dadosAnterior })
-				setUltimo({ dados, anterior: dadosAnterior, ano: selecao.ano })
+		consultarResumo(query, controller.signal)
+			.then((dados) => {
+				if (!controller.signal.aborted) setResposta({ chave, dados })
 			})
-			.catch(() => {
+			.catch((falha) => {
 				if (!controller.signal.aborted)
 					setResposta({
 						chave,
-						erro: 'Não foi possível carregar o resumo deste recorte.'
+						erro: mensagemErro(
+							falha,
+							'Não foi possível carregar o resumo deste recorte.'
+						)
 					})
 			})
 		return () => controller.abort()
 	}, [query, chave, selecao.ano, carregandoCatalogo, erroCatalogo])
+
+	// O ano anterior só é consultado se estiver no catálogo; fora dele não há
+	// o que comparar, e a chamada a mais pesaria no limite de consultas da API.
+	const anoAnteriorCalendario = Number(selecao.ano) - 1
+	const queryAnterior = catalogo?.anos.includes(anoAnteriorCalendario)
+		? serializarFiltros({ ...selecao, ano: String(anoAnteriorCalendario) })
+		: ''
+	const chaveAnterior = `${tentativa}:${queryAnterior}`
+	useEffect(() => {
+		if (!queryAnterior || carregandoCatalogo || erroCatalogo) return
+		const controller = new AbortController()
+		// A variação é complementar: chega depois do resumo e, se falhar, os
+		// cartões mostram "sem comparação".
+		consultarResumo(queryAnterior, controller.signal)
+			.then((dados) => {
+				if (!controller.signal.aborted)
+					setRespostaAnterior({ chave: chaveAnterior, dados })
+			})
+			.catch(() => {
+				if (!controller.signal.aborted)
+					setRespostaAnterior({ chave: chaveAnterior, dados: null })
+			})
+		return () => controller.abort()
+	}, [queryAnterior, chaveAnterior, carregandoCatalogo, erroCatalogo])
+	const anterior: Resumo | null | undefined = !queryAnterior
+		? null
+		: respostaAnterior?.chave === chaveAnterior
+			? respostaAnterior.dados
+			: undefined
 
 	const atual = resposta?.chave === chave ? resposta : null
 	const carregando =
@@ -122,11 +150,17 @@ export function PainelIndicadores() {
 	const resumo = atual?.dados
 	const ativos = listarFiltrosAtivos(selecao, catalogo)
 	const filtrosAtivos = ativos.length > 0
-	// Durante a recarga, o resumo anterior continua visível e esmaecido.
-	const reaproveitado =
-		carregando && !carregandoCatalogo && !erro && !resumo && ultimo
-			? ultimo
-			: null
+	useEffect(() => {
+		if (resumo) setUltimo({ dados: resumo, anterior, ano: selecao.ano })
+	}, [resumo, anterior, selecao.ano])
+	// Durante a recarga, o último resumo com dados continua visível e
+	// esmaecido; um resumo sem dados não é reaproveitado.
+	const vista = exibicao(
+		resumo ? { dados: resumo, anterior, ano: selecao.ano } : undefined,
+		ultimo,
+		carregando && !carregandoCatalogo && !erro,
+		(dado) => !dado.dados.qualidade.sem_dados
+	)
 	const indiceAno = catalogo?.anos.indexOf(Number(selecao.ano)) ?? -1
 	const anoAnterior = indiceAno >= 0 ? catalogo?.anos[indiceAno + 1] : undefined
 
@@ -141,7 +175,8 @@ export function PainelIndicadores() {
 		if (serializarFiltros(proxima) === query) return
 		setAvisoSelecao('')
 		if (proxima.ano !== selecao.ano) setAnoAutomatico(false)
-		setHistorico((lista) => [...lista.slice(-19), selecao])
+		setHistorico((lista) => empilhar(lista, selecao))
+		setAnuncio(anuncioMudanca(selecao, proxima, catalogo))
 		setSelecao(proxima)
 	}
 	function alterar(chaveFiltro: keyof SelecaoFiltros, valor: string) {
@@ -156,6 +191,7 @@ export function PainelIndicadores() {
 		setAvisoSelecao('')
 		setAnoAutomatico(false)
 		setHistorico((lista) => lista.slice(0, -1))
+		setAnuncio(anuncioMudanca(selecao, anterior, catalogo))
 		setSelecao(anterior)
 	}
 
@@ -172,7 +208,8 @@ export function PainelIndicadores() {
 			<ChipsFiltros
 				ano={selecao.ano}
 				ativos={ativos}
-				resumo={resumo ?? reaproveitado?.dados}
+				resumo={vista.dado?.dados}
+				anuncio={anuncio}
 				onRemover={(chave: CampoFiltro) => alterar(chave, '')}
 				onLimpar={limpar}
 			/>
@@ -233,7 +270,7 @@ export function PainelIndicadores() {
 					</div>
 				</div>
 				<div aria-live="polite">
-					{carregando && !reaproveitado && (
+					{carregando && !vista.atualizando && (
 						<Carregando texto="Carregando indicadores…" />
 					)}
 					{!carregando && erro && (
@@ -288,19 +325,15 @@ export function PainelIndicadores() {
 						</div>
 					)}
 				</div>
-				{!carregando && !erro && resumo && !resumo.qualidade.sem_dados && (
-					<ResumoIndicadores
-						resumo={resumo}
-						anterior={atual?.anterior}
-						ano={Number(selecao.ano)}
-					/>
-				)}
-				{reaproveitado && !reaproveitado.dados.qualidade.sem_dados && (
-					<div className="is-refreshing">
+				{!erro && vista.dado && !vista.dado.dados.qualidade.sem_dados && (
+					<div
+						className={vista.atualizando ? 'is-refreshing' : undefined}
+						aria-busy={vista.atualizando || undefined}
+					>
 						<ResumoIndicadores
-							resumo={reaproveitado.dados}
-							anterior={reaproveitado.anterior}
-							ano={Number(reaproveitado.ano)}
+							resumo={vista.dado.dados}
+							anterior={vista.dado.anterior}
+							ano={Number(vista.dado.ano)}
 						/>
 					</div>
 				)}

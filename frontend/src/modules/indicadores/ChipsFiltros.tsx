@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useMedia } from '../../lib/useMedia'
 import type { Resumo } from './api'
 import type { CampoFiltro, FiltroAtivo } from './filtros'
@@ -15,6 +15,8 @@ interface Props {
 	ativos: FiltroAtivo[]
 	// Taxas do recorte atual; ficam visíveis mesmo com o resumo fora da tela.
 	resumo?: Resumo
+	// Texto para leitores de tela sobre a última mudança feita pela pessoa.
+	anuncio: string
 	onRemover: (chave: CampoFiltro) => void
 	onLimpar: () => void
 }
@@ -24,44 +26,37 @@ export function ChipsFiltros({
 	ano,
 	ativos,
 	resumo,
+	anuncio,
 	onRemover,
 	onLimpar
 }: Props) {
 	const estreito = useMedia('(max-width: 575px)')
 	const [expandido, setExpandido] = useState(false)
-	const [anuncio, setAnuncio] = useState('')
-	const anteriores = useRef<FiltroAtivo[] | null>(null)
 
-	// Anuncia o que mudou para leitores de tela (não na primeira carga).
+	// No celular a lista aberta ocupa boa parte da tela e a faixa é fixa:
+	// recolhe ao rolar a página ou quando os filtros mudam.
+	const assinatura = ativos
+		.map((filtro) => `${filtro.chave}=${filtro.valor}`)
+		.join('&')
+	useEffect(() => setExpandido(false), [assinatura])
 	useEffect(() => {
-		const antes = anteriores.current
-		anteriores.current = ativos
-		if (!antes) return
-		// Compara por campo e valor: o rótulo muda quando o catálogo chega.
-		const id = (filtro: FiltroAtivo) => `${filtro.chave}=${filtro.valor}`
-		const texto = (filtro: FiltroAtivo) => `${filtro.campo} ${filtro.texto}`
-		const ids = new Set(antes.map(id))
-		const novos = ativos.filter((filtro) => !ids.has(id(filtro)))
-		const atuais = new Set(ativos.map(id))
-		const removidos = antes.filter(
-			(filtro) =>
-				!atuais.has(id(filtro)) &&
-				!novos.some((novo) => novo.chave === filtro.chave)
-		)
-		const partes = [
-			...novos.map((filtro) => `Filtro aplicado: ${texto(filtro)}.`),
-			...removidos.map((filtro) => `Filtro removido: ${texto(filtro)}.`)
-		]
-		if (partes.length)
-			setAnuncio(
-				`${partes.join(' ')} Resumo, evolução e comparação atualizados.`
-			)
-	}, [ativos])
+		if (!expandido) return
+		const inicio = window.scrollY
+		const aoRolar = () => {
+			if (Math.abs(window.scrollY - inicio) > 24) setExpandido(false)
+		}
+		window.addEventListener('scroll', aoRolar, { passive: true })
+		return () => window.removeEventListener('scroll', aoRolar)
+	}, [expandido])
 
 	const compacto = estreito && !expandido && ativos.length > 1
 	const visiveis = compacto ? ativos.slice(0, 1) : ativos
 	return (
-		<div className="recorte" role="region" aria-label="Recorte atual">
+		<div
+			className={compacto ? 'recorte is-compact' : 'recorte'}
+			role="region"
+			aria-label="Recorte atual"
+		>
 			<span className="recorte-ano">{ano ? `Ano ${ano}` : 'Ano'}</span>
 			{ativos.length === 0 ? (
 				<span className="recorte-vazio">Todos os recortes</span>
@@ -69,8 +64,9 @@ export function ChipsFiltros({
 				<ul className="chips" aria-label="Filtros ativos">
 					{visiveis.map((filtro) => (
 						<li className="chip" key={filtro.chave}>
-							<span>
-								{filtro.campo}: {filtro.texto}
+							<span title={`${filtro.campo}: ${filtro.texto}`}>
+								<span className="chip-campo">{filtro.campo}: </span>
+								{filtro.texto}
 							</span>
 							<button
 								type="button"
@@ -99,7 +95,7 @@ export function ChipsFiltros({
 					)}
 				</ul>
 			)}
-			{ativos.length > 0 && (
+			{ativos.length > 0 && !compacto && (
 				<button type="button" className="chip-limpar" onClick={onLimpar}>
 					Limpar tudo
 				</button>

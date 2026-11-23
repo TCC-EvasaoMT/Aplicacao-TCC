@@ -13,6 +13,7 @@ import {
 } from 'recharts'
 import type { PontoTemporal } from './api'
 import {
+	FOLGA_EIXO_ANOS,
 	anoNoClique,
 	avisosDoRecorte,
 	escalaTaxas,
@@ -154,7 +155,7 @@ export function GraficoEvolucao({
 								minTickGap={24}
 								allowDecimals={false}
 								tickFormatter={String}
-								padding={{ left: 24, right: 24 }}
+								padding={{ left: FOLGA_EIXO_ANOS, right: FOLGA_EIXO_ANOS }}
 							/>
 							<YAxis
 								// A escala inclui o zero, como na comparação, para não

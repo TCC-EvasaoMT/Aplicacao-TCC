@@ -720,6 +720,26 @@ footer {
 	.chip-limpar {
 		margin-left: auto;
 	}
+	/* Compacta: o primeiro filtro divide a linha com o ano e o "+N", só com o
+	   valor; o nome do campo fica no title e no ×. "Limpar tudo" aparece ao
+	   expandir (o cartão de filtros também tem "Limpar filtros"). */
+	.recorte.is-compact .chips {
+		flex: 1 1 0;
+		flex-wrap: nowrap;
+		min-width: 0;
+	}
+	.recorte.is-compact .chip {
+		min-width: 0;
+	}
+	.recorte.is-compact .chip > span {
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.recorte.is-compact .chip-campo {
+		display: none;
+	}
 	.temporal,
 	.comparison {
 		margin-top: 24px;

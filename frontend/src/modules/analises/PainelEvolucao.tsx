@@ -7,6 +7,8 @@ import {
 	type FormEvent
 } from 'react'
 import { Carregando, GraficoCarregando } from '../../lib/Estados'
+import { exibicao } from '../../lib/exibicao'
+import { mensagemErro } from '../../lib/http'
 import { LimiteErro } from '../../lib/LimiteErro'
 import type { SelecaoFiltros } from '../indicadores'
 import { consultarEvolucao, type EvolucaoTemporal } from './api'
@@ -92,11 +94,14 @@ export function PainelEvolucao({
 				setResposta({ chave, dados })
 				setUltima({ dados, query, periodo: aplicado })
 			})
-			.catch(() => {
+			.catch((falha) => {
 				if (!controller.signal.aborted)
 					setResposta({
 						chave,
-						erro: 'Não foi possível carregar a evolução temporal.'
+						erro: mensagemErro(
+							falha,
+							'Não foi possível carregar a evolução temporal.'
+						)
 					})
 			})
 		return () => controller.abort()
@@ -104,14 +109,17 @@ export function PainelEvolucao({
 
 	const atual = resposta?.chave === chave ? resposta : null
 	const carregando = podeConsultar && !atual
-	const exibida = !podeConsultar
-		? null
-		: atual?.dados
-			? { dados: atual.dados, query, periodo: aplicado }
-			: carregando
-				? ultima
-				: null
-	const atualizando = carregando && !!ultima
+	const vista = podeConsultar
+		? exibicao(
+				atual?.dados
+					? { dados: atual.dados, query, periodo: aplicado }
+					: undefined,
+				ultima,
+				carregando
+			)
+		: { dado: null, atualizando: false }
+	const exibida = vista.dado
+	const atualizando = vista.atualizando
 	function aplicar(event: FormEvent) {
 		event.preventDefault()
 		const erro = validarPeriodo(campos)
@@ -214,7 +222,10 @@ export function PainelEvolucao({
 				)}
 			</div>
 			{exibida && (
-				<div className={atualizando ? 'is-refreshing' : undefined}>
+				<div
+					className={atualizando ? 'is-refreshing' : undefined}
+					aria-busy={atualizando || undefined}
+				>
 					<p className="filter-count">
 						Período aplicado: {exibida.periodo.ano_inicial} a{' '}
 						{exibida.periodo.ano_final}

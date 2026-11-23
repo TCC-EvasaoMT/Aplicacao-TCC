@@ -54,12 +54,15 @@ export function escalaTaxas(valores: (number | null)[]): {
 // Ano mais próximo de um clique no gráfico temporal, a partir da posição
 // horizontal e da área de plotagem (com a folga lateral do eixo). Não depende
 // do estado do tooltip, que chega atrasado em toques rápidos.
+// Folga lateral do eixo dos anos, usada no gráfico e no cálculo do clique.
+export const FOLGA_EIXO_ANOS = 24
+
 export function anoNoClique(
 	x: number,
 	inicio: number,
 	largura: number,
 	anos: number[],
-	folga = 24
+	folga = FOLGA_EIXO_ANOS
 ): number | null {
 	if (!anos.length || x < inicio || x > inicio + largura) return null
 	const menor = Math.min(...anos)

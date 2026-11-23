@@ -98,3 +98,31 @@ test('ano escolhido no gráfico só vale se estiver no catálogo', async () => {
 	assert.equal(selecionarAno(selecao, 2022, catalogo.anos), selecao)
 	assert.equal(selecionarAno(selecao, 2024, catalogo.anos), selecao)
 })
+
+test('anúncio cita ano, filtros aplicados, trocados e removidos, comparando por valor', async () => {
+	const { anuncioMudanca } =
+		await import('../src/modules/indicadores/filtros.ts')
+	const inicial = limparFiltros('2023')
+	const comCurso = { ...inicial, codigo_curso: '001' }
+	assert.equal(
+		anuncioMudanca(inicial, comCurso, catalogo),
+		'Filtro aplicado: Curso Nome não informado (001). Resumo, evolução e comparação atualizados.'
+	)
+	assert.equal(
+		anuncioMudanca(comCurso, inicial, catalogo),
+		'Filtro removido: Curso Nome não informado (001). Resumo, evolução e comparação atualizados.'
+	)
+	assert.equal(
+		anuncioMudanca(comCurso, { ...comCurso, ano: '2024' }, catalogo),
+		'Ano 2024 selecionado. Resumo, evolução e comparação atualizados.'
+	)
+	assert.equal(
+		anuncioMudanca(
+			{ ...inicial, modalidade: 'Presencial' },
+			{ ...inicial, modalidade: 'A distância' },
+			catalogo
+		),
+		'Filtro aplicado: Modalidade A distância. Resumo, evolução e comparação atualizados.'
+	)
+	assert.equal(anuncioMudanca(comCurso, { ...comCurso }, catalogo), '')
+})

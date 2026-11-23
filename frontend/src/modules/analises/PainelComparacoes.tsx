@@ -1,5 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
 import { Carregando, GraficoCarregando } from '../../lib/Estados'
+import { exibicao } from '../../lib/exibicao'
+import { mensagemErro } from '../../lib/http'
 import { LimiteErro } from '../../lib/LimiteErro'
 import { plural } from './apresentacao'
 import type { Catalogo } from '../catalogos'
@@ -79,20 +81,23 @@ export function PainelComparacoes({
 	const carregando = podeConsultar && !atual
 	// Enquanto o novo recorte carrega, a última comparação fica na tela,
 	// esmaecida; rótulos e cliques seguem a dimensão dessa comparação.
-	const exibida = !podeConsultar
-		? null
-		: atual?.dados
-			? {
-					dados: atual.dados,
-					query,
-					agrupar_por: aplicado.agrupar_por,
-					grupos: aplicado.grupos,
-					ano: selecao.ano
-				}
-			: carregando
-				? ultima
-				: null
-	const atualizando = carregando && !!ultima
+	const vista = podeConsultar
+		? exibicao(
+				atual?.dados
+					? {
+							dados: atual.dados,
+							query,
+							agrupar_por: aplicado.agrupar_por,
+							grupos: aplicado.grupos,
+							ano: selecao.ano
+						}
+					: undefined,
+				ultima,
+				carregando
+			)
+		: { dado: null, atualizando: false }
+	const exibida = vista.dado
+	const atualizando = vista.atualizando
 	const dados = exibida?.dados
 	const dimensaoExibida = exibida?.agrupar_por ?? aplicado.agrupar_por
 	const dimensao = dimensoesComparacao[dimensaoExibida]
@@ -143,11 +148,11 @@ export function PainelComparacoes({
 					ano: selecao.ano
 				})
 			})
-			.catch(() => {
+			.catch((falha) => {
 				if (!controller.signal.aborted)
 					setResposta({
 						chave,
-						erro: 'Não foi possível carregar a comparação.'
+						erro: mensagemErro(falha, 'Não foi possível carregar a comparação.')
 					})
 			})
 		return () => controller.abort()
@@ -257,7 +262,10 @@ export function PainelComparacoes({
 					</div>
 				)}
 				{exibida && dados && (
-					<div className={atualizando ? 'is-refreshing' : undefined}>
+					<div
+						className={atualizando ? 'is-refreshing' : undefined}
+						aria-busy={atualizando || undefined}
+					>
 						<h3 className="comparison-result">
 							{dimensao.rotulo} em {exibida.ano}:{' '}
 							{dados.grupos.length === dados.total_grupos
@@ -303,7 +311,10 @@ export function PainelComparacoes({
 				)}
 			</div>
 			{exibida && dados && dados.grupos.length > 0 && (
-				<div className={atualizando ? 'is-refreshing' : undefined}>
+				<div
+					className={atualizando ? 'is-refreshing' : undefined}
+					aria-busy={atualizando || undefined}
+				>
 					<LimiteErro mensagem="Não foi possível exibir o gráfico da comparação.">
 						<Suspense fallback={<GraficoCarregando />}>
 							<GraficoComparacoes

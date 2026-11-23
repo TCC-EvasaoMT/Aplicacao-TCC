@@ -2,8 +2,10 @@
 // resumos da API. Não altera as fórmulas: compara valores já calculados.
 export interface Variacao {
 	direcao: 'alta' | 'queda' | 'estavel'
-	// Valor absoluto já formatado, sem sinal: "5 p.p." ou "12,5%".
+	// Valor absoluto já formatado, sem sinal: "5" (pontos percentuais) ou
+	// "12,5%" (variação relativa).
 	texto: string
+	unidade: 'pp' | 'relativa'
 }
 
 const pontos = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 1 })
@@ -30,7 +32,8 @@ export function variacaoTaxa(
 	const diferenca = arredondar((atual - anterior) * 100, 10)
 	return {
 		direcao: direcao(diferenca),
-		texto: `${pontos.format(Math.abs(diferenca))} p.p.`
+		texto: pontos.format(Math.abs(diferenca)),
+		unidade: 'pp'
 	}
 }
 
@@ -43,6 +46,7 @@ export function variacaoTotal(
 	const proporcao = arredondar((atual - anterior) / anterior, 1000)
 	return {
 		direcao: direcao(proporcao),
-		texto: relativa.format(Math.abs(proporcao))
+		texto: relativa.format(Math.abs(proporcao)),
+		unidade: 'relativa'
 	}
 }

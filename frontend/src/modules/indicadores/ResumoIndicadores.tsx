@@ -23,8 +23,8 @@ function LinhaVariacao({
 		return <p className="variation">sem comparação com {ano}</p>
 	if (variacao.direcao === 'estavel')
 		return <p className="variation">sem variação ante {ano}</p>
-	const pontos = variacao.texto.endsWith(' p.p.')
-	const valor = pontos ? variacao.texto.slice(0, -5) : variacao.texto
+	const pontos = variacao.unidade === 'pp'
+	const valor = variacao.texto
 	return (
 		<p className="variation">
 			<span aria-hidden="true">{variacao.direcao === 'alta' ? '▲' : '▼'} </span>

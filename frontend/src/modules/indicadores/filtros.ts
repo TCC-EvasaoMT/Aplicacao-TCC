@@ -86,6 +86,37 @@ export function filtrosAtivos(
 	})
 }
 
+// Texto para leitores de tela depois de uma mudança feita pela pessoa.
+// Compara por campo e valor; um campo com valor trocado conta como aplicado.
+export function anuncioMudanca(
+	antes: SelecaoFiltros,
+	depois: SelecaoFiltros,
+	catalogo: Catalogo | null
+): string {
+	const id = (filtro: FiltroAtivo) => `${filtro.chave}=${filtro.valor}`
+	const texto = (filtro: FiltroAtivo) => `${filtro.campo} ${filtro.texto}`
+	const anteriores = filtrosAtivos(antes, catalogo)
+	const atuais = filtrosAtivos(depois, catalogo)
+	const idsAntes = new Set(anteriores.map(id))
+	const idsDepois = new Set(atuais.map(id))
+	const aplicados = atuais.filter((filtro) => !idsAntes.has(id(filtro)))
+	const removidos = anteriores.filter(
+		(filtro) =>
+			!idsDepois.has(id(filtro)) &&
+			!aplicados.some((novo) => novo.chave === filtro.chave)
+	)
+	const partes = [
+		...(antes.ano !== depois.ano && depois.ano
+			? [`Ano ${depois.ano} selecionado.`]
+			: []),
+		...aplicados.map((filtro) => `Filtro aplicado: ${texto(filtro)}.`),
+		...removidos.map((filtro) => `Filtro removido: ${texto(filtro)}.`)
+	]
+	return partes.length
+		? `${partes.join(' ')} Resumo, evolução e comparação atualizados.`
+		: ''
+}
+
 // Ano escolhido no gráfico: só anos do catálogo entram no resumo.
 export function selecionarAno(
 	selecao: SelecaoFiltros,
