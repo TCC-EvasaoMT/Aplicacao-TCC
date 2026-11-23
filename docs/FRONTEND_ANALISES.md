@@ -42,7 +42,7 @@ Esta é uma comparação de censos anuais, não acompanhamento de coortes nem ex
 
 `pnpm test` cobre limites do intervalo, catálogo vazio, serialização dos sete filtros, independência do ano do resumo, códigos, percentuais e avisos anuais. `pnpm check` também verifica tipos e build.
 
-Com `pnpm dev:demo`, confira o período 2022–2024:
+Com `pnpm dev:demo`, confira o período 2022 a 2024:
 
 | Recorte                   | Resultado esperado                                 |
 | ------------------------- | -------------------------------------------------- |
@@ -58,4 +58,4 @@ Teste também um único ano, lacunas entre anos, mudança rápida de filtros, fa
 
 Na verificação atual em Windows, `pnpm check` passou com 31 testes (21 do backend e 10 do frontend), incluindo o direcionamento de foco para correção do período. Na entrega inicial do gráfico, foram conferidos no navegador curso `001`, ano único, ruído negativo, base zero, somente docentes, rejeição de intervalo superior a 30 anos, apresentação em 390 px e recuperação após parar e reconstruir a Gold de demonstração com os grants reaplicados. A revisão de layout está descrita em [Estilização do frontend](FRONTEND_ESTILIZACAO.md).
 
-O build emite um aviso de bundle JavaScript acima de 500 kB após incluir Recharts; a medição de carregamento em conexão real e eventual divisão do bundle permanecem pendentes. A pendência de formatação em `scripts/demo.mjs` foi resolvida no incremento de proteção da API pública. A verificação global atual passa.
+O aviso de bundle JavaScript acima de 500 kB foi resolvido com o carregamento sob demanda dos gráficos, descrito em [Finalização do frontend](FRONTEND_FINALIZACAO.md). A medição de carregamento em conexão real permanece pendente. A pendência de formatação em `scripts/demo.mjs` foi resolvida no incremento de proteção da API pública. A verificação global atual passa.

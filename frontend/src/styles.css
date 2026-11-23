@@ -5,6 +5,9 @@
 	--panel-surface: #fff;
 	--panel-background: #f5f7f7;
 	--panel-secondary: #805128;
+	--panel-chip-bg: #e8f0eb;
+	--panel-chip-border: #b9cbc3;
+	--panel-select-ring: var(--panel-ink);
 	--bs-body-font-family: 'Source Sans 3', 'Segoe UI', system-ui, sans-serif;
 	--bs-body-color: var(--panel-ink);
 	--bs-body-bg: var(--panel-background);
@@ -125,6 +128,200 @@ h3 {
 .filters .section-heading {
 	margin-bottom: 8px;
 }
+.filters .filter-count {
+	margin: 4px 0 0;
+	font-weight: 400;
+	color: var(--panel-muted);
+}
+.filters-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+/* Faixa do recorte: fica fixa no topo ao rolar, para o clique num gráfico
+   mostrar o filtro e as taxas sem voltar ao início da página. */
+html {
+	scroll-padding-top: 80px;
+}
+.recorte {
+	position: sticky;
+	top: 8px;
+	z-index: 5;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px 12px;
+	margin: 0 0 24px;
+	padding: 8px 12px;
+	background: var(--panel-surface);
+	border: 1px solid var(--panel-chip-border);
+	border-left: 4px solid var(--panel-green);
+	border-radius: 8px;
+	box-shadow:
+		0 1px 2px rgb(23 46 41 / 10%),
+		0 6px 16px rgb(23 46 41 / 8%);
+	font-size: 0.875rem;
+}
+.recorte-ano {
+	flex: none;
+	padding-right: 12px;
+	border-right: 1px solid #dce5e1;
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+}
+.recorte-vazio {
+	color: var(--panel-muted);
+}
+.chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	min-height: 32px;
+	padding: 0 3px 0 10px;
+	border: 1px solid var(--panel-chip-border);
+	border-radius: 4px;
+	background: var(--panel-chip-bg);
+	color: var(--panel-green);
+	font-weight: 600;
+	overflow-wrap: anywhere;
+}
+.chip-remover {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	border: 0;
+	border-radius: 4px;
+	background: none;
+	color: inherit;
+	font-size: 1.125rem;
+	line-height: 1;
+}
+/* Área de toque de 44 px sem aumentar o chip. */
+.chip-remover::before {
+	content: '';
+	position: absolute;
+	inset: -8px -4px;
+}
+.chip-remover:hover {
+	background: var(--panel-green);
+	color: #fff;
+}
+/* O anel padrão (offset 4 px) invadiria o chip vizinho. */
+.chip-remover:focus-visible,
+.chip-mais:focus-visible,
+.chip-limpar:focus-visible {
+	outline: 2px solid var(--panel-select-ring);
+	outline-offset: 1px;
+}
+.chip-remover:focus-visible {
+	background: var(--panel-surface);
+}
+@media (prefers-reduced-motion: no-preference) {
+	.chip {
+		animation: chip-entrada 0.12s ease-out;
+	}
+	.chip-remover,
+	.chip-mais,
+	.link-filtro {
+		transition:
+			background-color 0.15s ease,
+			color 0.15s ease;
+	}
+}
+@keyframes chip-entrada {
+	from {
+		opacity: 0;
+		transform: translateY(-2px);
+	}
+}
+.chip-mais {
+	min-height: 32px;
+	padding: 0 10px;
+	border: 1px solid var(--panel-chip-border);
+	border-radius: 4px;
+	background: var(--panel-surface);
+	color: var(--panel-green);
+	font-weight: 600;
+}
+.chip-mais:hover {
+	background: var(--panel-chip-bg);
+	border-color: var(--panel-green);
+}
+.chip-limpar {
+	min-height: 32px;
+	padding: 4px 8px;
+	border: 0;
+	border-radius: 4px;
+	background: none;
+	color: var(--panel-green);
+	font-weight: 600;
+	text-decoration: underline;
+	text-decoration-thickness: 1px;
+	text-underline-offset: 3px;
+}
+.chip-limpar:hover {
+	background: var(--panel-chip-bg);
+	text-decoration-thickness: 2px;
+}
+.recorte-taxas {
+	display: flex;
+	gap: 16px;
+	margin: 0 0 0 auto;
+	color: var(--panel-ink);
+	font-variant-numeric: tabular-nums;
+}
+.recorte-taxas span {
+	white-space: nowrap;
+}
+/* Quadrado na cor da série, igual ao gráfico e aos cartões. */
+.recorte-taxas span::before {
+	content: '';
+	display: inline-block;
+	width: 8px;
+	height: 8px;
+	margin-right: 6px;
+	border-radius: 2px;
+	background: var(--panel-green);
+}
+.recorte-taxas span + span::before {
+	background: var(--panel-secondary);
+}
+/* Variação contra o ano anterior, em cor neutra. */
+.variation {
+	margin: 0 0 8px;
+	color: var(--panel-muted);
+	font-size: 0.875rem;
+	font-variant-numeric: tabular-nums;
+}
+.metric .variation {
+	margin: 4px 0 0;
+	font-size: 0.8125rem;
+}
+.variation abbr {
+	text-decoration: none;
+	cursor: help;
+}
+/* Dados anteriores visíveis enquanto o novo recorte carrega. */
+.is-refreshing {
+	opacity: 0.6;
+	cursor: progress;
+}
+@media (prefers-reduced-motion: no-preference) {
+	.is-refreshing {
+		transition: opacity 0.15s ease;
+	}
+}
 .summary-controls {
 	display: flex;
 	align-items: end;
@@ -189,15 +386,28 @@ h3 {
 	--bs-btn-disabled-color: var(--panel-muted);
 	--bs-btn-disabled-border-color: #b9cbc3;
 }
+/* Ação principal de cada bloco (aplicar período, comparar). */
+.btn-success {
+	--bs-btn-bg: var(--panel-green);
+	--bs-btn-border-color: var(--panel-green);
+	--bs-btn-hover-bg: #0f2f28;
+	--bs-btn-hover-border-color: #0f2f28;
+	--bs-btn-active-bg: #0b241e;
+	--bs-btn-active-border-color: #0b241e;
+	--bs-btn-disabled-bg: var(--panel-muted);
+	--bs-btn-disabled-border-color: var(--panel-muted);
+}
 .metrics {
 	display: grid;
 	grid-template-columns: repeat(4, minmax(0, 1fr));
-	border-top: 1px solid #dce5e1;
-	border-bottom: 1px solid #dce5e1;
+	border: 1px solid #dce5e1;
+	border-radius: 8px;
+	background: var(--panel-surface);
 	margin-top: 16px;
+	overflow: hidden;
 }
 .metric {
-	padding: 16px;
+	padding: 16px 24px;
 }
 .metric + .metric {
 	border-left: 1px solid #dce5e1;
@@ -213,7 +423,7 @@ h3 {
 	overflow-wrap: anywhere;
 }
 .metric-value {
-	font-size: 1.75rem;
+	font-size: 1.5rem;
 	margin: 8px 0 0;
 }
 .rates {
@@ -226,14 +436,16 @@ h3 {
 	border: 1px solid #dce5e1;
 	border-top: 3px solid var(--panel-green);
 	border-radius: 0 0 8px 8px;
-	padding: 16px 24px;
+	padding: 16px 24px 20px;
+	box-shadow: 0 1px 2px rgb(23 46 41 / 6%);
 }
 .rate + .rate {
 	border-top-color: var(--panel-secondary);
 }
 .rate-value {
-	margin: 8px 0;
-	font-size: 2rem;
+	margin: 8px 0 4px;
+	font-size: clamp(2.25rem, 4vw, 2.75rem);
+	letter-spacing: -0.01em;
 }
 .rate p:last-child {
 	margin: 0;
@@ -250,6 +462,40 @@ h3 {
 	border-color: #dfb6b2;
 	color: #8b2921;
 }
+.state-loading {
+	color: var(--panel-muted);
+}
+.state-loading .spinner-border {
+	margin-right: 8px;
+	vertical-align: -2px;
+}
+.state-empty {
+	border-style: dashed;
+	border-color: #b9cbc3;
+}
+.state-empty h3 {
+	margin-bottom: 4px;
+}
+.state-empty p {
+	margin: 0 0 12px;
+	color: var(--panel-muted);
+}
+.state-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+/* Reserva a altura do gráfico enquanto o chunk do Recharts carrega. */
+.chart-loading {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 360px;
+	margin: 24px 0;
+	border: 1px dashed #dce5e1;
+	border-radius: 8px;
+	color: var(--panel-muted);
+}
 .quality {
 	margin-top: 16px;
 	padding: 12px 16px;
@@ -263,8 +509,8 @@ h3 {
 }
 .temporal,
 .comparison {
-	margin-top: 32px;
-	padding: 24px;
+	margin-top: 40px;
+	padding: 24px 24px 32px;
 	background: var(--panel-surface);
 	border: 1px solid #dce5e1;
 	border-radius: 8px;
@@ -277,6 +523,8 @@ h3 {
 }
 .temporal-table {
 	margin-top: 24px;
+	/* Contém os textos visually-hidden (absolutos) dentro da rolagem da tabela. */
+	position: relative;
 }
 .temporal-table table {
 	--bs-table-color: var(--panel-ink);
@@ -296,6 +544,76 @@ h3 {
 }
 .temporal-table th:first-child {
 	min-width: 65px;
+}
+/* Filtragem cruzada: linha da tabela ligada ao gráfico. */
+.temporal-table tbody tr.is-active > * {
+	--bs-table-bg-state: #f0f4f2;
+}
+.temporal-table tbody tr.is-selected > * {
+	--bs-table-bg-state: var(--panel-chip-bg);
+}
+.temporal-table tbody tr.is-selected > th {
+	/* Mantém o fundo do Bootstrap (também um box-shadow) e soma a barra. */
+	box-shadow:
+		inset 3px 0 0 var(--panel-green),
+		inset 0 0 0 9999px var(--panel-chip-bg);
+}
+/* Clique do mouse foca a área do gráfico; só o teclado mostra o anel. */
+.recharts-wrapper :focus:not(:focus-visible) {
+	outline: none;
+}
+.link-filtro {
+	padding: 2px 4px;
+	margin: -2px -4px;
+	border: 0;
+	border-radius: 4px;
+	background: none;
+	color: var(--panel-green);
+	font: inherit;
+	font-weight: 600;
+	text-align: left;
+	text-decoration: underline;
+	text-decoration-thickness: 1px;
+	text-underline-offset: 3px;
+}
+.link-filtro:hover {
+	background: var(--panel-chip-bg);
+	text-decoration-thickness: 2px;
+}
+.link-filtro[aria-pressed='true'] {
+	text-decoration: none;
+}
+.link-filtro[aria-pressed='true']::after {
+	content: ' ✓';
+}
+.link-filtro:focus-visible {
+	outline: 2px solid var(--panel-select-ring);
+	outline-offset: 2px;
+}
+@media (prefers-reduced-motion: no-preference) {
+	.comparison-bar {
+		transition: fill-opacity 0.15s ease;
+	}
+	.temporal-table tbody tr > * {
+		transition: background-color 0.15s ease;
+	}
+}
+.temporal-table td.text-end {
+	white-space: nowrap;
+}
+.table-footer {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px 16px;
+	margin-top: 8px;
+}
+.table-note {
+	margin: 0;
+}
+.table-scroll-help {
+	display: none;
 }
 .temporal-table thead {
 	--bs-table-bg: var(--panel-background);
@@ -339,15 +657,6 @@ h3 {
 	margin: 24px 0 8px;
 	font-weight: 600;
 }
-.comparison-chart-scroll {
-	overflow-x: auto;
-}
-.comparison-scroll-help {
-	display: none;
-}
-.comparison-chart {
-	min-width: 520px;
-}
 .comparison-table th:first-child {
 	min-width: 180px;
 	max-width: 280px;
@@ -390,8 +699,61 @@ footer {
 	}
 }
 @media (max-width: 575px) {
-	.comparison-scroll-help {
-		display: block;
+	html {
+		scroll-padding-top: 104px;
+	}
+	/* Faixa fixa compacta: ocupa o mínimo da tela pequena. */
+	.recorte {
+		top: 4px;
+		margin: 0 -8px 16px;
+		padding: 6px 8px;
+		gap: 4px 8px;
+		border-left-width: 3px;
+	}
+	.recorte-ano {
+		padding-right: 8px;
+	}
+	.chip {
+		min-height: 28px;
+		font-size: 0.8125rem;
+	}
+	.chip-limpar {
+		margin-left: auto;
+	}
+	/* Compacta: o primeiro filtro divide a linha com o ano e o "+N", só com o
+	   valor; o nome do campo fica no title e no ×. "Limpar tudo" aparece ao
+	   expandir (o cartão de filtros também tem "Limpar filtros"). */
+	.recorte.is-compact .chips {
+		flex: 1 1 0;
+		flex-wrap: nowrap;
+		min-width: 0;
+	}
+	.recorte.is-compact .chip {
+		min-width: 0;
+	}
+	.recorte.is-compact .chip > span {
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.recorte.is-compact .chip-campo {
+		display: none;
+	}
+	.temporal,
+	.comparison {
+		margin-top: 24px;
+	}
+	.recorte-taxas {
+		display: none;
+	}
+	.table-scroll-help {
+		display: inline;
+	}
+	.temporal-table th,
+	.temporal-table td {
+		min-width: 80px;
+		padding: 8px;
 	}
 	main {
 		padding-top: 24px;
@@ -414,4 +776,7 @@ footer {
 	.metric {
 		padding: 12px;
 	}
+}
+.link-status:empty {
+	display: none;
 }

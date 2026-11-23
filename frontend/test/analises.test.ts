@@ -7,8 +7,11 @@ import {
 	validarPeriodo
 } from '../src/modules/analises/periodo.ts'
 import {
+	anoNoClique,
 	avisosDoRecorte,
-	formatarTaxa
+	escalaTaxas,
+	formatarTaxa,
+	plural
 } from '../src/modules/analises/apresentacao.ts'
 import type { PontoTemporal } from '../src/modules/analises/api.ts'
 import { limparFiltros } from '../src/modules/indicadores/filtros.ts'
@@ -133,7 +136,7 @@ test('avisos distinguem ausência, somente docentes, base zero, ruído e grupos 
 			...ponto,
 			qualidade: { ...ponto.qualidade, registros_sem_alunos: 1 }
 		}),
-		['Sem dados de alunos', '1 registro(s) sem contagens de alunos']
+		['Sem dados de alunos', '1 registro sem contagens de alunos']
 	)
 	assert.deepEqual(
 		avisosDoRecorte({
@@ -161,4 +164,38 @@ test('avisos distinguem ausência, somente docentes, base zero, ruído e grupos 
 		}),
 		['Dados incompletos', 'Valores negativos na origem', 'Base inferior a 30']
 	)
+})
+
+test('escala das taxas inclui o zero, usa passos arredondados e acomoda negativos', () => {
+	assert.deepEqual(escalaTaxas([0.1, 0.09, null]), {
+		dominio: [0, 0.1],
+		marcas: [0, 0.02, 0.04, 0.06, 0.08, 0.1]
+	})
+	assert.deepEqual(escalaTaxas([0.1, 0.15]).marcas, [0, 0.05, 0.1, 0.15])
+	assert.deepEqual(escalaTaxas([0.0366, -0.122]), {
+		dominio: [-0.15, 0.05],
+		marcas: [-0.15, -0.1, -0.05, 0, 0.05]
+	})
+	assert.deepEqual(escalaTaxas([1.5]).dominio, [0, 1.5])
+	assert.deepEqual(escalaTaxas([null, null]).dominio, [0, 0.01])
+	assert.deepEqual(escalaTaxas([0]).dominio, [0, 0.01])
+})
+
+test('plural concorda com a quantidade e formata o número em pt-BR', () => {
+	assert.equal(plural(0, 'grupo', 'grupos'), '0 grupos')
+	assert.equal(plural(1, 'grupo', 'grupos'), '1 grupo')
+	assert.equal(plural(1200, 'registro', 'registros'), '1.200 registros')
+})
+
+test('ano do clique é o mais próximo na área do gráfico, com folga lateral', () => {
+	const anos = [2022, 2023, 2024]
+	// Área de 0 a 248 px, folga de 24: 2022 em 24, 2023 em 124, 2024 em 224.
+	assert.equal(anoNoClique(30, 0, 248, anos), 2022)
+	assert.equal(anoNoClique(120, 0, 248, anos), 2023)
+	assert.equal(anoNoClique(180, 0, 248, anos), 2024)
+	assert.equal(anoNoClique(0, 0, 248, anos), 2022)
+	assert.equal(anoNoClique(-1, 0, 248, anos), null)
+	assert.equal(anoNoClique(249, 0, 248, anos), null)
+	assert.equal(anoNoClique(100, 50, 300, [2023]), 2023)
+	assert.equal(anoNoClique(10, 0, 248, []), null)
 })

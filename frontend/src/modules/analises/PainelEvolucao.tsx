@@ -1,8 +1,20 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react'
+import {
+	lazy,
+	Suspense,
+	useEffect,
+	useRef,
+	useState,
+	type FormEvent
+} from 'react'
+import { Carregando, GraficoCarregando } from '../../lib/Estados'
+import { exibicao } from '../../lib/exibicao'
+import { mensagemErro } from '../../lib/http'
+import { LimiteErro } from '../../lib/LimiteErro'
 import type { SelecaoFiltros } from '../indicadores'
 import { consultarEvolucao, type EvolucaoTemporal } from './api'
-import { GraficoEvolucao } from './GraficoEvolucao'
+import { gravarUrl, lerUrl } from '../../lib/url'
 import {
+	lerPeriodo,
 	periodoInicial,
 	campoInvalidoPeriodo,
 	serializarEvolucao,
@@ -10,9 +22,16 @@ import {
 	type Periodo
 } from './periodo'
 
+// Recharts fica em um chunk separado; o download começa junto com a consulta.
+const carregarGrafico = () => import('./GraficoEvolucao')
+const GraficoEvolucao = lazy(() =>
+	carregarGrafico().then((modulo) => ({ default: modulo.GraficoEvolucao }))
+)
+
 interface Props {
 	anos: number[]
 	selecao: SelecaoFiltros
+	onAnoChange: (ano: string) => void
 	atualizacao: number
 	indisponivel: boolean
 }
@@ -21,9 +40,12 @@ export function PainelEvolucao({
 	anos,
 	selecao,
 	atualizacao,
-	indisponivel
+	indisponivel,
+	onAnoChange
 }: Props) {
-	const [periodo, setPeriodo] = useState<Periodo | null>(null)
+	const [periodo, setPeriodo] = useState<Periodo | null>(() =>
+		lerPeriodo(lerUrl())
+	)
 	const [rascunho, setRascunho] = useState<Periodo | null>(null)
 	const [erroPeriodo, setErroPeriodo] = useState('')
 	const camposPeriodo = useRef<
@@ -43,6 +65,24 @@ export function PainelEvolucao({
 	const podeConsultar =
 		!indisponivel && anos.length > 0 && !validarPeriodo(aplicado)
 	const chave = `${atualizacao}:${tentativa}:${query}`
+	// Última série exibida: fica na tela, esmaecida, enquanto o novo recorte
+	// carrega, para o gráfico não sumir a cada clique.
+	const [ultima, setUltima] = useState<{
+		dados: EvolucaoTemporal
+		query: string
+		periodo: Periodo
+	} | null>(null)
+
+	useEffect(() => {
+		carregarGrafico().catch(() => {})
+	}, [])
+
+	useEffect(() => {
+		gravarUrl(
+			['ano_inicial', 'ano_final'],
+			periodo ? Object.entries(periodo) : []
+		)
+	}, [periodo])
 
 	useEffect(() => {
 		if (!podeConsultar) return
@@ -50,13 +90,18 @@ export function PainelEvolucao({
 		setResposta(null)
 		consultarEvolucao(query, controller.signal)
 			.then((dados) => {
-				if (!controller.signal.aborted) setResposta({ chave, dados })
+				if (controller.signal.aborted) return
+				setResposta({ chave, dados })
+				setUltima({ dados, query, periodo: aplicado })
 			})
-			.catch(() => {
+			.catch((falha) => {
 				if (!controller.signal.aborted)
 					setResposta({
 						chave,
-						erro: 'Não foi possível carregar a evolução temporal.'
+						erro: mensagemErro(
+							falha,
+							'Não foi possível carregar a evolução temporal.'
+						)
 					})
 			})
 		return () => controller.abort()
@@ -64,6 +109,17 @@ export function PainelEvolucao({
 
 	const atual = resposta?.chave === chave ? resposta : null
 	const carregando = podeConsultar && !atual
+	const vista = podeConsultar
+		? exibicao(
+				atual?.dados
+					? { dados: atual.dados, query, periodo: aplicado }
+					: undefined,
+				ultima,
+				carregando
+			)
+		: { dado: null, atualizando: false }
+	const exibida = vista.dado
+	const atualizando = vista.atualizando
 	function aplicar(event: FormEvent) {
 		event.preventDefault()
 		const erro = validarPeriodo(campos)
@@ -123,7 +179,7 @@ export function PainelEvolucao({
 				))}
 				<div className="col-12 col-sm-auto">
 					<button
-						className="btn btn-outline-success"
+						className="btn btn-success"
 						disabled={indisponivel || !anos.length}
 						type="submit"
 					>
@@ -150,7 +206,9 @@ export function PainelEvolucao({
 				{!indisponivel && !anos.length && (
 					<p className="state">Nenhum ano está disponível na base conectada.</p>
 				)}
-				{carregando && <p className="state">Carregando evolução temporal…</p>}
+				{carregando && !ultima && (
+					<Carregando texto="Carregando evolução temporal…" />
+				)}
 				{podeConsultar && atual?.erro && (
 					<div className="alert alert-danger" role="alert">
 						<p>{atual.erro}</p>
@@ -163,13 +221,29 @@ export function PainelEvolucao({
 					</div>
 				)}
 			</div>
-			{podeConsultar && atual?.dados && (
-				<>
+			{exibida && (
+				<div
+					className={atualizando ? 'is-refreshing' : undefined}
+					aria-busy={atualizando || undefined}
+				>
 					<p className="filter-count">
-						Período aplicado: {aplicado.ano_inicial}–{aplicado.ano_final}
+						Período aplicado: {exibida.periodo.ano_inicial} a{' '}
+						{exibida.periodo.ano_final}
 					</p>
-					<GraficoEvolucao serie={atual.dados.serie} />
-				</>
+					<LimiteErro mensagem="Não foi possível exibir o gráfico da evolução temporal.">
+						<Suspense fallback={<GraficoCarregando />}>
+							<GraficoEvolucao
+								serie={exibida.dados.serie}
+								parametros={Object.fromEntries(
+									new URLSearchParams(exibida.query)
+								)}
+								anoSelecionado={selecao.ano ? Number(selecao.ano) : null}
+								anosSelecionaveis={anos}
+								onSelecionarAno={(ano) => onAnoChange(String(ano))}
+							/>
+						</Suspense>
+					</LimiteErro>
+				</div>
 			)}
 		</section>
 	)

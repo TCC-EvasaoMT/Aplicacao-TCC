@@ -51,7 +51,9 @@ O comando inicia os dois pacotes. O Vite encaminha `/api`, `/health` e `/docs` p
 
 A tela inicial exibe vínculos, matrículas, ingressantes, concluintes e taxas de evasão. Permite combinar ano, curso, área CINE, modalidade, categoria administrativa, organização acadêmica e municípios de oferta e sede. Os filtros são aplicados automaticamente; limpar mantém o ano e atualizar preserva as seleções ainda disponíveis. O gráfico temporal usa os mesmos filtros opcionais e um intervalo próprio, independente do ano do resumo. Mostra estados de carregamento, erro, ausência de dados e qualidade. Ela utiliza a base conectada, sem injetar números fictícios no frontend.
 
-A [API de comparações entre cursos e grupos](docs/COMPARACOES.md) está disponível no Swagger, em `GET /api/v1/analises/comparacoes`, sem login. Exemplo: `?ano=2023&agrupar_por=curso&grupos=001&grupos=002`. O [frontend de comparações](docs/FRONTEND_COMPARACOES.md) permite escolher a dimensão e até 20 grupos, com barras horizontais, tabela de totais e qualidade e avisos de truncamento ou ausência. Para testar, selecione 2023 na seção **Comparação entre grupos**. Rankings permanecem pendentes.
+A [API de comparações entre cursos e grupos](docs/COMPARACOES.md) está disponível no Swagger, em `GET /api/v1/analises/comparacoes`, sem login. Exemplo: `?ano=2023&agrupar_por=curso&grupos=001&grupos=002`. O [frontend de comparações](docs/FRONTEND_COMPARACOES.md) permite escolher a dimensão e até 20 grupos, com barras horizontais, tabela de totais e qualidade e avisos de truncamento ou ausência. Para testar, use 2023 na seção **Comparação entre grupos**. Rankings permanecem pendentes.
+
+A [finalização do frontend](docs/FRONTEND_FINALIZACAO.md) descreve o link compartilhável (estado na URL), a exportação em CSV, o layout do celular e o carregamento sob demanda dos gráficos. A [interatividade](docs/FRONTEND_INTERATIVIDADE.md) explica a filtragem cruzada: clicar numa barra ou num ano filtra os outros painéis, e os cartões mostram a variação contra o ano anterior.
 
 ## Executar a versão compilada
 

@@ -65,3 +65,64 @@ test('atualização remove opções que deixaram de existir e trata catálogo va
 		limparFiltros()
 	)
 })
+
+test('filtros ativos seguem a ordem dos campos e usam o rótulo do catálogo', async () => {
+	const { filtrosAtivos } =
+		await import('../src/modules/indicadores/filtros.ts')
+	const selecao = {
+		...limparFiltros('2023'),
+		codigo_municipio_sede: '5103403',
+		codigo_curso: '001',
+		modalidade: 'Presencial'
+	}
+	assert.deepEqual(
+		filtrosAtivos(selecao, catalogo).map(({ chave, texto }) => [chave, texto]),
+		[
+			['codigo_curso', 'Nome não informado (001)'],
+			['modalidade', 'Presencial'],
+			['codigo_municipio_sede', 'Cuiabá (5103403)']
+		]
+	)
+	assert.equal(filtrosAtivos(limparFiltros('2023'), catalogo).length, 0)
+	assert.equal(filtrosAtivos(selecao, null)[0]?.texto, '001')
+})
+
+test('ano escolhido no gráfico só vale se estiver no catálogo', async () => {
+	const { selecionarAno } =
+		await import('../src/modules/indicadores/filtros.ts')
+	const selecao = { ...limparFiltros('2024'), codigo_curso: '001' }
+	assert.deepEqual(selecionarAno(selecao, 2023, catalogo.anos), {
+		...selecao,
+		ano: '2023'
+	})
+	assert.equal(selecionarAno(selecao, 2022, catalogo.anos), selecao)
+	assert.equal(selecionarAno(selecao, 2024, catalogo.anos), selecao)
+})
+
+test('anúncio cita ano, filtros aplicados, trocados e removidos, comparando por valor', async () => {
+	const { anuncioMudanca } =
+		await import('../src/modules/indicadores/filtros.ts')
+	const inicial = limparFiltros('2023')
+	const comCurso = { ...inicial, codigo_curso: '001' }
+	assert.equal(
+		anuncioMudanca(inicial, comCurso, catalogo),
+		'Filtro aplicado: Curso Nome não informado (001). Resumo, evolução e comparação atualizados.'
+	)
+	assert.equal(
+		anuncioMudanca(comCurso, inicial, catalogo),
+		'Filtro removido: Curso Nome não informado (001). Resumo, evolução e comparação atualizados.'
+	)
+	assert.equal(
+		anuncioMudanca(comCurso, { ...comCurso, ano: '2024' }, catalogo),
+		'Ano 2024 selecionado. Resumo, evolução e comparação atualizados.'
+	)
+	assert.equal(
+		anuncioMudanca(
+			{ ...inicial, modalidade: 'Presencial' },
+			{ ...inicial, modalidade: 'A distância' },
+			catalogo
+		),
+		'Filtro aplicado: Modalidade A distância. Resumo, evolução e comparação atualizados.'
+	)
+	assert.equal(anuncioMudanca(comCurso, { ...comCurso }, catalogo), '')
+})

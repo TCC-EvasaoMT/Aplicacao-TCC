@@ -1,4 +1,4 @@
-import type { Catalogo } from '../catalogos'
+import type { Catalogo, OpcaoCodigo } from '../catalogos'
 
 export const camposFiltro = [
 	{ chave: 'codigo_curso', catalogo: 'cursos', rotulo: 'Curso' },
@@ -46,6 +46,95 @@ export function limparFiltros(ano = ''): SelecaoFiltros {
 		codigo_municipio_oferta: '',
 		codigo_municipio_sede: ''
 	}
+}
+
+export type CampoFiltro = (typeof camposFiltro)[number]['chave']
+
+export function rotuloOpcao(opcao: string | OpcaoCodigo) {
+	return typeof opcao === 'string'
+		? opcao
+		: `${opcao.nome ?? 'Nome não informado'} (${opcao.codigo})`
+}
+
+export interface FiltroAtivo {
+	chave: CampoFiltro
+	valor: string
+	campo: string
+	texto: string
+}
+
+// Filtros aplicados, na ordem dos campos, com o rótulo do catálogo
+// ("Curso: Pedagogia (001)"). Valor fora do catálogo aparece como veio.
+export function filtrosAtivos(
+	selecao: SelecaoFiltros,
+	catalogo: Catalogo | null
+): FiltroAtivo[] {
+	return camposFiltro.flatMap((campo) => {
+		const valor = selecao[campo.chave]
+		if (!valor) return []
+		const opcao = (catalogo?.[campo.catalogo] ?? []).find(
+			(item) => (typeof item === 'string' ? item : item.codigo) === valor
+		)
+		return [
+			{
+				chave: campo.chave,
+				valor,
+				campo: campo.rotulo,
+				texto: opcao ? rotuloOpcao(opcao) : valor
+			}
+		]
+	})
+}
+
+// Texto para leitores de tela depois de uma mudança feita pela pessoa.
+// Compara por campo e valor; um campo com valor trocado conta como aplicado.
+export function anuncioMudanca(
+	antes: SelecaoFiltros,
+	depois: SelecaoFiltros,
+	catalogo: Catalogo | null
+): string {
+	const id = (filtro: FiltroAtivo) => `${filtro.chave}=${filtro.valor}`
+	const texto = (filtro: FiltroAtivo) => `${filtro.campo} ${filtro.texto}`
+	const anteriores = filtrosAtivos(antes, catalogo)
+	const atuais = filtrosAtivos(depois, catalogo)
+	const idsAntes = new Set(anteriores.map(id))
+	const idsDepois = new Set(atuais.map(id))
+	const aplicados = atuais.filter((filtro) => !idsAntes.has(id(filtro)))
+	const removidos = anteriores.filter(
+		(filtro) =>
+			!idsDepois.has(id(filtro)) &&
+			!aplicados.some((novo) => novo.chave === filtro.chave)
+	)
+	const partes = [
+		...(antes.ano !== depois.ano && depois.ano
+			? [`Ano ${depois.ano} selecionado.`]
+			: []),
+		...aplicados.map((filtro) => `Filtro aplicado: ${texto(filtro)}.`),
+		...removidos.map((filtro) => `Filtro removido: ${texto(filtro)}.`)
+	]
+	return partes.length
+		? `${partes.join(' ')} Resumo, evolução e comparação atualizados.`
+		: ''
+}
+
+// Ano escolhido no gráfico: só anos do catálogo entram no resumo.
+export function selecionarAno(
+	selecao: SelecaoFiltros,
+	ano: number,
+	anos: number[]
+): SelecaoFiltros {
+	return anos.includes(ano) && selecao.ano !== String(ano)
+		? { ...selecao, ano: String(ano) }
+		: selecao
+}
+
+// Seleção inicial a partir da URL; valores fora do catálogo são removidos
+// depois por atualizarSelecao.
+export function lerSelecao(parametros: URLSearchParams): SelecaoFiltros {
+	const selecao = limparFiltros()
+	for (const chave of Object.keys(selecao) as (keyof SelecaoFiltros)[])
+		selecao[chave] = parametros.get(chave)?.trim() ?? ''
+	return selecao
 }
 
 export function serializarFiltros(filtros: SelecaoFiltros): string {

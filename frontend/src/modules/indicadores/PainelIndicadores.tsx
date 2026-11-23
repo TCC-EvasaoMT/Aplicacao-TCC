@@ -1,11 +1,20 @@
 import { useEffect, useState } from 'react'
 import { PainelComparacoes, PainelEvolucao } from '../analises'
+import { Carregando } from '../../lib/Estados'
+import { empilhar, exibicao } from '../../lib/exibicao'
+import { mensagemErro } from '../../lib/http'
+import { gravarUrl, lerUrl } from '../../lib/url'
 import { consultarCatalogo, type Catalogo } from '../catalogos'
 import { consultarResumo, type Resumo } from './api'
+import { ChipsFiltros } from './ChipsFiltros'
 import {
+	anuncioMudanca,
 	atualizarSelecao,
+	filtrosAtivos as listarFiltrosAtivos,
+	lerSelecao,
 	limparFiltros,
 	serializarFiltros,
+	type CampoFiltro,
 	type SelecaoFiltros
 } from './filtros'
 import { FiltrosIndicadores } from './FiltrosIndicadores'
@@ -13,16 +22,36 @@ import { ResumoIndicadores } from './ResumoIndicadores'
 
 export function PainelIndicadores() {
 	const [catalogo, setCatalogo] = useState<Catalogo | null>(null)
-	const [selecao, setSelecao] = useState(limparFiltros)
+	const [selecao, setSelecao] = useState(() => lerSelecao(lerUrl()))
 	const [carregandoCatalogo, setCarregandoCatalogo] = useState(true)
 	const [erroCatalogo, setErroCatalogo] = useState('')
 	const [avisoSelecao, setAvisoSelecao] = useState('')
 	const [tentativa, setTentativa] = useState(0)
+	// Enquanto o ano não foi escolhido pela pessoa, o painel abre no ano mais
+	// recente que tem dados de alunos (o catálogo também lista anos só com
+	// docentes). Anos pulados são informados na tela.
+	const [anoAutomatico, setAnoAutomatico] = useState(() => !lerUrl().get('ano'))
+	const [anosPulados, setAnosPulados] = useState<string[]>([])
 	const [resposta, setResposta] = useState<{
 		chave: string
 		dados?: Resumo
 		erro?: string
 	} | null>(null)
+	// Mesmo recorte no ano anterior, para a variação; null se falhou.
+	const [respostaAnterior, setRespostaAnterior] = useState<{
+		chave: string
+		dados: Resumo | null
+	} | null>(null)
+	// Anúncio para leitores de tela, só para mudanças feitas pela pessoa.
+	const [anuncio, setAnuncio] = useState('')
+	// Último resumo exibido: fica na tela, esmaecido, enquanto o próximo carrega.
+	const [ultimo, setUltimo] = useState<{
+		dados: Resumo
+		anterior: Resumo | null | undefined
+		ano: string
+	} | null>(null)
+	// Mudanças feitas pela pessoa, para desfazer a última.
+	const [historico, setHistorico] = useState<SelecaoFiltros[]>([])
 	const query = serializarFiltros(selecao)
 	const chave = `${tentativa}:${query}`
 
@@ -46,6 +75,10 @@ export function PainelIndicadores() {
 	}, [tentativa])
 
 	useEffect(() => {
+		gravarUrl(Object.keys(limparFiltros()), Object.entries(selecao))
+	}, [selecao])
+
+	useEffect(() => {
 		if (!catalogo) return
 		const proximo = atualizarSelecao(selecao, catalogo)
 		if (serializarFiltros(proximo) !== query) {
@@ -54,6 +87,9 @@ export function PainelIndicadores() {
 					? 'Algumas seleções não estão mais disponíveis e foram ajustadas ao catálogo atual.'
 					: ''
 			)
+			// Ano ausente ou fora do catálogo (link antigo): volta a escolher o
+			// ano mais recente com dados.
+			if (proximo.ano !== selecao.ano) setAnoAutomatico(true)
 			setSelecao(proximo)
 		}
 	}, [catalogo, selecao, query])
@@ -65,24 +101,98 @@ export function PainelIndicadores() {
 			.then((dados) => {
 				if (!controller.signal.aborted) setResposta({ chave, dados })
 			})
-			.catch(() => {
+			.catch((falha) => {
 				if (!controller.signal.aborted)
 					setResposta({
 						chave,
-						erro: 'Não foi possível carregar o resumo deste recorte.'
+						erro: mensagemErro(
+							falha,
+							'Não foi possível carregar o resumo deste recorte.'
+						)
 					})
 			})
 		return () => controller.abort()
 	}, [query, chave, selecao.ano, carregandoCatalogo, erroCatalogo])
+
+	// O ano anterior só é consultado se estiver no catálogo; fora dele não há
+	// o que comparar, e a chamada a mais pesaria no limite de consultas da API.
+	const anoAnteriorCalendario = Number(selecao.ano) - 1
+	const queryAnterior = catalogo?.anos.includes(anoAnteriorCalendario)
+		? serializarFiltros({ ...selecao, ano: String(anoAnteriorCalendario) })
+		: ''
+	const chaveAnterior = `${tentativa}:${queryAnterior}`
+	useEffect(() => {
+		if (!queryAnterior || carregandoCatalogo || erroCatalogo) return
+		const controller = new AbortController()
+		// A variação é complementar: chega depois do resumo e, se falhar, os
+		// cartões mostram "sem comparação".
+		consultarResumo(queryAnterior, controller.signal)
+			.then((dados) => {
+				if (!controller.signal.aborted)
+					setRespostaAnterior({ chave: chaveAnterior, dados })
+			})
+			.catch(() => {
+				if (!controller.signal.aborted)
+					setRespostaAnterior({ chave: chaveAnterior, dados: null })
+			})
+		return () => controller.abort()
+	}, [queryAnterior, chaveAnterior, carregandoCatalogo, erroCatalogo])
+	const anterior: Resumo | null | undefined = !queryAnterior
+		? null
+		: respostaAnterior?.chave === chaveAnterior
+			? respostaAnterior.dados
+			: undefined
 
 	const atual = resposta?.chave === chave ? resposta : null
 	const carregando =
 		carregandoCatalogo || (!erroCatalogo && !!selecao.ano && !atual)
 	const erro = erroCatalogo || atual?.erro
 	const resumo = atual?.dados
-	function alterar(chaveFiltro: keyof SelecaoFiltros, valor: string) {
+	const ativos = listarFiltrosAtivos(selecao, catalogo)
+	const filtrosAtivos = ativos.length > 0
+	useEffect(() => {
+		if (resumo) setUltimo({ dados: resumo, anterior, ano: selecao.ano })
+	}, [resumo, anterior, selecao.ano])
+	// Durante a recarga, o último resumo com dados continua visível e
+	// esmaecido; um resumo sem dados não é reaproveitado.
+	const vista = exibicao(
+		resumo ? { dados: resumo, anterior, ano: selecao.ano } : undefined,
+		ultimo,
+		carregando && !carregandoCatalogo && !erro,
+		(dado) => !dado.dados.qualidade.sem_dados
+	)
+	const indiceAno = catalogo?.anos.indexOf(Number(selecao.ano)) ?? -1
+	const anoAnterior = indiceAno >= 0 ? catalogo?.anos[indiceAno + 1] : undefined
+
+	useEffect(() => {
+		if (!anoAutomatico || filtrosAtivos || !resumo?.qualidade.sem_dados) return
+		if (anoAnterior === undefined) return
+		setAnosPulados((lista) => [...lista, selecao.ano])
+		setSelecao((atual) => ({ ...atual, ano: String(anoAnterior) }))
+	}, [anoAutomatico, filtrosAtivos, resumo, anoAnterior, selecao.ano])
+
+	function aplicar(proxima: SelecaoFiltros) {
+		if (serializarFiltros(proxima) === query) return
 		setAvisoSelecao('')
-		setSelecao((atual) => ({ ...atual, [chaveFiltro]: valor }))
+		if (proxima.ano !== selecao.ano) setAnoAutomatico(false)
+		setHistorico((lista) => empilhar(lista, selecao))
+		setAnuncio(anuncioMudanca(selecao, proxima, catalogo))
+		setSelecao(proxima)
+	}
+	function alterar(chaveFiltro: keyof SelecaoFiltros, valor: string) {
+		aplicar({ ...selecao, [chaveFiltro]: valor })
+	}
+	function limpar() {
+		aplicar(limparFiltros(selecao.ano))
+	}
+	function desfazer() {
+		const anterior = historico.at(-1)
+		if (!anterior) return
+		setAvisoSelecao('')
+		setAnoAutomatico(false)
+		setHistorico((lista) => lista.slice(0, -1))
+		setAnuncio(anuncioMudanca(selecao, anterior, catalogo))
+		setSelecao(anterior)
 	}
 
 	return (
@@ -93,16 +203,31 @@ export function PainelIndicadores() {
 				carregando={carregandoCatalogo}
 				indisponivel={!!erroCatalogo}
 				onChange={alterar}
-				onLimpar={() => {
-					setAvisoSelecao('')
-					setSelecao(limparFiltros(selecao.ano))
-				}}
+				onLimpar={limpar}
+			/>
+			<ChipsFiltros
+				ano={selecao.ano}
+				ativos={ativos}
+				resumo={vista.dado?.dados}
+				anuncio={anuncio}
+				onRemover={(chave: CampoFiltro) => alterar(chave, '')}
+				onLimpar={limpar}
 			/>
 			{avisoSelecao && (
 				<p className="filter-help" role="status">
 					{avisoSelecao}
 				</p>
 			)}
+			{anoAutomatico &&
+				anosPulados.length > 0 &&
+				resumo &&
+				!resumo.qualidade.sem_dados && (
+					<p className="filter-help" role="status">
+						{anosPulados.join(', ')} ainda não{' '}
+						{anosPulados.length === 1 ? 'tem' : 'têm'} dados de alunos. Exibindo{' '}
+						{selecao.ano}, o ano mais recente com dados.
+					</p>
+				)}
 			<section aria-labelledby="resumo-titulo" aria-busy={carregando}>
 				<div className="section-heading">
 					<h2 id="resumo-titulo">Resumo anual</h2>
@@ -145,7 +270,9 @@ export function PainelIndicadores() {
 					</div>
 				</div>
 				<div aria-live="polite">
-					{carregando && <p className="state">Carregando indicadores…</p>}
+					{carregando && !vista.atualizando && (
+						<Carregando texto="Carregando indicadores…" />
+					)}
 					{!carregando && erro && (
 						<p className="state error" role="alert">
 							{erro} Use “Atualizar dados” para tentar novamente.
@@ -157,19 +284,64 @@ export function PainelIndicadores() {
 						</p>
 					)}
 					{!carregando && !erro && resumo?.qualidade.sem_dados && (
-						<p className="state">
-							Não há dados de alunos para esta combinação de filtros em{' '}
-							{selecao.ano}. Altere as seleções ou use “Limpar filtros”.
-						</p>
+						<div className="state state-empty">
+							<h3>Sem dados de alunos em {selecao.ano}</h3>
+							<p>
+								{filtrosAtivos
+									? `Nenhum registro de alunos com ${ativos
+											.map((filtro) => `${filtro.campo}: ${filtro.texto}`)
+											.join(' e ')}.`
+									: 'A base não tem registros de alunos neste ano.'}
+							</p>
+							<div className="state-actions">
+								{historico.length > 0 && (
+									<button
+										className="btn btn-outline-success btn-sm"
+										type="button"
+										onClick={desfazer}
+									>
+										Desfazer última mudança
+									</button>
+								)}
+								{anoAnterior !== undefined && (
+									<button
+										className="btn btn-outline-success btn-sm"
+										type="button"
+										onClick={() => alterar('ano', String(anoAnterior))}
+									>
+										Ver {anoAnterior}
+									</button>
+								)}
+								{filtrosAtivos && (
+									<button
+										className="btn btn-outline-success btn-sm"
+										type="button"
+										onClick={limpar}
+									>
+										Limpar filtros
+									</button>
+								)}
+							</div>
+						</div>
 					)}
 				</div>
-				{!carregando && !erro && resumo && !resumo.qualidade.sem_dados && (
-					<ResumoIndicadores resumo={resumo} />
+				{!erro && vista.dado && !vista.dado.dados.qualidade.sem_dados && (
+					<div
+						className={vista.atualizando ? 'is-refreshing' : undefined}
+						aria-busy={vista.atualizando || undefined}
+					>
+						<ResumoIndicadores
+							resumo={vista.dado.dados}
+							anterior={vista.dado.anterior}
+							ano={Number(vista.dado.ano)}
+						/>
+					</div>
 				)}
 			</section>
 			<PainelEvolucao
 				anos={catalogo?.anos ?? []}
 				selecao={selecao}
+				onAnoChange={(ano) => alterar('ano', ano)}
 				atualizacao={tentativa}
 				indisponivel={carregandoCatalogo || !!erroCatalogo}
 			/>
@@ -179,6 +351,7 @@ export function PainelIndicadores() {
 				atualizacao={tentativa}
 				indisponivel={carregandoCatalogo || !!erroCatalogo}
 				onAnoChange={(ano) => alterar('ano', ano)}
+				onSelecaoChange={aplicar}
 			/>
 		</>
 	)

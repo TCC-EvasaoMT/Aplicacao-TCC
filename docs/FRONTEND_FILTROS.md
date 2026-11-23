@@ -38,7 +38,7 @@ O painel de indicadores compõe o catálogo, a evolução temporal e as compara�
 
 ## Ciclo da consulta
 
-1. O painel busca `GET /api/v1/filtros` e seleciona o primeiro ano do catálogo, ordenado do mais recente ao mais antigo.
+1. O painel busca `GET /api/v1/filtros` e seleciona o primeiro ano do catálogo, ordenado do mais recente ao mais antigo, ou o ano da URL. Sem filtros e sem ano escolhido, se esse ano não tem dados de alunos, recua até o mais recente com dados e informa o ano pulado ([Finalização do frontend](FRONTEND_FINALIZACAO.md)).
 2. A seleção é serializada com `URLSearchParams`. Campos opcionais vazios não entram na URL.
 3. O painel consulta `GET /api/v1/indicadores/resumo` com ano e filtros ativos.
 4. A API calcula o resultado; o frontend apenas formata números e proporções para exibição.

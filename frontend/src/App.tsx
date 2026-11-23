@@ -7,8 +7,11 @@ export function App() {
 				Ir para o conteúdo
 			</a>
 			<header className="topbar">
-				<a className="brand" href="/" aria-label="Evasão MT, início">
-					<span className="brand-mark">MT</span> Evasão MT
+				<a className="brand" href="/">
+					<span className="brand-mark" aria-hidden="true">
+						MT
+					</span>{' '}
+					Evasão MT
 				</a>
 				<span className="project-label">Ensino superior público</span>
 			</header>
@@ -25,7 +28,7 @@ export function App() {
 				<details className="reading-note">
 					<summary>Como interpretar os dados</summary>
 					<p>
-						A base de risco corresponde aos vínculos aluno–curso, descontados os
+						A base de risco corresponde aos vínculos aluno-curso, descontados os
 						falecidos. Um estudante em dois cursos representa dois vínculos. Os
 						resultados refletem a base conectada e ajudam a descrever a evasão;
 						não identificam, isoladamente, suas causas.
