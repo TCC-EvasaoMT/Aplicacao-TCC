@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { PainelEvolucao } from '../analises'
+import { PainelComparacoes, PainelEvolucao } from '../analises'
 import { consultarCatalogo, type Catalogo } from '../catalogos'
 import { consultarResumo, type Resumo } from './api'
 import {
@@ -172,6 +172,13 @@ export function PainelIndicadores() {
 				selecao={selecao}
 				atualizacao={tentativa}
 				indisponivel={carregandoCatalogo || !!erroCatalogo}
+			/>
+			<PainelComparacoes
+				catalogo={catalogo}
+				selecao={selecao}
+				atualizacao={tentativa}
+				indisponivel={carregandoCatalogo || !!erroCatalogo}
+				onAnoChange={(ano) => alterar('ano', ano)}
 			/>
 		</>
 	)
