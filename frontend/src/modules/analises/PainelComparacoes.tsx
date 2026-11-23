@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
+import { Carregando, GraficoCarregando } from '../../lib/Estados'
 import { LimiteErro } from '../../lib/LimiteErro'
 import { plural } from './apresentacao'
 import type { Catalogo } from '../catalogos'
@@ -155,7 +156,7 @@ export function PainelComparacoes({
 						grupos={rascunho.grupos}
 						onChange={(grupos) => setRascunho({ ...rascunho, grupos })}
 					/>
-					<button className="btn btn-outline-success" type="submit">
+					<button className="btn btn-success" type="submit">
 						Comparar grupos
 					</button>
 				</fieldset>
@@ -173,7 +174,7 @@ export function PainelComparacoes({
 						“Atualizar dados” no resumo.
 					</p>
 				)}
-				{carregando && <p className="state">Carregando comparação…</p>}
+				{carregando && <Carregando texto="Carregando comparação…" />}
 				{podeConsultar && atual?.erro && (
 					<div className="alert alert-danger" role="alert">
 						<p>{atual.erro}</p>
@@ -228,7 +229,7 @@ export function PainelComparacoes({
 			</div>
 			{dados && dados.grupos.length > 0 && (
 				<LimiteErro mensagem="Não foi possível exibir o gráfico da comparação.">
-					<Suspense fallback={<p className="state">Carregando gráfico…</p>}>
+					<Suspense fallback={<GraficoCarregando />}>
 						<GraficoComparacoes grupos={dados.grupos} />
 					</Suspense>
 				</LimiteErro>

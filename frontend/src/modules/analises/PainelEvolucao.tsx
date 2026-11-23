@@ -6,6 +6,7 @@ import {
 	useState,
 	type FormEvent
 } from 'react'
+import { Carregando, GraficoCarregando } from '../../lib/Estados'
 import { LimiteErro } from '../../lib/LimiteErro'
 import type { SelecaoFiltros } from '../indicadores'
 import { consultarEvolucao, type EvolucaoTemporal } from './api'
@@ -140,7 +141,7 @@ export function PainelEvolucao({
 				))}
 				<div className="col-12 col-sm-auto">
 					<button
-						className="btn btn-outline-success"
+						className="btn btn-success"
 						disabled={indisponivel || !anos.length}
 						type="submit"
 					>
@@ -167,7 +168,7 @@ export function PainelEvolucao({
 				{!indisponivel && !anos.length && (
 					<p className="state">Nenhum ano está disponível na base conectada.</p>
 				)}
-				{carregando && <p className="state">Carregando evolução temporal…</p>}
+				{carregando && <Carregando texto="Carregando evolução temporal…" />}
 				{podeConsultar && atual?.erro && (
 					<div className="alert alert-danger" role="alert">
 						<p>{atual.erro}</p>
@@ -186,7 +187,7 @@ export function PainelEvolucao({
 						Período aplicado: {aplicado.ano_inicial}–{aplicado.ano_final}
 					</p>
 					<LimiteErro mensagem="Não foi possível exibir o gráfico da evolução temporal.">
-						<Suspense fallback={<p className="state">Carregando gráfico…</p>}>
+						<Suspense fallback={<GraficoCarregando />}>
 							<GraficoEvolucao serie={atual.dados.serie} />
 						</Suspense>
 					</LimiteErro>
