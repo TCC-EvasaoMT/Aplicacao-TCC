@@ -46,11 +46,11 @@ Em desenvolvimento, `pnpm dev` inicia Fastify na porta 3000 e Vite na 5173. O na
 
 ## Módulos existentes
 
-| Módulo        | Responsabilidade                                                   | Entrada HTTP                             |
-| ------------- | ------------------------------------------------------------------ | ---------------------------------------- |
-| `catalogos`   | Listar opções disponíveis para filtros                             | `GET /api/v1/filtros`                    |
-| `indicadores` | Agregar um recorte anual e calcular seus totais, taxas e qualidade | `GET /api/v1/indicadores/resumo`         |
-| `analises`    | Consultar a série anual de um recorte, preservando lacunas         | `GET /api/v1/analises/evolucao-temporal` |
+| Módulo        | Responsabilidade                                                   | Entrada HTTP                                                                  |
+| ------------- | ------------------------------------------------------------------ | ----------------------------------------------------------------------------- |
+| `catalogos`   | Listar opções disponíveis para filtros                             | `GET /api/v1/filtros`                                                         |
+| `indicadores` | Agregar um recorte anual e calcular seus totais, taxas e qualidade | `GET /api/v1/indicadores/resumo`                                              |
+| `analises`    | Consultar evolução anual e comparar grupos no mesmo ano            | `GET /api/v1/analises/evolucao-temporal` e `GET /api/v1/analises/comparacoes` |
 
 Saúde da aplicação, tratamento de erros e documentação da API são recursos transversais. `GET /health` pertence a `plugins/health.ts`; não é uma responsabilidade do módulo de indicadores. As regras futuras de autorização também serão transversais, conforme o [modelo de acesso](AUTORIZACAO.md).
 
@@ -61,7 +61,7 @@ backend/src/
   modules/
     catalogos/       Opções disponíveis para filtros
     indicadores/    Resumo, agregações e taxas
-    analises/       Evolução temporal por ano e recorte
+    analises/       Evolução temporal e comparações entre grupos
   plugins/
     gold.ts         Junções da Gold e tratamento de falhas de consulta
     health.ts       Verificação de acesso às tabelas utilizadas
@@ -74,6 +74,8 @@ backend/src/
 ```
 
 O fragmento SQL em `plugins/gold.ts` define as junções comuns com a fato e as seis dimensões consumidas. Os módulos continuam responsáveis por suas seleções, filtros e agregações. Alterações nesse fragmento afetam catálogo, resumo, evolução temporal e saúde e devem passar pelos testes de integração.
+
+As comparações usam essas mesmas junções, com agrupamentos definidos em uma lista interna. `consultas.ts` concentra o SQL, aplica filtros e seleção antes de agrupar e limita a lista após contar todos os grupos encontrados. `comparacoes.ts` monta a resposta reutilizando `calcularResumo`, sem médias de taxas. O contrato expõe códigos/textos das dimensões, preserva grupos nulos e sinaliza truncamento. Não acrescenta tabelas, credenciais ou outro pool ao backend. Veja [API de comparações](COMPARACOES.md).
 
 Apesar do nome da pasta, nem todo arquivo em `plugins/` é um plugin registrável do Fastify. `health.ts` exporta um plugin; `gold.ts` e `erros.ts` fornecem funções, fragmentos SQL e schemas compartilhados. O tratamento global de erros é registrado em `app.ts`.
 

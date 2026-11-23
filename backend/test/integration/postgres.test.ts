@@ -9,6 +9,7 @@ import { criarConsultasIndicadores } from '../../src/modules/indicadores/index.j
 import { criarConsultasCatalogos } from '../../src/modules/catalogos/index.js'
 import { criarHealth } from '../../src/plugins/health.js'
 import { criarConsultasAnalises } from '../../src/modules/analises/index.js'
+import { testarComparacoes } from './comparacoes.js'
 
 test(
 	'API integrada ao PostgreSQL e a um usuário exclusivo de leitura',
@@ -81,7 +82,8 @@ test(
 				analises: criarConsultasAnalises(reader),
 				health: criarHealth(reader)
 			},
-			{ docs: true }
+			// A suíte compara muitos recortes em sequência; a cota é testada em seguranca.test.ts.
+			{ docs: true, maxRequisicoes: 1000 }
 		)
 		const server = app
 		const db = owner
@@ -355,15 +357,21 @@ test(
 			}
 		)
 
+		await testarComparacoes(t, server, db)
+
 		await t.test(
 			'reconstrução altera IDs; reaplicar grants recupera consultas por código',
 			async () => {
 				const antes = await resumo({ codigo_curso: '001' })
 				const serieAntes = await evolucao({ codigo_curso: '001' })
+				const urlComparacao =
+					'/api/v1/analises/comparacoes?ano=2023&agrupar_por=curso&grupos=001'
+				const comparacaoAntes = (await server.inject(urlComparacao)).json()
 				await db.query(
 					`BEGIN; DROP SCHEMA gold CASCADE; ${schema} ${dados} COMMIT;`
 				)
 				assert.equal((await server.inject('/health')).statusCode, 503)
+				assert.equal((await server.inject(urlComparacao)).statusCode, 503)
 				assert.equal(
 					(
 						await server.inject(
@@ -382,6 +390,10 @@ test(
 				assert.equal((await server.inject('/health')).statusCode, 200)
 				assert.deepEqual(await resumo({ codigo_curso: '001' }), antes)
 				assert.deepEqual(await evolucao({ codigo_curso: '001' }), serieAntes)
+				assert.deepEqual(
+					(await server.inject(urlComparacao)).json(),
+					comparacaoAntes
+				)
 			}
 		)
 
@@ -402,6 +414,19 @@ test(
 					`Série de 30 anos com dados sintéticos: ${serieDuration.toFixed(1)} ms.`
 				)
 				assert.ok(serieDuration < 3000, `${serieDuration.toFixed(1)} ms`)
+				const comparacaoStart = performance.now()
+				const comparacao = await server.inject(
+					'/api/v1/analises/comparacoes?ano=2023&agrupar_por=curso'
+				)
+				assert.equal(comparacao.statusCode, 200)
+				const comparacaoDuration = performance.now() - comparacaoStart
+				t.diagnostic(
+					`Comparação sintética: ${comparacaoDuration.toFixed(1)} ms; não representa o volume real.`
+				)
+				assert.ok(
+					comparacaoDuration < 3000,
+					`${comparacaoDuration.toFixed(1)} ms`
+				)
 			}
 		)
 	}
