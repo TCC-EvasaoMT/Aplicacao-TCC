@@ -141,11 +141,11 @@ h3 {
 /* Faixa do recorte: fica fixa no topo ao rolar, para o clique num gráfico
    mostrar o filtro e as taxas sem voltar ao início da página. */
 html {
-	scroll-padding-top: 72px;
+	scroll-padding-top: 80px;
 }
 .recorte {
 	position: sticky;
-	top: 0;
+	top: 8px;
 	z-index: 5;
 	display: flex;
 	flex-wrap: wrap;
@@ -154,13 +154,20 @@ html {
 	margin: 0 0 24px;
 	padding: 8px 12px;
 	background: var(--panel-surface);
-	border: 1px solid #dce5e1;
+	border: 1px solid var(--panel-chip-border);
+	border-left: 4px solid var(--panel-green);
 	border-radius: 8px;
-	box-shadow: 0 2px 6px rgb(23 46 41 / 8%);
+	box-shadow:
+		0 1px 2px rgb(23 46 41 / 10%),
+		0 6px 16px rgb(23 46 41 / 8%);
 	font-size: 0.875rem;
 }
 .recorte-ano {
+	flex: none;
+	padding-right: 12px;
+	border-right: 1px solid #dce5e1;
 	font-weight: 700;
+	font-variant-numeric: tabular-nums;
 }
 .recorte-vazio {
 	color: var(--panel-muted);
@@ -176,9 +183,9 @@ html {
 .chip {
 	display: inline-flex;
 	align-items: center;
-	gap: 2px;
+	gap: 4px;
 	min-height: 32px;
-	padding: 0 2px 0 10px;
+	padding: 0 3px 0 10px;
 	border: 1px solid var(--panel-chip-border);
 	border-radius: 4px;
 	background: var(--panel-chip-bg);
@@ -207,7 +214,36 @@ html {
 	inset: -8px -4px;
 }
 .chip-remover:hover {
-	background: rgb(21 63 53 / 10%);
+	background: var(--panel-green);
+	color: #fff;
+}
+/* O anel padrão (offset 4 px) invadiria o chip vizinho. */
+.chip-remover:focus-visible,
+.chip-mais:focus-visible,
+.chip-limpar:focus-visible {
+	outline: 2px solid var(--panel-select-ring);
+	outline-offset: 1px;
+}
+.chip-remover:focus-visible {
+	background: var(--panel-surface);
+}
+@media (prefers-reduced-motion: no-preference) {
+	.chip {
+		animation: chip-entrada 0.12s ease-out;
+	}
+	.chip-remover,
+	.chip-mais,
+	.link-filtro {
+		transition:
+			background-color 0.15s ease,
+			color 0.15s ease;
+	}
+}
+@keyframes chip-entrada {
+	from {
+		opacity: 0;
+		transform: translateY(-2px);
+	}
 }
 .chip-mais {
 	min-height: 32px;
@@ -218,34 +254,59 @@ html {
 	color: var(--panel-green);
 	font-weight: 600;
 }
+.chip-mais:hover {
+	background: var(--panel-chip-bg);
+	border-color: var(--panel-green);
+}
 .chip-limpar {
-	padding: 4px;
+	min-height: 32px;
+	padding: 4px 8px;
 	border: 0;
+	border-radius: 4px;
 	background: none;
 	color: var(--panel-green);
 	font-weight: 600;
 	text-decoration: underline;
+	text-decoration-thickness: 1px;
 	text-underline-offset: 3px;
+}
+.chip-limpar:hover {
+	background: var(--panel-chip-bg);
+	text-decoration-thickness: 2px;
 }
 .recorte-taxas {
 	display: flex;
 	gap: 16px;
 	margin: 0 0 0 auto;
-	color: var(--panel-muted);
+	color: var(--panel-ink);
 	font-variant-numeric: tabular-nums;
 }
 .recorte-taxas span {
 	white-space: nowrap;
 }
+/* Quadrado na cor da série, igual ao gráfico e aos cartões. */
+.recorte-taxas span::before {
+	content: '';
+	display: inline-block;
+	width: 8px;
+	height: 8px;
+	margin-right: 6px;
+	border-radius: 2px;
+	background: var(--panel-green);
+}
+.recorte-taxas span + span::before {
+	background: var(--panel-secondary);
+}
 /* Variação contra o ano anterior, em cor neutra. */
 .variation {
-	margin: 0 0 4px;
+	margin: 0 0 8px;
 	color: var(--panel-muted);
 	font-size: 0.875rem;
 	font-variant-numeric: tabular-nums;
 }
 .metric .variation {
-	margin-top: 4px;
+	margin: 4px 0 0;
+	font-size: 0.8125rem;
 }
 .variation abbr {
 	text-decoration: none;
@@ -254,6 +315,7 @@ html {
 /* Dados anteriores visíveis enquanto o novo recorte carrega. */
 .is-refreshing {
 	opacity: 0.6;
+	cursor: progress;
 }
 @media (prefers-reduced-motion: no-preference) {
 	.is-refreshing {
@@ -338,12 +400,14 @@ html {
 .metrics {
 	display: grid;
 	grid-template-columns: repeat(4, minmax(0, 1fr));
-	border-top: 1px solid #dce5e1;
-	border-bottom: 1px solid #dce5e1;
+	border: 1px solid #dce5e1;
+	border-radius: 8px;
+	background: var(--panel-surface);
 	margin-top: 16px;
+	overflow: hidden;
 }
 .metric {
-	padding: 16px;
+	padding: 16px 24px;
 }
 .metric + .metric {
 	border-left: 1px solid #dce5e1;
@@ -359,7 +423,7 @@ html {
 	overflow-wrap: anywhere;
 }
 .metric-value {
-	font-size: 1.75rem;
+	font-size: 1.5rem;
 	margin: 8px 0 0;
 }
 .rates {
@@ -372,14 +436,16 @@ html {
 	border: 1px solid #dce5e1;
 	border-top: 3px solid var(--panel-green);
 	border-radius: 0 0 8px 8px;
-	padding: 16px 24px;
+	padding: 16px 24px 20px;
+	box-shadow: 0 1px 2px rgb(23 46 41 / 6%);
 }
 .rate + .rate {
 	border-top-color: var(--panel-secondary);
 }
 .rate-value {
-	margin: 8px 0;
-	font-size: 2rem;
+	margin: 8px 0 4px;
+	font-size: clamp(2.25rem, 4vw, 2.75rem);
+	letter-spacing: -0.01em;
 }
 .rate p:last-child {
 	margin: 0;
@@ -443,8 +509,8 @@ html {
 }
 .temporal,
 .comparison {
-	margin-top: 32px;
-	padding: 24px;
+	margin-top: 40px;
+	padding: 24px 24px 32px;
 	background: var(--panel-surface);
 	border: 1px solid #dce5e1;
 	border-radius: 8px;
@@ -497,8 +563,10 @@ html {
 	outline: none;
 }
 .link-filtro {
-	padding: 0;
+	padding: 2px 4px;
+	margin: -2px -4px;
 	border: 0;
+	border-radius: 4px;
 	background: none;
 	color: var(--panel-green);
 	font: inherit;
@@ -509,6 +577,7 @@ html {
 	text-underline-offset: 3px;
 }
 .link-filtro:hover {
+	background: var(--panel-chip-bg);
 	text-decoration-thickness: 2px;
 }
 .link-filtro[aria-pressed='true'] {
@@ -630,9 +699,30 @@ footer {
 	}
 }
 @media (max-width: 575px) {
+	html {
+		scroll-padding-top: 104px;
+	}
+	/* Faixa fixa compacta: ocupa o mínimo da tela pequena. */
 	.recorte {
-		margin-inline: -8px;
-		padding: 8px;
+		top: 4px;
+		margin: 0 -8px 16px;
+		padding: 6px 8px;
+		gap: 4px 8px;
+		border-left-width: 3px;
+	}
+	.recorte-ano {
+		padding-right: 8px;
+	}
+	.chip {
+		min-height: 28px;
+		font-size: 0.8125rem;
+	}
+	.chip-limpar {
+		margin-left: auto;
+	}
+	.temporal,
+	.comparison {
+		margin-top: 24px;
 	}
 	.recorte-taxas {
 		display: none;
