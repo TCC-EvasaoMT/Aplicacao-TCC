@@ -1,18 +1,18 @@
-# Finalização do frontend
+# Estado da tela, exportação e carregamento
 
-Este incremento fecha pendências de interface do painel público: tamanho do bundle, leitura dos gráficos, uso no celular, acessibilidade, exportação e link compartilhável. Não altera a API, os cálculos, os contratos HTTP nem a pipeline. As taxas continuam calculadas no backend; a interface apenas apresenta os valores recebidos.
+O painel permite compartilhar o estado da tela pela URL e exportar os dados carregados em CSV. Este guia descreve essas ações, a apresentação em telas pequenas e o carregamento dos gráficos. A API calcula as taxas de evasão; o frontend apresenta os resultados recebidos.
 
-## O que muda para quem usa
+## Comportamento da interface
 
-- **Primeira tela com dados.** Sem ano escolhido e sem filtros, o painel abre no ano mais recente com dados de alunos. Se o último ano do catálogo só tem docentes, a tela recua e informa o ano pulado. Escolher um ano desliga esse ajuste.
-- **Estado vazio com ação.** Um recorte sem alunos mostra título, explicação curta e os botões **Ver ano anterior** e **Limpar filtros**, quando aplicáveis.
-- **Filtros no celular.** Abaixo de 576 px, os sete filtros ficam recolhidos em **Mostrar filtros**. Os filtros ativos aparecem na faixa do recorte ([Interatividade](FRONTEND_INTERATIVIDADE.md)). A contagem de filtros fica no cabeçalho do bloco.
-- **Link da visão.** Ano, filtros, período aplicado e comparação aplicada ficam na URL, com os nomes de parâmetros da API. Recarregar mantém a visão; **Copiar link** copia o endereço.
-- **Exportação.** Cada tabela tem **Baixar CSV**, gerado no navegador com os dados já carregados.
-- **Gráficos.** A escala das taxas inclui o zero e usa passos arredondados, também com valores negativos. A evolução mostra o valor ao lado de pontos isolados. A comparação mostra o valor no fim de cada barra e, abaixo de 576 px, o nome do grupo acima das barras, sem rolagem lateral.
-- **Tabelas.** Dado ausente aparece como `...`, a convenção do IBGE para dado numérico não disponível. Leitores de tela ouvem "Não disponível", e uma nota abaixo da tabela explica o símbolo. Colunas numéricas não quebram linha.
-- **Textos.** Concordância de número ("1 registro", "4 grupos") e rótulo de grupo no formato dos filtros: `Nome (código)`.
-- **Ações principais.** **Aplicar período** e **Comparar grupos** usam botão sólido; as demais ações seguem com contorno.
+Sem ano escolhido e sem filtros, o painel abre no ano mais recente com dados de alunos. Se o último ano do catálogo só tem docentes, a tela recua e informa o ano pulado. Escolher um ano desliga esse ajuste. Recortes sem alunos mostram uma explicação e ações para voltar ao ano anterior, desfazer a última mudança ou limpar filtros, quando aplicáveis.
+
+Abaixo de 576 px, os sete filtros ficam recolhidos em **Mostrar filtros**. A contagem aparece no cabeçalho do bloco e as seleções ficam na faixa do recorte, descrita em [interatividade](INTERATIVIDADE.md).
+
+Ano, filtros, período e comparação aplicada ficam na URL. Recarregar restaura a seleção; **Copiar link** copia o endereço. Cada tabela oferece **Baixar CSV**, gerado no navegador com os dados já carregados.
+
+Os gráficos incluem zero no eixo e preservam valores negativos. A evolução mostra valores junto aos pontos isolados. A comparação mostra o valor de cada barra e, no celular, o nome do grupo acima delas. Dados ausentes aparecem como `...` nas tabelas, acompanhados do texto acessível "Não disponível" e de uma nota explicativa. As colunas numéricas não quebram linha.
+
+Os rótulos seguem o formato `Nome (código)`, e os textos distinguem singular e plural. **Aplicar período** e **Comparar grupos** usam botões sólidos; as demais ações usam contorno.
 
 ## Parâmetros na URL
 
@@ -22,7 +22,7 @@ Este incremento fecha pendências de interface do painel público: tamanho do bu
 | `ano_inicial`, `ano_final`         | Evolução   | Só quando um período foi aplicado; inválido é ignorado |
 | `agrupar_por`, `grupos` (repetido) | Comparação | Só quando difere do padrão; até 20 grupos, sem repetir |
 
-Cada painel grava apenas as próprias chaves com `history.replaceState`, sem criar entradas no histórico. Um ano fora do catálogo volta ao mais recente com dados e exibe o aviso de seleção ajustada.
+Cada painel grava apenas as próprias chaves com `history.replaceState`, sem criar entradas no histórico. Um ano fora do catálogo é ajustado ao mais recente disponível, com aviso. Sem filtros, a seleção automática pode recuar até um ano com dados de alunos.
 
 ## CSV
 
@@ -33,9 +33,13 @@ O arquivo atende planilhas em português: separador `;`, vírgula decimal, UTF-8
 
 As colunas trazem os quatro totais, a base de risco, as duas taxas como proporção da API (0,1 = 10%), sem arredondamento, e as marcas de qualidade. Ausências ficam vazias, nunca zero. A última coluna descreve o recorte com os nomes dos parâmetros, por exemplo `ano_inicial=2022; ano_final=2024; codigo_curso=001`.
 
+Na comparação, o CSV contém apenas os grupos carregados. Se houver truncamento, selecione os grupos desejados antes de exportar; o arquivo não busca os demais resultados. Códigos são escritos com seus zeros iniciais. Ao importar numa planilha, defina essas colunas como texto para evitar a conversão automática em números.
+
 ## Desempenho
 
-Os gráficos são carregados com `React.lazy`. O Recharts fica em um chunk próprio, baixado em paralelo com a primeira consulta, e o bundle inicial cai de 722 kB para cerca de 252 kB de JavaScript (79 kB com gzip). O build não emite mais o aviso de chunk acima de 500 kB. Enquanto o chunk carrega, a área do gráfico mantém a altura reservada. Um limite de erro isola falhas do gráfico; filtros, resumo e tabelas continuam utilizáveis.
+Os componentes dos gráficos usam `React.lazy`, e o download começa em paralelo com a primeira consulta. Enquanto carregam, a interface reserva espaço para o gráfico. A distribuição dos arquivos depende do build; na revisão de 23/11/2026, os dois maiores arquivos JavaScript tinham cerca de 493 e 447 kB, sem o aviso de chunk acima de 500 kB. Isso não comprova carregamento rápido numa conexão real.
+
+`LimiteErro` impede que uma falha do componente derrube o restante do painel. Porém, gráfico, tabela e CSV pertencem ao mesmo componente lazy: uma falha nesse arquivo também oculta a tabela e a exportação da seção. Filtros e resumo permanecem disponíveis. Separar esses elementos é um ajuste adiado, registrado no [guia de validação](../operacao/VALIDACAO.md#ajustes-adiados).
 
 ## Organização
 
@@ -66,4 +70,4 @@ Na base de demonstração, confira:
 | Curso `005`                                                        | Eixo de -15% a 5%, zero marcado e valores dos pontos       |
 | 320 px                                                             | Sem rolagem lateral da página; comparação cabe na tela     |
 
-Na conferência local de 23/11/2026, `pnpm check` passou com 55 testes (31 backend e 24 frontend), tipos e build, sem o aviso de chunk. O build compilado, servido pelo Fastify com a política de segurança de conteúdo ativa, foi conferido em 1280, 390 e 320 px com dados sintéticos: sem rolagem lateral da página, sem erros no console e sem violações do axe-core. A validação com dados reais do INEP, o desempenho no volume da pipeline e a conferência com leitor de tela continuam pendentes.
+O aceite original deste incremento registrou 55 testes, tipos e build aprovados, além de uma conferência em 1280, 390 e 320 px sem rolagem lateral da página, erros no console ou violações reportadas pelo axe-core. Esse é um registro da entrega, não uma nova auditoria de acessibilidade. A revisão posterior da `main` passou com 66 testes; consulte [evidências e limites](../operacao/VALIDACAO.md). Dados reais, desempenho no volume da pipeline e uso com leitor de tela permanecem pendentes.

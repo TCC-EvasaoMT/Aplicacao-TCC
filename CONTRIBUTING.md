@@ -13,7 +13,7 @@ Exemplos de nomes:
 - `docs/metodologia-indicadores`
 - `chore/atualizar-dependencias`
 
-Depois que `main` estiver publicada no GitHub, inicie cada tarefa com:
+Inicie cada tarefa a partir da `main` atualizada:
 
 ```powershell
 git switch main
@@ -36,7 +36,7 @@ Abra um pull request para `main`. Use uma descrição que explique o comportamen
 
 ## Formatação
 
-Frontend e backend usam a mesma configuração do Prettier, em `.prettierrc.json` na raiz: dois espaços, aspas simples em JavaScript/TypeScript, ponto e vírgula, vírgula final quando permitida e finais de linha LF. A largura de referência é de 100 caracteres; o Prettier decide as quebras conforme a sintaxe.
+Frontend e backend usam a configuração do Prettier em `.prettierrc.json`: tabulações com largura de dois espaços, aspas simples em JavaScript/TypeScript, sem ponto e vírgula, sem vírgula final e finais de linha LF. A largura de referência é de 80 caracteres; o Prettier decide as quebras conforme a sintaxe.
 
 Execute na raiz:
 
@@ -49,7 +49,7 @@ Para formatar somente os arquivos de uma tarefa, use, por exemplo, `pnpm exec pr
 
 `.prettierignore` exclui builds, dependências, caches, lockfile, dados, configurações de ambiente e a documentação local em `docs-codex`. O Prettier também respeita o `.gitignore` ao ser executado pela raiz. SQL não tem formatador incluído nesta configuração.
 
-A adoção inicial adiciona a ferramenta; os arquivos existentes ainda podem precisar de formatação. Mantenha formatações gerais em commits próprios, separados de mudanças funcionais. `format:check` ainda não integra `pnpm check` nem a CI; essa exigência pode ser adicionada após a aplicação do padrão ao código existente.
+Execute a formatação ao terminar uma alteração. Mantenha formatações gerais em commits próprios, separadas de mudanças funcionais. `format:check` não integra `pnpm check` nem o workflow de CI atual; execute-o também antes do PR.
 
 ## Commits
 
@@ -80,27 +80,25 @@ feat(backend)!: altera a representação dos filtros
 BREAKING CHANGE: o filtro de curso passa a aceitar o código original como texto.
 ```
 
-## Primeiro commit e publicação
+## Configuração de um novo clone
 
-O Git local foi iniciado com `main`; o primeiro commit deve registrar a base funcional existente. Depois de revisar `git status`, os arquivos e a documentação acadêmica que deseja incluir:
-
-```powershell
-git add .
-git diff --staged --stat
-git diff --staged
-git commit -m "feat: inicia aplicação de evasão com React e Fastify"
-```
-
-Crie no GitHub um repositório vazio para a aplicação, por exemplo `TCC-EvasaoMT/Aplicacao-TCC`, sem gerar README ou `.gitignore` pelo site. O nome é uma sugestão, não um repositório já criado. Adicione o endereço real como remote e publique a base:
+O repositório da aplicação já está publicado. Para começar em outro computador:
 
 ```powershell
-git remote add origin URL_DO_REPOSITORIO
-git push -u origin main
+git clone https://github.com/TCC-EvasaoMT/Aplicacao-TCC.git
+cd Aplicacao-TCC
+pnpm install --frozen-lockfile
 ```
 
-O primeiro envio estabelece a base. A partir dele, trabalhe por branches e PRs. Um repositório Git local e um repositório hospedado no GitHub são coisas distintas: `git init` não publica arquivos.
+Siga o [README](README.md) para configurar o ambiente ou executar a demonstração. O clone já configura `origin`; confira o destino com `git remote -v` antes de publicar uma branch.
 
-Depois da publicação, configure uma regra para `main` exigir PR, uma aprovação de outro integrante e o check **Validar monorepo**, se esses recursos estiverem disponíveis para o repositório. Habilite squash merge e exclusão automática das branches após o merge. O workflow incluído executa TypeScript, testes, build e integração com PostgreSQL sintético; a regra de proteção precisa ser configurada no GitHub.
+A configuração recomendada de `main` exige PR, uma aprovação de outro integrante e o check **Validar monorepo**, conforme os recursos disponíveis no GitHub. Habilite squash merge e exclusão automática das branches após o merge. O workflow executa TypeScript, testes, build e integração com PostgreSQL sintético; sua presença no código não confirma que a proteção de branch está ativa.
+
+## Documentação
+
+Consulte o [índice](docs/README.md) antes de criar um arquivo. Mantenha contratos em `docs/api`, interface em `docs/frontend`, decisões estruturais em `docs/arquitetura` e execução em `docs/operacao`. Fontes e definições ficam em `docs/metodologia`; a comparação com o texto acadêmico fica em `docs/tcc`.
+
+Descreva o comportamento disponível na `main`. Identifique funcionalidades de branches adiadas e diferencie testes executados de roteiros ainda pendentes. Ao mover um documento, atualize links e âncoras, inclusive nos READMEs. Mudanças de funcionalidade devem atualizar a documentação do módulo e a matriz de requisitos; o mapa de desenvolvimento permanece local em `docs-codex/`.
 
 ## O que versionar
 

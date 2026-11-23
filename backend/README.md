@@ -1,14 +1,14 @@
 # Backend de indicadores de evasão
 
-API local em TypeScript/Fastify para consultar a camada Gold da [Pipeline-TCC](https://github.com/TCC-EvasaoMT/Pipeline-TCC). A primeira entrega oferece resumo anual, filtros e documentação interativa. A pipeline continua responsável pela extração, transformação e carga; a API apenas lê a Gold e calcula taxas sobre os totais selecionados.
+API em TypeScript/Fastify para consultar a camada Gold da [Pipeline-TCC](https://github.com/TCC-EvasaoMT/Pipeline-TCC). Oferece catálogo de filtros, resumo anual, evolução temporal, comparações e Swagger em desenvolvimento. A pipeline extrai, transforma e carrega os dados; a API lê a Gold e calcula taxas sobre os totais selecionados.
 
 ## Preparar e iniciar
 
-O código está organizado em `src/modules/catalogos`, `src/modules/indicadores` e `src/modules/analises`, com plugins compartilhados em `src/plugins` e configuração em `src/config`. Veja a [arquitetura](../docs/ARQUITETURA.md) e os [contratos dos módulos](../docs/MODULOS_BACKEND.md). A extração do catálogo preserva `GET /api/v1/filtros` e sua resposta.
+O código está organizado em `src/modules/catalogos`, `src/modules/indicadores` e `src/modules/analises`, com plugins compartilhados em `src/plugins` e configuração em `src/config`. Veja a [arquitetura](../docs/arquitetura/ARQUITETURA.md) e os [contratos dos módulos](../docs/arquitetura/MODULOS_BACKEND.md). A extração do catálogo preserva `GET /api/v1/filtros` e sua resposta.
 
 Requisitos: Node.js 22.13 ou superior, pnpm 11.25.0 e PostgreSQL 17 com a Gold carregada pela pipeline. O banco não é criado ou migrado pela API. Se o pnpm ainda não estiver instalado, depois de instalar o Node.js execute `npm install --global pnpm@11.25.0`.
 
-O backend agora faz parte do workspace da raiz. Para instalar dependências, execute na raiz do repositório:
+O backend faz parte do workspace pnpm. Para instalar as dependências, execute na raiz do repositório:
 
 ```powershell
 pnpm install --frozen-lockfile
@@ -31,20 +31,20 @@ pnpm start
 
 O servidor escuta exclusivamente em `127.0.0.1`. `pnpm start` serve também `frontend/dist` em `/`. Swagger só é registrado com `NODE_ENV=development`, inclusive na versão compilada. `NODE_ENV=production` desativa `/docs`. Esta entrega não inclui autenticação nem implantação pública.
 
-| Variável              | Uso                                                                                 |
-| --------------------- | ----------------------------------------------------------------------------------- |
-| `NODE_ENV`            | `development` por padrão; também aceita `test` e `production`.                      |
-| `PORT`                | Porta HTTP, padrão `3000`.                                                          |
+| Variável | Uso |
+| ----------------------- | ---------------------------------------------------------------------------------------- |
+| `NODE_ENV` | `development` por padrão; também aceita `test` e `production`. |
+| `PORT` | Porta HTTP, padrão `3000`. |
 | `HTTP_RATE_LIMIT_MAX` | Chamadas por minuto por IP e processo em `/api`, padrão `120`; aceita de 1 a 10000. |
-| `POSTGRES_HOST`       | Host do banco, padrão `127.0.0.1`.                                                  |
-| `POSTGRES_PORT`       | Porta do banco, padrão `5432`.                                                      |
-| `POSTGRES_DB`         | Obrigatória: nome do banco da pipeline.                                             |
-| `POSTGRES_USER`       | Obrigatória: login exclusivo de leitura.                                            |
-| `POSTGRES_PASSWORD`   | Obrigatória: senha desse login.                                                     |
+| `POSTGRES_HOST` | Host do banco, padrão `127.0.0.1`. |
+| `POSTGRES_PORT` | Porta do banco, padrão `5432`. |
+| `POSTGRES_DB` | Obrigatória: nome do banco da pipeline. |
+| `POSTGRES_USER` | Obrigatória: login exclusivo de leitura. |
+| `POSTGRES_PASSWORD` | Obrigatória: senha desse login. |
 
 Credenciais ausentes ou portas inválidas impedem a inicialização. Uma conexão indisponível mantém o HTTP ativo, mas as consultas respondem `503`. O pool tem até cinco conexões, espera de conexão de dois segundos e limite SQL de 2,5 segundos. Esses limites não substituem a medição de desempenho com a carga real.
 
-Consulte a [proteção da API pública](../docs/SEGURANCA_API.md) para limites HTTP, respostas `429`, cabeçalhos e cuidados com proxy. O painel continua sem login; autenticação administrativa é uma entrega futura.
+Consulte a [proteção da API pública](../docs/operacao/SEGURANCA_API.md) para limites HTTP, respostas `429`, cabeçalhos e cuidados com proxy. O painel continua sem login; autenticação administrativa é uma entrega futura.
 
 ## Preparar o acesso ao PostgreSQL
 
@@ -74,14 +74,14 @@ Sem cliente local, abra o `psql` dentro do container e execute o conteúdo de `s
 
 ## Rotas e filtros
 
-| Método e rota                            | Resultado                                                                                                                                  |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `GET /health`                            | Testa a leitura da fato e das dimensões. `200` com `{"status":"ok"}` ou `503`. Uma Gold vazia, mas acessível, é saudável.                  |
-| `GET /api/v1/filtros`                    | Catálogo de todos os anos e opções presentes na fato de cursos. Não recebe parâmetros.                                                     |
-| `GET /api/v1/indicadores/resumo`         | Totais, base de risco, taxas e qualidade; exige `ano`.                                                                                     |
-| `GET /api/v1/analises/evolucao-temporal` | Série anual com os mesmos indicadores e filtros; exige `ano_inicial` e `ano_final`, até 30 anos inclusivos.                                |
-| `GET /api/v1/analises/comparacoes`       | Totais, taxas e qualidade por grupo no mesmo ano; exige `ano` e `agrupar_por`. Até 20 grupos, com seleção opcional e aviso de truncamento. |
-| `GET /docs/`                             | Swagger UI em desenvolvimento. A especificação fica em `/docs/json`.                                                                       |
+| Método e rota | Resultado |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET /health` | Testa a leitura da fato e das dimensões. `200` com `{"status":"ok"}` ou `503`. Uma Gold vazia, mas acessível, é saudável. |
+| `GET /api/v1/filtros` | Catálogo de todos os anos e opções presentes na fato de cursos. Não recebe parâmetros. |
+| `GET /api/v1/indicadores/resumo` | Totais, base de risco, taxas e qualidade; exige `ano`. |
+| `GET /api/v1/analises/evolucao-temporal` | Série anual com os mesmos indicadores e filtros; exige `ano_inicial` e `ano_final`, até 30 anos inclusivos. |
+| `GET /api/v1/analises/comparacoes` | Totais, taxas e qualidade por grupo no mesmo ano; exige `ano` e `agrupar_por`. Até 20 grupos, com seleção opcional e aviso de truncamento. |
+| `GET /docs/` | Swagger UI em desenvolvimento. A especificação fica em `/docs/json`. |
 
 Exemplo no PowerShell:
 
@@ -91,20 +91,20 @@ Invoke-RestMethod 'http://127.0.0.1:3000/api/v1/indicadores/resumo?ano=2023&codi
 Invoke-RestMethod 'http://127.0.0.1:3000/api/v1/analises/comparacoes?ano=2023&agrupar_por=curso&grupos=001&grupos=002'
 ```
 
-A comparação é pública e reaproveita a conexão de leitura. Consulte [dimensões, seleção de grupos, regras de ausência e truncamento](../docs/COMPARACOES.md). A seleção `grupos` é o único parâmetro que aceita repetição nessa rota; os filtros de recorte continuam aceitando um valor cada. O frontend comparativo fica para a próxima entrega.
+A comparação é pública e usa a conexão de leitura. Consulte [dimensões, seleção de grupos, regras de ausência e truncamento](../docs/api/COMPARACOES.md). A seleção `grupos` é o único parâmetro que aceita repetição nessa rota; os filtros de recorte aceitam um valor cada. O [frontend de comparações](../docs/frontend/COMPARACOES.md) já está integrado ao painel.
 
-| Parâmetro                  | Tipo e significado                                            |
-| -------------------------- | ------------------------------------------------------------- |
-| `ano`                      | Inteiro obrigatório, ano do censo.                            |
-| `codigo_curso`             | Texto, código original do curso.                              |
-| `codigo_area_geral`        | Texto, área geral CINE; preserva zeros iniciais, como `01`.   |
-| `codigo_municipio_oferta`  | Texto, código IBGE do local de oferta presencial.             |
-| `modalidade`               | Texto exatamente como retornado em `modalidades`.             |
-| `categoria_administrativa` | Texto de `categorias_administrativas`.                        |
-| `organizacao_academica`    | Texto de `organizacoes_academicas`.                           |
-| `codigo_municipio_sede`    | Texto, código IBGE da sede institucional, inclusive para EaD. |
+| Parâmetro | Tipo e significado |
+| ---------------------------- | -------------------------------------------------------------- |
+| `ano` | Inteiro obrigatório, ano do censo. |
+| `codigo_curso` | Texto, código original do curso. |
+| `codigo_area_geral` | Texto, área geral CINE; preserva zeros iniciais, como `01`. |
+| `codigo_municipio_oferta` | Texto, código IBGE do local de oferta presencial. |
+| `modalidade` | Texto exatamente como retornado em `modalidades`. |
+| `categoria_administrativa` | Texto de `categorias_administrativas`. |
+| `organizacao_academica` | Texto de `organizacoes_academicas`. |
+| `codigo_municipio_sede` | Texto, código IBGE da sede institucional, inclusive para EaD. |
 
-Um valor por parâmetro, todos combinados por **E**. Parâmetros desconhecidos, repetidos ou inválidos retornam `400`. Valores válidos, mas inexistentes, retornam resumo sem dados com `200`. O ano não tem intervalo fixo de 2019–2023: novos anos carregados aparecem sem mudar o contrato.
+Os filtros aceitam um valor por parâmetro e combinam por E. Parâmetros desconhecidos, repetidos ou inválidos retornam `400`. Valores válidos, mas inexistentes, retornam resumo sem dados com `200`. O ano não está restrito ao recorte de pesquisa de 2019 a 2023: novos anos carregados aparecem sem mudar o contrato. A API não aplica automaticamente uma restrição a MT, à graduação ou às IES públicas; a pipeline deve entregar a Gold com o recorte acordado.
 
 O catálogo é independente do recorte atual. Códigos vêm como `{ "codigo": "01", "nome": "Educação" }`; o nome pode ser `null` quando falta referência. Categorias e modalidades são listas de textos. Os anos vêm da fato, evitando anos exclusivos de ingresso das coortes. Códigos nulos não são oferecidos como filtros; essas linhas continuam nos totais quando o respectivo filtro não é aplicado. Município de oferta ausente em EaD nunca é substituído pela sede.
 
@@ -112,16 +112,16 @@ Os IDs `id_*` da Gold não fazem parte do contrato: são reconstruídos pela pip
 
 ## Cálculos e qualidade
 
-Na evolução temporal, as regras abaixo são aplicadas separadamente por ano. Anos sem registros aparecem com medidas `null`, e o período solicitado não é reduzido silenciosamente. Veja o [contrato e os exemplos da série temporal](../docs/ANALISES_TEMPORAIS.md).
+Na evolução temporal, as regras abaixo são aplicadas separadamente por ano. Anos sem registros aparecem com medidas `null`, e o período solicitado não é reduzido silenciosamente. Veja o [contrato e os exemplos da série temporal](../docs/api/ANALISES_TEMPORAIS.md).
 
-Somente `gold.fato_evasao_curso` alimenta este incremento. Nenhuma fato de perfil, coorte ou docentes é somada a ela.
+As consultas usam exclusivamente `gold.fato_evasao_curso` e suas dimensões. Fatos de perfil, coorte e contexto docente não são somadas a ela. O guia de [fontes e indicadores](../docs/metodologia/FONTES_E_INDICADORES.md) explica o grão, a origem e os limites dessas medidas.
 
-| Campo                | Cálculo                                                                                                                 |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `totais`             | Somas de vínculos, ingressantes, matrículas, concluintes, cursando, desvinculados, transferidos, trancados e falecidos. |
-| `base_risco`         | `SUM(vinculos_total) - SUM(alunos_falecidos)`.                                                                          |
-| `taxas.evasao_curso` | `(SUM(alunos_desvinculados) + SUM(alunos_transferidos)) / base_risco`.                                                  |
-| `taxas.evasao_ies`   | `SUM(alunos_desvinculados) / base_risco`.                                                                               |
+| Campo | Cálculo |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `totais` | Somas de vínculos, ingressantes, matrículas, concluintes, cursando, desvinculados, transferidos, trancados e falecidos. |
+| `base_risco` | `SUM(vinculos_total) - SUM(alunos_falecidos)`. |
+| `taxas.evasao_curso` | `(SUM(alunos_desvinculados) + SUM(alunos_transferidos)) / base_risco`. |
+| `taxas.evasao_ies` | `SUM(alunos_desvinculados) / base_risco`. |
 
 As taxas são proporções: `0.2` significa 20%. Nunca se faz média de taxas individuais. As funções de cálculo ficam separadas do SQL e não dependem do PostgreSQL.
 
@@ -143,7 +143,7 @@ pnpm test
 pnpm build
 ```
 
-Para integração, suba o banco descartável separado da pipeline:
+Para integração, execute os comandos abaixo dentro de `backend/`. O banco é descartável e separado da pipeline:
 
 ```powershell
 docker compose -f test/compose.yml up -d --wait
@@ -162,15 +162,17 @@ Os testes cobrem taxas sobre somas, todos os filtros, códigos com zeros iniciai
 
 Registrar na próxima revisão do Word:
 
-| Previsão do Word                                | Implementação adotada                                                                  |
-| ----------------------------------------------- | -------------------------------------------------------------------------------------- |
-| Microdados públicos em CSV                      | Consultas agregadas do SEDAP+, respostas JSON na Bronze; IBGE e CINE como referências. |
-| Uma fato `fato_desempenho_curso`                | A pipeline implementa quatro fatos; esta API usa `fato_evasao_curso`.                  |
-| Vagas e inscritos                               | Não estão disponíveis na Gold atual e ficam fora dos indicadores.                      |
-| Identificação de IES por nome/sigla             | Filtros por características institucionais, sem identificação nominal.                 |
-| Evasão operacional = desvinculados / matrículas | Evasão do curso e da IES sobre vínculos menos falecidos, conforme a modelagem Gold.    |
-| Infraestrutura AWS                              | Esta entrega executa localmente; nuvem fica para etapa posterior.                      |
+| Previsão do Word                                 | Implementação adotada                                                                  |
+| ------------------------------------------------ | -------------------------------------------------------------------------------------- |
+| Microdados públicos em CSV                       | Consultas agregadas do SEDAP+, respostas JSON na Bronze; IBGE e CINE como referências. |
+| Uma fato `fato_desempenho_curso`                 | A pipeline implementa quatro fatos; esta API usa `fato_evasao_curso`.                  |
+| Vagas e inscritos                                | Não estão disponíveis na Gold atual e ficam fora dos indicadores.                      |
+| Identificação de IES por nome/sigla              | Filtros por características institucionais, sem identificação nominal.                 |
+| Evasão operacional = desvinculados / matrículas  | Evasão do curso e da IES sobre vínculos menos falecidos, conforme a modelagem Gold.    |
+| Infraestrutura AWS                               | Esta entrega executa localmente; nuvem fica para etapa posterior.                      |
 
-A stack TypeScript/Fastify/pg e a finalidade de apoiar a análise da evasão são mantidas. A evolução temporal tem API e visualização; as comparações estão disponíveis na API. Frontend comparativo, rankings, perfis, coortes, administração da pipeline e implantação ficam para outras entregas. A autenticação está adiada, preservada em branches separadas. A API não acessa a Bronze para deduzir status de execução ou datas de atualização.
+A stack TypeScript/Fastify/pg e a finalidade de apoiar a análise da evasão são mantidas. Evolução temporal e comparações têm API e visualização. O gráfico de dispersão, os rankings simultâneos, a administração da pipeline e a implantação estão pendentes. Perfis e coortes dependem de definição de escopo. A autenticação permanece adiada em branches separadas. A API não acessa a Bronze para deduzir status de execução ou datas de atualização.
+
+A [matriz de requisitos do TCC](../docs/tcc/RASTREABILIDADE.md) detalha as diferenças, incluindo o cartão de desvinculados ausente na interface, a comparação nominal de IES e as metas operacionais ainda não verificadas. Atualizar a documentação da aplicação não altera nem aprova uma revisão dos requisitos acadêmicos.
 
 Referências técnicas: [validação do Fastify](https://fastify.dev/docs/latest/Reference/Validation-and-Serialization/), [consultas parametrizadas do pg](https://node-postgres.com/features/queries) e [schema Gold da pipeline](https://github.com/TCC-EvasaoMT/Pipeline-TCC/blob/ff66b7d44306a257fedde422a771848cc9a7899f/sql/gold.sql).

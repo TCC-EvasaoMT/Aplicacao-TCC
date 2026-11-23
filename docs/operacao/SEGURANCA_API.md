@@ -1,6 +1,6 @@
 # Proteção da API pública
 
-O painel e as consultas continuam públicos. Os controles desta entrega protegem o transporte HTTP da aplicação; login, sessão e permissões administrativas permanecem planejados em [AUTORIZACAO.md](AUTORIZACAO.md).
+O painel e as consultas são públicos. A aplicação limita requisições, aplica cabeçalhos HTTP e controla os campos dos logs. Login, sessão e permissões administrativas aguardam integração, conforme o [modelo de acesso](../arquitetura/AUTORIZACAO.md). O servidor local usa HTTP; HTTPS depende da implantação.
 
 ## Organização
 
@@ -21,7 +21,7 @@ Ao ultrapassar o limite, a API responde `429`:
 }
 ```
 
-`Retry-After` informa a espera em segundos. `X-RateLimit-Limit`, `X-RateLimit-Remaining` e `X-RateLimit-Reset` informam limite, saldo e segundos até a renovação. As três rotas de consulta documentam `429` no Swagger. O frontend mantém seu tratamento de falha e nova tentativa manual, sem repetição automática de chamadas bloqueadas.
+`Retry-After` informa a espera em segundos. `X-RateLimit-Limit`, `X-RateLimit-Remaining` e `X-RateLimit-Reset` informam limite, saldo e segundos até a renovação. As quatro rotas de consulta documentam `429` no Swagger. O frontend orienta aguardar e permite nova tentativa manual, sem repetição automática de chamadas bloqueadas.
 
 O contador fica na memória de cada processo, com cache limitado a 5000 chaves pelo plugin. Reiniciar o processo ou remover entradas antigas do cache reinicia os contadores correspondentes. Instâncias distintas têm cotas independentes. IPv4 é agrupado por endereço e IPv6 por rede /64; pessoas compartilhando uma saída de rede também compartilham a cota. Para múltiplas instâncias ou exposição externa, avaliar armazenamento compartilhado e limitação no ingresso.
 
@@ -49,6 +49,8 @@ HSTS e a diretiva de atualização automática para HTTPS ficam desativados nest
 
 ## Logs e correlação
 
+Os logs são enviados em JSON para a saída padrão do processo e aparecem no terminal. A aplicação não cria arquivos em uma pasta `logs/` nem envia eventos ao CloudWatch. Retenção, rotação e coleta precisam ser configuradas no ambiente de execução.
+
 `plugins/logs.ts` configura o logger JSON e registra o término das requisições com método, modelo da rota, status e duração. O backend gera um UUID e o devolve em `X-Request-Id`; o mesmo valor aparece em `reqId` nos logs. Um `X-Request-Id` enviado pelo cliente é ignorado. Caminhos desconhecidos recebem um marcador fixo e rotas de arquivos usam o modelo da rota, sem registrar o caminho fornecido pelo visitante.
 
 Os logs automáticos de requisição do Fastify são substituídos pelo evento controlado. URLs completas, query strings, IP, host, headers e corpos não entram nesse evento. Serializadores de `req`, `res` e `err` restringem o conteúdo, e os campos estruturados de credenciais previstos na configuração são removidos. Falhas registram somente códigos reconhecidos de PostgreSQL, conexão ou Fastify; códigos arbitrários viram `INTERNAL_ERROR`. Mensagens originais, SQL e stack traces não são registrados.
@@ -59,7 +61,7 @@ Essa configuração não remove segredos de textos arbitrários escritos por có
 
 `pnpm check` inclui testes de acesso público, cabeçalhos, limite compartilhado, rejeição de IP forjado em cabeçalhos, renovação da janela, independência entre instâncias, corpo excessivo, tipos de conteúdo, erros controlados, configuração inválida e Swagger desativado em produção. Os testes da SPA verificam a coexistência dos arquivos e da API.
 
-A entrega foi validada no Windows com 37 testes de frontend/backend, tipos e build, além dos onze cenários de integração PostgreSQL sintética. O navegador confirmou filtros, resumo, gráfico e consulta pelo Swagger na versão compilada sem erros de CSP. O teste de logs cobre credenciais em headers, query, corpo, erro e caminho desconhecido, além da correlação de respostas `503` e `429`. `pnpm format` e `pnpm format:check` foram executados. Permanece o aviso anterior de tamanho do bundle Recharts; não houve validação com dados reais, proxy de produção ou teste de carga distribuída.
+O aceite inicial da proteção HTTP no Windows registrou 37 testes, tipos, build e onze cenários de integração PostgreSQL sintética. O navegador confirmou filtros, resumo, gráfico e Swagger sem erros de CSP. O teste de logs cobre credenciais em headers, query, corpo, erro e caminho desconhecido, além da correlação de respostas `503` e `429`. O [registro de validação](VALIDACAO.md) reúne a evidência mais recente e os limites dos testes. Dados reais, proxy de produção e carga distribuída ainda precisam ser validados.
 
 Para testar manualmente, inicie o backend com `HTTP_RATE_LIMIT_MAX=3` em um ambiente local de teste e faça quatro chamadas a `/api/v1/filtros` dentro de um minuto. A quarta deve retornar `429` com `Retry-After`; depois da janela, a consulta volta a funcionar. Restaure o limite normal ao encerrar o teste. A carga sintética é suficiente para essa verificação; desempenho real e configuração de infraestrutura são validações separadas.
 

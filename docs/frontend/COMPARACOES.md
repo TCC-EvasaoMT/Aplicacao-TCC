@@ -1,6 +1,6 @@
 # Comparações na interface
 
-A seção **Comparação entre grupos**, abaixo da evolução temporal, consome `GET /api/v1/analises/comparacoes`. Permite comparar cursos, áreas gerais CINE, municípios de oferta ou sede, modalidades, categorias administrativas e organizações acadêmicas. A consulta permanece pública, sem login. O [contrato da API](COMPARACOES.md) não mudou.
+A seção **Comparação entre grupos**, abaixo da evolução temporal, consome `GET /api/v1/analises/comparacoes`. Permite comparar cursos, áreas gerais CINE, municípios de oferta ou sede, modalidades, categorias administrativas e organizações acadêmicas. A consulta permanece pública, sem login. O [contrato da API](../api/COMPARACOES.md) não mudou.
 
 ## Como utilizar
 
@@ -18,7 +18,7 @@ Ao marcar 20 opções, as demais ficam desabilitadas até que alguma seja desmar
 
 **Ano do resumo** e **Ano da comparação** controlam o mesmo estado. Alterar qualquer um atualiza imediatamente resumo e comparação, preservando o período independente da evolução temporal.
 
-Os sete filtros globais são combinados por E e se aplicam às três consultas, com uma exceção: a comparação não envia o filtro da dimensão pela qual agrupa. Com `codigo_curso=001` e agrupamento por curso, todos os cursos seguem visíveis e o 001 fica em destaque; resumo e evolução recebem o filtro normalmente. Veja [Interatividade e filtragem cruzada](FRONTEND_INTERATIVIDADE.md). Grupos selecionados dentro da comparação combinam-se por OU, respeitando os demais filtros.
+Os sete filtros globais são combinados por E e se aplicam às três consultas, com uma exceção: a comparação não envia o filtro da dimensão pela qual agrupa. Com `codigo_curso=001` e agrupamento por curso, todos os cursos seguem visíveis e o 001 fica em destaque; resumo e evolução recebem o filtro normalmente. Veja [Interatividade e filtragem cruzada](INTERATIVIDADE.md). Grupos selecionados dentro da comparação combinam-se por OU, respeitando os demais filtros.
 
 Agrupamento e seleção de grupos têm um rascunho e uma configuração aplicada. Editar esses campos não dispara a consulta; a tela avisa quando existem mudanças pendentes e identifica o agrupamento aplicado junto ao resultado. Trocar de dimensão limpa a seleção do rascunho. Alterar o ano ou os filtros globais atualiza a configuração já aplicada.
 
@@ -42,7 +42,7 @@ Os arquivos ficam em `frontend/src/modules/analises`:
 
 `PainelIndicadores` compõe a entrada pública de análises, fornecendo catálogo, seleção global, contador de atualização e alteração do ano. Análises importa apenas os tipos públicos de `catalogos` e `indicadores`, sem acessar suas implementações internas. A comunicação usa o cliente HTTP existente; não há novas dependências, migrações, configuração ou integração adicional com a pipeline.
 
-A URL é montada com `URLSearchParams`, preservando zeros iniciais e repetindo `grupos` para cada seleção. Cada resposta é vinculada à query e à tentativa. `AbortController` cancela requisições substituídas; o callback verifica o cancelamento e respostas de outra seleção não são exibidas. Catálogo indisponível bloqueia a consulta. Falhas removem os resultados e oferecem **Tentar comparação novamente**, que repete somente essa requisição.
+A URL é montada com `URLSearchParams`, preservando zeros iniciais e repetindo `grupos` para cada seleção. Cada resposta é vinculada à consulta e à tentativa. `AbortController` cancela requisições substituídas, e os callbacks descartam respostas canceladas. Enquanto a nova consulta carrega, a comparação anterior permanece esmaecida, com seu ano e agrupamento. Catálogo indisponível bloqueia a consulta. Falhas da API removem os resultados e oferecem **Tentar comparação novamente**, que repete somente essa requisição.
 
 ## Leitura e acessibilidade
 
@@ -55,6 +55,8 @@ A URL é montada com `URLSearchParams`, preservando zeros iniciais e repetindo `
 - Controles nativos possuem rótulos; estados são anunciados, e a tabela tem cabeçalhos de linha e coluna. A tabela permite foco e rolagem horizontal em telas estreitas. Abaixo de 576 px, o nome do grupo fica acima das barras e o gráfico cabe na tela. Cada barra mostra o valor no fim. As barras não têm animação.
 
 Características institucionais podem agrupar várias IES; não há comparação nominal entre instituições. Município da sede não substitui oferta ausente em EaD. Essas análises não demonstram causa da evasão.
+
+Um clique no grupo aplica ou remove seu filtro global; os botões da tabela oferecem a mesma ação pelo teclado. **Baixar CSV** exporta apenas os grupos carregados, não todos os grupos de uma resposta truncada. A configuração aplicada fica na URL. Veja [interatividade](INTERATIVIDADE.md) e [estado e exportação](ESTADO_E_EXPORTACAO.md).
 
 ## Verificação
 
@@ -75,4 +77,4 @@ Na base de demonstração, use 2023:
 
 Na conferência local em 22/11/2026, `pnpm check` passou com 47 testes (31 backend e 16 frontend), tipos e build. O navegador foi verificado em 1280, 390 e 320 px, incluindo foco por teclado, busca sem acento, seleção máxima, docentes, base zero, ruído, ausência de grupos, filtros combinados e recuperação após reconstrução da Gold e reaplicação de permissões. Grupos sintéticos temporários permitiram conferir o aviso **20 de 33** e o bloqueio da 21ª seleção; a base original foi restaurada após a verificação.
 
-A suíte automatizada de integração do backend não foi repetida neste incremento de interface. A conferência visual utilizou a API real com PostgreSQL sintético. Dados reais, desempenho no volume da pipeline, CI remota e outras plataformas permanecem pendentes. O aviso de tamanho do bundle foi resolvido com o carregamento sob demanda dos gráficos; veja [Finalização do frontend](FRONTEND_FINALIZACAO.md).
+A suíte automatizada de integração do backend não foi repetida naquele incremento de interface. A conferência visual usou a API com PostgreSQL sintético. A evidência mais recente e as verificações pendentes estão no [guia de validação](../operacao/VALIDACAO.md). O carregamento dos gráficos está descrito em [estado e exportação](ESTADO_E_EXPORTACAO.md).

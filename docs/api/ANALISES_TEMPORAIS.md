@@ -1,6 +1,6 @@
 # API de evolução temporal
 
-O módulo `backend/src/modules/analises` consulta a evolução anual de um recorte da Gold. A API pode ser consultada pelo Swagger e pelo [gráfico temporal do frontend](FRONTEND_ANALISES.md), com controles de intervalo e tabela de valores anuais.
+O módulo `backend/src/modules/analises` consulta a evolução anual de um recorte da Gold. A API pode ser consultada pelo Swagger e pelo [gráfico temporal do frontend](../frontend/ANALISES.md), com controles de intervalo e tabela de valores anuais.
 
 ## Consulta
 
@@ -20,7 +20,7 @@ GET /api/v1/analises/evolucao-temporal?ano_inicial=2022&ano_final=2024&codigo_cu
 | `organizacao_academica`    | Texto retornado pelo catálogo                                    |
 | `codigo_municipio_sede`    | Código da sede institucional                                     |
 
-O intervalo é inclusivo e aceita de **1 a 30 anos**. `2000–2029` é válido; `2000–2030` excede o limite. Esse limite inicial mantém a resposta limitada e não substitui a medição com a base real. Os sete filtros opcionais combinam por **E** e aceitam um valor por parâmetro. Parâmetros desconhecidos, repetidos, vazios ou inválidos retornam `400`; o parâmetro `ano` do resumo anual não é aceito nesta rota.
+O intervalo é inclusivo e aceita de 1 a 30 anos. De 2000 a 2029 é válido; de 2000 a 2030 excede o limite. O limite controla o tamanho da resposta; o desempenho precisa ser medido com a base real. Os sete filtros opcionais combinam por E e aceitam um valor por parâmetro. Parâmetros desconhecidos, repetidos, vazios ou inválidos retornam `400`; o parâmetro `ano` do resumo anual não é aceito nesta rota.
 
 É permitido solicitar anos que não aparecem em `/api/v1/filtros`: eles serão representados como lacunas, sem inventar medidas. As rotas atuais de catálogo e resumo permanecem inalteradas.
 
@@ -28,7 +28,7 @@ O intervalo é inclusivo e aceita de **1 a 30 anos**. `2000–2029` é válido; 
 
 A resposta tem dois campos: `filtros`, contendo os parâmetros aplicados, e `serie`, contendo exatamente uma entrada para cada ano solicitado, em ordem crescente.
 
-Cada entrada possui `ano`, `totais`, `base_risco`, `taxas` e `qualidade`. Os campos e as fórmulas são os mesmos do [resumo anual](../backend/README.md#cálculos-e-qualidade), calculados separadamente para cada ano:
+Cada entrada possui `ano`, `totais`, `base_risco`, `taxas` e `qualidade`. Os campos e as fórmulas são os mesmos do [resumo anual](../../backend/README.md#cálculos-e-qualidade), calculados separadamente para cada ano:
 
 - A base de risco é a soma dos vínculos menos a soma dos falecidos.
 - Evasão do curso = (soma dos desvinculados + soma dos transferidos) / base.
@@ -46,6 +46,7 @@ A API não interpola lacunas. A visualização representa a ausência de informa
 | ----- | ------------------------------------------------------------------------------ |
 | `200` | Série retornada, inclusive quando todo o período está sem dados                |
 | `400` | Parâmetros ou intervalo inválidos; consulta rejeitada antes de acessar o banco |
+| `429` | Limite de requisições atingido; aguardar o tempo indicado em `Retry-After`     |
 | `503` | Gold indisponível, sem acesso ou sem as tabelas necessárias                    |
 | `500` | Falha interna não classificada como indisponibilidade da Gold                  |
 

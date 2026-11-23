@@ -2,19 +2,19 @@
 
 A aplicação é um monorepo com dois pacotes: `frontend` (React/Vite) e `backend` (Fastify). O backend é um monólito modular: os módulos compartilham o mesmo processo e banco, mas cada um possui suas rotas, consultas e contratos. A pipeline Python tem repositório e execução independentes.
 
-No frontend, Bootstrap 5.3 fornece estilos de formulários, botões, grade responsiva e tabela; Recharts apresenta as séries temporais e as comparações entre grupos. O CSS do Bootstrap é importado no ponto de entrada e complementado pelo tema em `styles.css`. React mantém o controle dos componentes e eventos. Veja [Estilização do frontend](FRONTEND_ESTILIZACAO.md) para a organização e os limites dessa integração.
+No frontend, Bootstrap 5.3 fornece estilos de formulários, botões, grade responsiva e tabela; Recharts apresenta as séries temporais e as comparações entre grupos. O CSS do Bootstrap é importado no ponto de entrada e complementado pelo tema em `styles.css`. React mantém o controle dos componentes e eventos. Veja [Estilização do frontend](../frontend/ESTILIZACAO.md) para a organização e os limites dessa integração.
 
 ## Arquitetura adotada no backend
 
-**Monólito modular, organizado por funcionalidade, com separação entre HTTP, acesso a dados e regras de negócio e injeção de dependências manual.** Essa é a descrição da implementação atual.
+O backend é um monólito modular organizado por funcionalidade. Cada módulo separa entrada HTTP, consultas SQL e regras de negócio. A composição recebe as dependências como argumentos.
 
-O termo **monólito** significa que todos os módulos do backend são executados por uma única aplicação Fastify. Eles compartilham o pool de conexões com PostgreSQL e são compilados e implantados juntos. Não existe um servidor independente para catálogos, outro para indicadores e outro para análises.
+Todos os módulos executam na mesma aplicação Fastify, compartilham o pool PostgreSQL e são compilados e implantados juntos. Esse é o limite do monólito.
 
-O termo **modular** significa que o código está dividido por responsabilidades do negócio. Cada módulo concentra suas rotas, contratos, consultas e regras específicas, expondo uma entrada pública em `index.ts`. Uma mudança na evolução temporal, por exemplo, começa em `modules/analises`, sem precisar reunir arquivos espalhados em pastas globais de controllers, services e repositories.
+O código se divide por responsabilidade do negócio. Cada módulo concentra rotas, contratos, consultas e regras específicas, com uma entrada pública em `index.ts`. Uma mudança na evolução temporal, por exemplo, começa em `modules/analises`.
 
-**Monorepo** descreve outra decisão: frontend e backend ficam no mesmo repositório e workspace pnpm. Isso não transforma o React em um módulo interno do backend. A comunicação entre eles continua sendo HTTP/JSON; no modo compilado, o Fastify também entrega os arquivos estáticos da interface.
+Monorepo descreve a organização do repositório: frontend e backend pertencem ao mesmo workspace pnpm. O React é um cliente HTTP/JSON da API. No modo compilado, o Fastify também entrega seus arquivos estáticos.
 
-Essa organização atende ao estágio atual do TCC: permite desenvolver, testar e executar o sistema como uma aplicação única, mantendo limites claros para novas funcionalidades. A pipeline é um sistema externo, com seu próprio repositório e ciclo de execução; sua separação não faz dos módulos da API microsserviços.
+A pipeline é externa à aplicação e mantém repositório e execução próprios. A [matriz do TCC](../tcc/RASTREABILIDADE.md) compara essa implementação local com a infraestrutura em nuvem prevista no trabalho.
 
 ### Relação com outros estilos de arquitetura
 
@@ -66,6 +66,8 @@ backend/src/
     gold.ts         Junções da Gold e tratamento de falhas de consulta
     health.ts       Verificação de acesso às tabelas utilizadas
     erros.ts        Schema público de erro
+    seguranca.ts    Cabeçalhos HTTP e limite de requisições
+    logs.ts         Campos permitidos e correlação dos logs
   config/
     index.ts        Leitura e validação de variáveis de ambiente
   app.ts            Composição dos plugins e tratamento HTTP de erros
@@ -73,9 +75,9 @@ backend/src/
   server.ts         Pool, inicialização e encerramento do processo
 ```
 
-O fragmento SQL em `plugins/gold.ts` define as junções comuns com a fato e as seis dimensões consumidas. Os módulos continuam responsáveis por suas seleções, filtros e agregações. Alterações nesse fragmento afetam catálogo, resumo, evolução temporal e saúde e devem passar pelos testes de integração.
+O fragmento SQL em `plugins/gold.ts` define as junções comuns com a fato e as seis dimensões consumidas. Os módulos definem seleções, filtros e agregações. Alterações nesse fragmento afetam catálogo, resumo, evolução, comparações e saúde e devem passar pelos testes de integração.
 
-As comparações usam essas mesmas junções, com agrupamentos definidos em uma lista interna. `consultas.ts` concentra o SQL, aplica filtros e seleção antes de agrupar e limita a lista após contar todos os grupos encontrados. `comparacoes.ts` monta a resposta reutilizando `calcularResumo`, sem médias de taxas. O contrato expõe códigos/textos das dimensões, preserva grupos nulos e sinaliza truncamento. Não acrescenta tabelas, credenciais ou outro pool ao backend. Veja [API de comparações](COMPARACOES.md).
+As comparações usam essas mesmas junções, com agrupamentos definidos em uma lista interna. `consultas.ts` concentra o SQL, aplica filtros e seleção antes de agrupar e limita a lista após contar todos os grupos encontrados. `comparacoes.ts` monta a resposta reutilizando `calcularResumo`, sem médias de taxas. O contrato expõe códigos/textos das dimensões, preserva grupos nulos e sinaliza truncamento. Não acrescenta tabelas, credenciais ou outro pool ao backend. Veja [API de comparações](../api/COMPARACOES.md).
 
 Apesar do nome da pasta, nem todo arquivo em `plugins/` é um plugin registrável do Fastify. `health.ts` exporta um plugin; `gold.ts` e `erros.ts` fornecem funções, fragmentos SQL e schemas compartilhados. O tratamento global de erros é registrado em `app.ts`.
 
@@ -181,25 +183,27 @@ Isso é injeção de dependências manual: a aplicação recebe os recursos nece
 
 A integração também testa a recuperação após reconstrução da Gold e reaplicação das permissões. Essas verificações protegem as responsabilidades compartilhadas, mas não substituem a validação com dados reais nem constituem uma prova automática de todas as fronteiras arquiteturais.
 
-## Evolução prevista
+## Interface e próximos módulos
 
 O módulo `analises` oferece a API de evolução temporal e utiliza o contrato público de indicadores para manter as mesmas regras de agregação e cálculo. No frontend, `modules/analises` consulta essa API e apresenta gráfico Recharts e tabela acessível; o painel de indicadores compõe sua entrada pública e compartilha os sete filtros de recorte. Apenas tipos públicos de indicadores são importados por análises. O intervalo temporal é independente do ano do resumo e as taxas não são recalculadas no cliente.
 
-Comparações entre cursos e grupos institucionais estão implementadas no mesmo módulo de análises, na API e no frontend. `PainelComparacoes` reutiliza catálogo, filtros e ano do resumo; mantém rascunho e seleção aplicada próprios, consulta HTTP cancelável, gráfico e tabela. As taxas e agregações continuam no backend. Veja [Comparações na interface](FRONTEND_COMPARACOES.md). A Gold atual não fornece nomes ou siglas de IES nem identificadores institucionais permanentes para comparação individual. Administração do ETL depende de um contrato externo para execuções e reprocessamentos. Autorização e monitoramento serão recursos transversais; ainda não estão implementados. Pastas vazias desses módulos não são criadas antecipadamente.
+Comparações entre cursos e grupos institucionais estão implementadas na API e no frontend de análises. `PainelComparacoes` recebe catálogo, filtros e ano do resumo; mantém rascunho e seleção aplicada próprios, consulta cancelável, gráfico e tabela. O frontend omite o filtro da dimensão agrupada para manter os outros grupos visíveis; essa regra não modifica a API. Veja [comparações na interface](../frontend/COMPARACOES.md).
+
+A Gold consumida não fornece nomes ou siglas de IES nem identificadores institucionais permanentes para comparação individual. Administração do ETL depende de um contrato externo para execuções e reprocessamentos. A proteção HTTP e os logs já estão na aplicação; a autenticação permanece em branches adiadas, e a integração com monitoramento externo está pendente. Os módulos futuros serão criados junto de suas funcionalidades.
 
 ## Documentação relacionada
 
-O [modelo de autorização](AUTORIZACAO.md) prevê painel público e administração autenticada. A decisão de acesso foi definida, mas o controle de sessão e permissões ainda será implementado.
+O [modelo de autorização](AUTORIZACAO.md) mantém o painel público e prevê administração autenticada. A implementação de sessão e permissões existe em branches separadas e ainda não foi integrada à `main`.
 
 - [Módulos e contratos do backend](MODULOS_BACKEND.md)
-- [Filtros e fluxo da interface](FRONTEND_FILTROS.md)
-- [API de evolução temporal](ANALISES_TEMPORAIS.md)
-- [Evolução temporal na interface](FRONTEND_ANALISES.md)
-- [API de comparações](COMPARACOES.md)
-- [Comparações na interface](FRONTEND_COMPARACOES.md)
-- [Finalização do frontend](FRONTEND_FINALIZACAO.md)
-- [Interatividade e filtragem cruzada](FRONTEND_INTERATIVIDADE.md)
+- [Filtros e fluxo da interface](../frontend/FILTROS.md)
+- [API de evolução temporal](../api/ANALISES_TEMPORAIS.md)
+- [Evolução temporal na interface](../frontend/ANALISES.md)
+- [API de comparações](../api/COMPARACOES.md)
+- [Comparações na interface](../frontend/COMPARACOES.md)
+- [Estado e exportação](../frontend/ESTADO_E_EXPORTACAO.md)
+- [Interatividade e filtragem cruzada](../frontend/INTERATIVIDADE.md)
 - [Acesso ao painel e à administração](AUTORIZACAO.md)
-- [Execução, permissões e fórmulas](../backend/README.md)
-- [Comandos do monorepo](../README.md)
-- [Branches, commits e revisões](../CONTRIBUTING.md)
+- [Execução, permissões e fórmulas](../../backend/README.md)
+- [Comandos do monorepo](../../README.md)
+- [Branches, commits e revisões](../../CONTRIBUTING.md)

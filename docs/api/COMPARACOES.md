@@ -1,6 +1,6 @@
 # API de comparações
 
-`GET /api/v1/analises/comparacoes` compara totais e taxas entre grupos de um mesmo ano. Pertence ao módulo `analises`, é pública e usa a Gold existente. O [frontend comparativo](FRONTEND_COMPARACOES.md) apresenta seleção, gráfico e tabela no painel público. Resumo, filtros e evolução temporal mantêm seus contratos.
+`GET /api/v1/analises/comparacoes` compara totais e taxas entre grupos de um mesmo ano. Pertence ao módulo `analises`, é pública e usa a Gold existente. O [frontend comparativo](../frontend/COMPARACOES.md) apresenta seleção, gráfico e tabela no painel público. Resumo, filtros e evolução temporal mantêm seus contratos.
 
 ## Consulta
 
@@ -29,7 +29,7 @@ GET /api/v1/analises/comparacoes?ano=2023&agrupar_por=curso&grupos=001&grupos=00
 
 Use os códigos e textos retornados por `/api/v1/filtros`. Códigos permanecem strings, incluindo zeros iniciais. Na seleção por código, cada valor deve conter somente dígitos, com até 32 caracteres. Textos devem ter de 1 a 200 caracteres e não podem conter apenas espaços. Não há comparação nominal entre IES: as características institucionais podem reunir várias instituições.
 
-Os filtros de recorte combinam por **E**; os valores de `grupos` combinam por **OU** dentro desse recorte. Filtrar `codigo_curso=001` e selecionar `grupos=002` retorna vazio. Nenhum filtro é removido automaticamente por coincidir com a dimensão de agrupamento.
+Os filtros de recorte combinam por E; os valores de `grupos` combinam por OU dentro desse recorte. Filtrar `codigo_curso=001` e selecionar `grupos=002` retorna vazio. A API respeita todos os filtros recebidos. A [filtragem cruzada do frontend](../frontend/INTERATIVIDADE.md) omite o filtro da dimensão agrupada antes de enviar a requisição; essa é uma regra da interface.
 
 `grupos=001&grupos=002` é válido; `grupos=001,002` não é uma lista de códigos válida. Somente `grupos` pode ser repetido. Duplicatas na seleção, filtros repetidos, campos desconhecidos, limites fora da faixa e valores inválidos retornam `400` antes da consulta ao banco. `ano_inicial`, `ano_final`, ordenação por taxa e IDs sequenciais não são parâmetros desta rota.
 
@@ -42,7 +42,7 @@ A resposta contém:
 - `truncado`: indica que o recorte contém mais grupos do que os retornados.
 - `grupos`: resultados com `grupo: { valor, nome }`, `totais`, `base_risco`, `taxas` e `qualidade`.
 
-A ordenação é textual crescente pelo código/atributo, com collation `C` no PostgreSQL, e valores nulos por último. Ela não é numérica nem ordenada pela taxa e **não constitui um ranking**. Se `truncado=true`, refine os filtros ou envie `grupos` para selecionar os grupos desejados, inclusive aqueles fora da primeira lista. Não há paginação neste incremento.
+A ordenação é textual crescente pelo código/atributo, com collation `C` no PostgreSQL, e valores nulos por último. Ela não é numérica nem ordenada pela taxa e não constitui um ranking. Se `truncado=true`, refine os filtros ou envie `grupos` para selecionar os grupos desejados, inclusive aqueles fora da primeira lista. A rota não oferece paginação.
 
 O limite é aplicado depois da agregação e da contagem dos grupos. Não recorta os cursos que compõem um grupo nem modifica suas taxas. O cliente não deve apresentar a soma da lista truncada como total do recorte ou classificar os grupos omitidos como ausentes.
 
@@ -50,7 +50,7 @@ Um grupo solicitado que não tem registros no ano/recorte não é retornado: nã
 
 ## Cálculos e qualidade
 
-Cada grupo reutiliza as regras do [resumo anual](../backend/README.md#cálculos-e-qualidade). A base é a soma dos vínculos menos a soma dos falecidos; evasão do curso usa desvinculados mais transferidos, e evasão da IES usa desvinculados. As taxas são proporções e usam as somas, nunca médias das taxas dos cursos.
+Cada grupo reutiliza as regras do [resumo anual](../../backend/README.md#cálculos-e-qualidade). A base é a soma dos vínculos menos a soma dos falecidos; evasão do curso usa desvinculados mais transferidos, e evasão da IES usa desvinculados. As taxas são proporções e usam as somas, nunca médias das taxas dos cursos.
 
 Valores negativos e decimais permanecem no resultado. Base ausente ou não positiva e numerador ausente produzem taxa `null`. Medidas parcialmente ausentes continuam `null`, com `dados_incompletos=true`. A sinalização de grupo pequeno é recalculada pela base agregada, com limite estrito de 30.
 
