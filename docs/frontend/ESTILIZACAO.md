@@ -1,6 +1,6 @@
 # Estilização do frontend
 
-A interface utiliza React, Bootstrap 5.3 e Recharts, alinhando a estilização e os gráficos às tecnologias previstas no documento do TCC. O Bootstrap é uma dependência do pacote `frontend`, instalada pelo workspace pnpm e registrada no lockfile da raiz. Não depende de CDN.
+A interface usa React, Bootstrap 5.3 e Recharts. O Bootstrap é uma dependência do pacote `frontend`, instalada pelo workspace pnpm e registrada no lockfile da raiz. Seus arquivos são servidos pela aplicação, sem CDN. A [comparação com o TCC](../tcc/RASTREABILIDADE.md) registra a diferença entre essa escolha e a previsão de usar também shadcn/ui.
 
 ## Carregamento e responsabilidades
 
@@ -10,7 +10,7 @@ A fonte **Source Sans 3** é fornecida pelo pacote `@fontsource/source-sans-3`, 
 
 ## Identidade visual
 
-O painel prioriza consulta e comparação. O cabeçalho apresenta “Evasão no ensino superior” e o contexto institucional; os dados ocupam o espaço antes reservado à abertura de apresentação. O link “Ir para o conteúdo” aparece ao receber foco de teclado. Explicações metodológicas ficam em “Como interpretar os dados”, um elemento nativo `details`.
+O cabeçalho apresenta “Evasão no ensino superior” e o contexto institucional. A sequência da página é filtros, resumo, evolução e comparação. O link “Ir para o conteúdo” aparece ao receber foco de teclado. As explicações metodológicas ficam em “Como interpretar os dados”, um elemento nativo `details`.
 
 | Token                | Valor     | Uso                                |
 | -------------------- | --------- | ---------------------------------- |
@@ -21,7 +21,7 @@ O painel prioriza consulta e comparação. O cabeçalho apresenta “Evasão no 
 | `--panel-surface`    | `#FFFFFF` | Áreas de leitura e controles       |
 | `--panel-secondary`  | `#805128` | Segunda taxa e série               |
 
-A escala tipográfica usa título de 28–32 px, seções de 20 px, texto de 16 px e informações auxiliares de 14 px. Espaçamentos seguem 4, 8, 12, 16, 24 e 32 px. Números de indicadores e tabela usam algarismos de largura uniforme. As duas taxas têm o mesmo peso visual, diferenciadas por cor e nome; os totais usam uma faixa com divisórias. Controles têm cantos de 4 px e painéis de 8 px.
+A escala tipográfica usa título de 28 a 32 px, seções de 20 px, texto de 16 px e informações auxiliares de 14 px. Espaçamentos seguem 4, 8, 12, 16, 24 e 32 px. Números de indicadores e tabela usam algarismos de largura uniforme. As duas taxas têm o mesmo peso visual, diferenciadas por cor e nome; os totais usam uma faixa com divisórias. Controles têm cantos de 4 px e painéis de 8 px.
 
 | Camada       | Responsabilidade                                                                                   |
 | ------------ | -------------------------------------------------------------------------------------------------- |
@@ -35,7 +35,7 @@ Os plugins JavaScript do Bootstrap não são importados: os componentes atuais f
 ## Uso nos módulos
 
 - **Indicadores:** a grade `row` reserva meia linha ao curso e um quarto aos demais filtros a partir de 768 px. Em telas menores, usa uma ou duas colunas. O seletor de ano fica no cabeçalho do resumo. `form-label` e `form-select` estilizam os controles; `btn btn-outline-success` estiliza as ações.
-- **Análises:** a grade distribui os campos de período e o botão de aplicação. `form-control`, `is-invalid` e `alert alert-danger` apresentam validação e falhas. `table` e `table-responsive` permitem consultar as séries e comparações em telas estreitas; `caption-top` mantém o título antes dos dados. A comparação usa `details` para a seleção opcional, checkboxes nativos com `form-check-input` e barras horizontais nas mesmas cores das taxas. O eixo inclui zero. A tabela possui rolagem horizontal própria, sem ampliar a página; abaixo de 576 px o gráfico de comparação coloca o nome do grupo acima das barras. Estados vazio, carregando e erro, botões principais sólidos e filtros recolhidos no celular estão em [Finalização do frontend](FRONTEND_FINALIZACAO.md). Veja [Comparações na interface](FRONTEND_COMPARACOES.md).
+- **Análises:** a grade distribui os campos de período e o botão de aplicação. `form-control`, `is-invalid` e `alert alert-danger` apresentam validação e falhas. `table` e `table-responsive` permitem consultar as séries e comparações em telas estreitas; `caption-top` mantém o título antes dos dados. A comparação usa `details` para a seleção opcional, checkboxes nativos com `form-check-input` e barras horizontais nas mesmas cores das taxas. O eixo inclui zero. A tabela possui rolagem horizontal própria, sem ampliar a página; abaixo de 576 px o gráfico de comparação coloca o nome do grupo acima das barras. Estados vazio, carregando e erro, botões principais sólidos e filtros recolhidos no celular estão em [Estado e exportação](ESTADO_E_EXPORTACAO.md). Veja [Comparações na interface](COMPARACOES.md).
 - **Tema:** variáveis `--bs-body-*` preservam fonte, fundo e cor do texto. Variáveis `--bs-btn-*` personalizam os botões; variáveis `--bs-table-*` mantêm as cores da tabela. Regras duplicadas de select, botão e grade foram removidas do CSS próprio.
 
 O framework não altera os contratos HTTP, os cálculos, o comportamento dos filtros ou as responsabilidades dos módulos. Não há configuração adicional no backend ou na pipeline.
@@ -54,6 +54,6 @@ Após atualizar a branch, execute `pnpm install --frozen-lockfile`. Para conferi
 
 `pnpm check` verifica tipos, testes e build. Para mudanças de estilo, confira também no navegador: grade de filtros em desktop e celular, foco de teclado, campos desabilitados, intervalo inválido, tabela com rolagem e gráfico. A integração é somente visual; não exige novos testes das fórmulas da API.
 
-Na validação de 22/11/2026, os 31 testes, tipos e build passaram. A interface foi conferida em 1280, 390 e 320 px com dados sintéticos, incluindo fonte local, ordem dos indicadores, foco dos erros de período, atalho para o conteúdo, limpeza e atualização dos filtros, combinações sem dados, valores negativos e tabela com rolagem horizontal. O documento não apresenta rolagem horizontal em 320 px; a tabela mantém sua própria área rolável. O console não apresentou erros ou avisos. Permanece o aviso de build sobre o tamanho do bundle JavaScript com Recharts, anterior à adoção do Bootstrap.
+O aceite do refinamento em 22/11/2026 registrou 31 testes, tipos e build aprovados. A interface foi conferida em 1280, 390 e 320 px com dados sintéticos: fonte local, ordem dos indicadores, foco dos erros, atalho para o conteúdo, filtros, ausência, valores negativos e tabela com rolagem própria. Não houve rolagem horizontal da página em 320 px nem erros ou avisos no console. O aviso de tamanho do bundle existia naquele build; não apareceu na revisão de 23/11/2026. Consulte o [registro de validação](../operacao/VALIDACAO.md) para os limites dessas verificações.
 
 Referências oficiais: [Bootstrap com Vite](https://getbootstrap.com/docs/5.3/getting-started/vite/) e [variáveis CSS](https://getbootstrap.com/docs/5.3/customize/css-variables/).

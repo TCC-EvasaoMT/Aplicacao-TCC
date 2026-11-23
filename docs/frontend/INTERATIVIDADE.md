@@ -1,6 +1,6 @@
 # Interatividade e filtragem cruzada
 
-O painel liga resumo, evolução temporal e comparação: um clique num gráfico ou numa tabela muda o recorte dos outros painéis. Tudo usa as rotas existentes (`/api/v1/filtros`, `/api/v1/indicadores/resumo`, `/api/v1/analises/evolucao-temporal` e `/api/v1/analises/comparacoes`). Não há endpoint, parâmetro ou cálculo novo no backend. Os números da demonstração são sintéticos.
+Resumo, evolução e comparação compartilham o recorte. Clicar num grupo aplica seu filtro ao resumo e à evolução; clicar num ano altera o resumo e a comparação. As ações usam as rotas públicas de catálogo, resumo e análises, com as fórmulas de evasão do backend. A demonstração usa números sintéticos.
 
 ## O que cada clique faz
 
@@ -19,7 +19,7 @@ O filtro aplicado pelo clique é um filtro comum: aparece no cartão de filtros,
 
 A comparação deixa de enviar à API o filtro da dimensão pela qual agrupa. Com `codigo_curso=001` e agrupamento por curso, a consulta da comparação sai sem `codigo_curso`: todos os cursos seguem visíveis, o 001 fica em destaque (contorno) e os demais esmaecem. Os outros filtros continuam valendo, e resumo e evolução recebem `codigo_curso=001` normalmente.
 
-Sem essa regra, clicar numa barra deixaria uma barra só no gráfico clicado. É o comportamento usual de painéis com filtragem cruzada. Se o grupo em destaque não aparece (sem registros no ano ou fora dos 20 grupos exibidos), a tela avisa.
+Essa regra mantém os outros grupos disponíveis para comparação após o clique. Se o grupo em destaque não aparece, por ausência de registros ou por ficar fora dos grupos retornados, a tela avisa.
 
 ## Variação contra o ano anterior
 
@@ -28,7 +28,7 @@ Os cartões do resumo mostram a variação contra o ano anterior com os mesmos f
 - Taxas: diferença em pontos percentuais (`▲ 5 p.p. ante 2022`).
 - Totais: variação relativa, só com base anterior positiva (`▼ 90% ante 2022`).
 - Valor ausente em qualquer ano: "sem comparação", nunca zero. Falha na consulta do ano anterior não afeta o resumo.
-- Um clique num grupo gera três consultas (resumo, ano anterior e evolução; a comparação não muda). A API limita a 120 consultas por minuto por IP; ao receber 429, os painéis pedem para aguardar alguns segundos.
+- Um clique num grupo atualiza resumo e evolução. Há também uma consulta ao ano anterior quando ele existe no catálogo; a comparação não muda. O limite padrão da API é 120 chamadas por minuto por IP e processo, configurável. Ao receber `429`, os painéis orientam aguardar.
 - Setas em texto e cor neutra: o painel não classifica a mudança como boa ou ruim.
 
 É uma comparação de valores já calculados pela API; as fórmulas de evasão não mudam. Censos de anos diferentes não acompanham a mesma coorte.
@@ -40,6 +40,8 @@ Abaixo do cartão de filtros, uma faixa fica fixa no topo ao rolar a página. Mo
 ## Recarga sem piscar
 
 Ao mudar o recorte, cada painel mantém os dados anteriores esmaecidos (`.is-refreshing`, com `aria-busy`) até a resposta chegar, em vez de trocar o conteúdo por "Carregando". O texto de carregamento aparece na primeira consulta e quando o último resumo exibido estava sem dados (`exibicao`, em `lib/exibicao.ts`).
+
+A faixa do recorte tem uma limitação: durante uma consulta lenta, ela já mostra os novos filtros, mas pode manter as taxas anteriores sem sinalizar a espera. O resultado correto aparece após a resposta. Esse ajuste está adiado; a revisão o reproduziu com atraso controlado na base sintética.
 
 ## Ligação entre gráfico e tabela
 

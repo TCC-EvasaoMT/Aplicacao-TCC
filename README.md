@@ -17,13 +17,13 @@ pnpm-lock.yaml         Único lockfile da aplicação
 
 O backend é um monólito modular: catálogos, indicadores e análises são plugins encapsulados do Fastify, cada um com entrada pública em `index.ts`. O catálogo continua acessível em `/api/v1/filtros`. Novos módulos serão adicionados quando houver funcionalidades que justifiquem a separação.
 
-Leia a [arquitetura da aplicação](docs/ARQUITETURA.md), os [módulos e contratos do backend](docs/MODULOS_BACKEND.md) e os [filtros e fluxo da interface](docs/FRONTEND_FILTROS.md). A pasta local `docs-codex/` permanece ignorada pelo Git.
+O [índice da documentação](docs/README.md) reúne arquitetura, contratos, interface e operação. A [comparação com o TCC](docs/tcc/RASTREABILIDADE.md) registra os requisitos atendidos e as lacunas; [fontes e indicadores](docs/metodologia/FONTES_E_INDICADORES.md) explica o recorte e as fórmulas. A pasta local `docs-codex/` permanece ignorada pelo Git.
 
 O frontend não importa arquivos internos do backend e não acessa o banco. Ele usa HTTP/JSON em `/api/v1`. As fórmulas de evasão continuam no backend; a interface apenas formata os resultados.
 
 A interface organiza filtros compartilhados, resumo anual, evolução temporal e comparação entre grupos. Resumo e comparação compartilham o ano; o gráfico temporal mantém seu próprio período. O tema usa Source Sans 3 servida localmente, duas taxas com igual destaque e totais em uma faixa compacta. A seção **Como interpretar os dados** reúne as explicações metodológicas.
 
-A [API de evolução temporal](docs/ANALISES_TEMPORAIS.md) permite consultar séries anuais em `/api/v1/analises/evolucao-temporal`, com intervalo inclusivo de até 30 anos e os mesmos filtros de recorte. O [módulo de análises do frontend](docs/FRONTEND_ANALISES.md) apresenta as duas taxas em um gráfico Recharts e uma tabela de valores e qualidade por ano. A interface utiliza Bootstrap 5.3 para formulários, botões, grade responsiva e tabela, com CSS próprio para a identidade visual, conforme a [documentação de estilização](docs/FRONTEND_ESTILIZACAO.md).
+A [API de evolução temporal](docs/api/ANALISES_TEMPORAIS.md) permite consultar séries anuais em `/api/v1/analises/evolucao-temporal`, com intervalo inclusivo de até 30 anos e os mesmos filtros de recorte. O [módulo de análises do frontend](docs/frontend/ANALISES.md) apresenta as duas taxas em um gráfico Recharts e uma tabela de valores e qualidade por ano. A interface utiliza Bootstrap 5.3 para formulários, botões, grade responsiva e tabela, com CSS próprio para a identidade visual, conforme a [documentação de estilização](docs/frontend/ESTILIZACAO.md).
 
 ## Executar em desenvolvimento
 
@@ -51,9 +51,9 @@ O comando inicia os dois pacotes. O Vite encaminha `/api`, `/health` e `/docs` p
 
 A tela inicial exibe vínculos, matrículas, ingressantes, concluintes e taxas de evasão. Permite combinar ano, curso, área CINE, modalidade, categoria administrativa, organização acadêmica e municípios de oferta e sede. Os filtros são aplicados automaticamente; limpar mantém o ano e atualizar preserva as seleções ainda disponíveis. O gráfico temporal usa os mesmos filtros opcionais e um intervalo próprio, independente do ano do resumo. Mostra estados de carregamento, erro, ausência de dados e qualidade. Ela utiliza a base conectada, sem injetar números fictícios no frontend.
 
-A [API de comparações entre cursos e grupos](docs/COMPARACOES.md) está disponível no Swagger, em `GET /api/v1/analises/comparacoes`, sem login. Exemplo: `?ano=2023&agrupar_por=curso&grupos=001&grupos=002`. O [frontend de comparações](docs/FRONTEND_COMPARACOES.md) permite escolher a dimensão e até 20 grupos, com barras horizontais, tabela de totais e qualidade e avisos de truncamento ou ausência. Para testar, use 2023 na seção **Comparação entre grupos**. Rankings permanecem pendentes.
+A [API de comparações entre cursos e grupos](docs/api/COMPARACOES.md) está disponível no Swagger, em `GET /api/v1/analises/comparacoes`, sem login. Exemplo: `?ano=2023&agrupar_por=curso&grupos=001&grupos=002`. O [frontend de comparações](docs/frontend/COMPARACOES.md) permite escolher a dimensão e até 20 grupos, com barras horizontais, tabela de totais e qualidade e avisos de truncamento ou ausência. Para testar, use 2023 na seção **Comparação entre grupos**. Rankings permanecem pendentes.
 
-A [finalização do frontend](docs/FRONTEND_FINALIZACAO.md) descreve o link compartilhável (estado na URL), a exportação em CSV, o layout do celular e o carregamento sob demanda dos gráficos. A [interatividade](docs/FRONTEND_INTERATIVIDADE.md) explica a filtragem cruzada: clicar numa barra ou num ano filtra os outros painéis, e os cartões mostram a variação contra o ano anterior.
+O guia de [estado e exportação](docs/frontend/ESTADO_E_EXPORTACAO.md) descreve o link compartilhável, o CSV, o layout do celular e o carregamento dos gráficos. A [interatividade](docs/frontend/INTERATIVIDADE.md) explica a filtragem cruzada: clicar num grupo aplica o filtro ao resumo e à evolução; clicar num ano altera o resumo e a comparação. Os cartões mostram a variação contra o ano anterior.
 
 ## Executar a versão compilada
 
@@ -120,10 +120,10 @@ pnpm test:integration
 
 O PostgreSQL de teste usa armazenamento em memória. Se precisar de outro container isolado, escolha um nome de projeto Compose e uma porta por `TEST_POSTGRES_PORT`. Não encerre o container enquanto estiver usando seus dados em uma sessão manual. Os testes de integração criam e removem apenas seus próprios bancos e roles, e não deixam uma base de demonstração carregada para a interface.
 
-O GitHub Actions executará `pnpm check` e a integração com PostgreSQL 17 em PRs para `main` e após pushes em `main`. O workflow está preparado; sua primeira execução no GitHub ocorre depois da publicação do repositório.
+O workflow do GitHub Actions está configurado para executar `pnpm check` e a integração com PostgreSQL 17 em PRs para `main` e após pushes em `main`. Consulte a aba Actions para verificar o resultado de cada execução. O [guia de validação](docs/operacao/VALIDACAO.md) separa os testes sintéticos da conferência com a Gold real.
 
 ## Colaboração
 
-A [proteção da API pública](docs/SEGURANCA_API.md) documenta cabeçalhos de segurança, limites HTTP e a cota de consultas configurável por `HTTP_RATE_LIMIT_MAX`. O painel permanece público; o [acesso administrativo](docs/AUTORIZACAO.md) será implementado separadamente.
+A [proteção da API pública](docs/operacao/SEGURANCA_API.md) documenta cabeçalhos de segurança, limites HTTP e a cota de consultas configurável por `HTTP_RATE_LIMIT_MAX`. O painel permanece público; o [acesso administrativo](docs/arquitetura/AUTORIZACAO.md) será implementado separadamente.
 
 Use uma branch curta por tarefa, PR para `main` e Conventional Commits em português. O [guia de contribuição](CONTRIBUTING.md) explica nomes de branches, commits, revisão e a primeira publicação. Frontend e backend pertencem ao mesmo repositório; a pipeline permanece separada.
