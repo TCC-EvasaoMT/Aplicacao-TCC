@@ -29,6 +29,7 @@ const GraficoEvolucao = lazy(() =>
 interface Props {
 	anos: number[]
 	selecao: SelecaoFiltros
+	onAnoChange: (ano: string) => void
 	atualizacao: number
 	indisponivel: boolean
 }
@@ -37,7 +38,8 @@ export function PainelEvolucao({
 	anos,
 	selecao,
 	atualizacao,
-	indisponivel
+	indisponivel,
+	onAnoChange
 }: Props) {
 	const [periodo, setPeriodo] = useState<Periodo | null>(() =>
 		lerPeriodo(lerUrl())
@@ -195,13 +197,16 @@ export function PainelEvolucao({
 			{podeConsultar && atual?.dados && (
 				<>
 					<p className="filter-count">
-						Período aplicado: {aplicado.ano_inicial}–{aplicado.ano_final}
+						Período aplicado: {aplicado.ano_inicial} a {aplicado.ano_final}
 					</p>
 					<LimiteErro mensagem="Não foi possível exibir o gráfico da evolução temporal.">
 						<Suspense fallback={<GraficoCarregando />}>
 							<GraficoEvolucao
 								serie={atual.dados.serie}
 								parametros={Object.fromEntries(new URLSearchParams(query))}
+								anoSelecionado={selecao.ano ? Number(selecao.ano) : null}
+								anosSelecionaveis={anos}
+								onSelecionarAno={(ano) => onAnoChange(String(ano))}
 							/>
 						</Suspense>
 					</LimiteErro>

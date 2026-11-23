@@ -4,15 +4,23 @@ import {
 	CartesianGrid,
 	LabelList,
 	Legend,
+	Rectangle,
 	ReferenceLine,
 	ResponsiveContainer,
 	Tooltip,
 	XAxis,
-	YAxis
+	YAxis,
+	type BarShapeProps
 } from 'recharts'
+import { useState } from 'react'
 import { useMedia } from '../../lib/useMedia'
 import type { GrupoComparacao } from './api'
-import { avisosDoRecorte, escalaTaxas, formatarTaxa } from './apresentacao'
+import {
+	avisosDoRecorte,
+	escalaTaxas,
+	formatarTaxa,
+	ordemSeries
+} from './apresentacao'
 import { CelulaNumero, CelulaTaxa, NotaTabela } from './Celulas'
 import { csvComparacao, descreverRecorte } from './exportacao'
 import { rotuloGrupo } from './comparacoes'
@@ -33,9 +41,83 @@ interface Props {
 	grupos: GrupoComparacao[]
 	// Parâmetros da consulta, usados para descrever o recorte no CSV.
 	parametros: Record<string, string>
+	// Valor do grupo usado como filtro ('' quando nenhum).
+	destaque: string
+	onSelecionar: (valor: string) => void
 }
 
-export function GraficoComparacoes({ grupos, parametros }: Props) {
+export function GraficoComparacoes({
+	grupos,
+	parametros,
+	destaque,
+	onSelecionar
+}: Props) {
+	// Grupo sob o ponteiro ou com foco na tabela; liga gráfico e tabela.
+	const [ativo, setAtivo] = useState<number | null>(null)
+	const indiceDestaque = destaque
+		? grupos.findIndex(({ grupo }) => grupo.valor === destaque)
+		: -1
+	const filtravel = (indice: number | null) =>
+		indice !== null && (grupos[indice]?.grupo.valor ?? null) !== null
+	function selecionar(indice: number | null) {
+		const valor = indice === null ? null : (grupos[indice]?.grupo.valor ?? null)
+		if (valor !== null) onSelecionar(valor)
+	}
+	function indiceDoEvento(estado: { activeIndex?: unknown }) {
+		if (estado.activeIndex == null) return null
+		const indice = Number(estado.activeIndex)
+		return Number.isInteger(indice) && indice >= 0 ? indice : null
+	}
+	// Nome do grupo no eixo: também filtra ao clicar. O texto completo
+	// aparece ao passar o mouse quando é abreviado.
+	function rotuloEixo(props: {
+		x?: number | string
+		y?: number | string
+		index?: number
+		payload?: { value?: unknown }
+	}) {
+		const indice = props.index ?? -1
+		const texto = String(props.payload?.value ?? '')
+		const comum = {
+			fill: 'var(--panel-ink)',
+			fontSize: 13,
+			fontWeight: indice === indiceDestaque || estreito ? 600 : 400,
+			style: { cursor: filtravel(indice) ? 'pointer' : 'default' },
+			onClick: () => selecionar(indice)
+		}
+		return estreito ? (
+			<text x={4} y={Number(props.y) - 26} {...comum}>
+				<title>{texto}</title>
+				{encurtar(texto, 38)}
+			</text>
+		) : (
+			<text
+				x={Number(props.x)}
+				y={Number(props.y)}
+				dy={4}
+				textAnchor="end"
+				{...comum}
+			>
+				<title>{texto}</title>
+				{encurtar(texto, 22)}
+			</text>
+		)
+	}
+	// Barra selecionada com contorno; as demais esmaecem enquanto há destaque.
+	function forma(props: BarShapeProps) {
+		const indice = props.index
+		const esmaecida = indiceDestaque >= 0 && indice !== indiceDestaque
+		const contorno = indice === indiceDestaque ? 2 : indice === ativo ? 1 : 0
+		return (
+			<Rectangle
+				{...props}
+				className="comparison-bar"
+				style={{ fillOpacity: esmaecida ? 0.45 : 1 }}
+				stroke={contorno ? 'var(--panel-ink)' : 'none'}
+				strokeWidth={contorno}
+			/>
+		)
+	}
 	const dados = grupos.map((grupo) => ({
 		...grupo,
 		rotulo: rotuloGrupo(grupo.grupo)
@@ -65,6 +147,8 @@ export function GraficoComparacoes({ grupos, parametros }: Props) {
 							accessibilityLayer
 							barGap={4}
 							margin={{ top: 8, right: 56, bottom: 8, left: 0 }}
+							onMouseMove={(estado) => setAtivo(indiceDoEvento(estado))}
+							onMouseLeave={() => setAtivo(null)}
 						>
 							<CartesianGrid strokeDasharray="3 3" horizontal={false} />
 							<XAxis
@@ -82,20 +166,7 @@ export function GraficoComparacoes({ grupos, parametros }: Props) {
 									width={1}
 									interval={0}
 									tickLine={false}
-									tick={(props: {
-										y?: number | string
-										payload?: { value?: unknown }
-									}) => (
-										<text
-											x={4}
-											y={Number(props.y) - 26}
-											fill="var(--panel-ink)"
-											fontSize={13}
-											fontWeight={600}
-										>
-											{encurtar(String(props.payload?.value ?? ''), 38)}
-										</text>
-									)}
+									tick={rotuloEixo}
 								/>
 							) : (
 								<YAxis
@@ -103,10 +174,12 @@ export function GraficoComparacoes({ grupos, parametros }: Props) {
 									dataKey="rotulo"
 									width={150}
 									interval={0}
-									tickFormatter={(valor: string) => encurtar(valor, 22)}
+									tick={rotuloEixo}
 								/>
 							)}
 							<Tooltip
+								cursor={{ fill: 'rgb(21 63 53 / 6%)' }}
+								itemSorter={ordemSeries}
 								formatter={(valor) =>
 									typeof valor === 'number'
 										? formatarTaxa(valor)
@@ -121,6 +194,9 @@ export function GraficoComparacoes({ grupos, parametros }: Props) {
 								fill="var(--panel-green)"
 								maxBarSize={20}
 								isAnimationActive={false}
+								shape={forma}
+								cursor="pointer"
+								onClick={(_, indice) => selecionar(indice)}
 							>
 								<LabelList
 									dataKey="taxas.evasao_curso"
@@ -136,6 +212,9 @@ export function GraficoComparacoes({ grupos, parametros }: Props) {
 								fill="var(--panel-secondary)"
 								maxBarSize={20}
 								isAnimationActive={false}
+								shape={forma}
+								cursor="pointer"
+								onClick={(_, indice) => selecionar(indice)}
 							>
 								<LabelList
 									dataKey="taxas.evasao_ies"
@@ -149,8 +228,9 @@ export function GraficoComparacoes({ grupos, parametros }: Props) {
 					</ResponsiveContainer>
 					<figcaption className="filter-help" id="comparacao-leitura">
 						Em cada grupo, a primeira barra representa a evasão do curso; a
-						segunda, da instituição. Taxas indisponíveis ficam sem barra.
-						Consulte valores e avisos na tabela.
+						segunda, da instituição. Taxas indisponíveis ficam sem barra. Clique
+						num grupo, aqui ou na tabela, para filtrar o resumo e a evolução;
+						clique de novo para remover.
 					</figcaption>
 				</figure>
 			) : (
@@ -188,11 +268,44 @@ export function GraficoComparacoes({ grupos, parametros }: Props) {
 						</tr>
 					</thead>
 					<tbody>
-						{grupos.map((grupo) => {
+						{grupos.map((grupo, indice) => {
 							const avisos = avisosDoRecorte(grupo)
+							const rotulo = rotuloGrupo(grupo.grupo)
+							const valor = grupo.grupo.valor
+							const classes = [
+								indice === indiceDestaque && 'is-selected',
+								indice === ativo && 'is-active'
+							].filter(Boolean)
 							return (
-								<tr key={grupo.grupo.valor ?? '__sem_identificador__'}>
-									<th scope="row">{rotuloGrupo(grupo.grupo)}</th>
+								<tr
+									key={valor ?? '__sem_identificador__'}
+									className={classes.join(' ') || undefined}
+									onMouseEnter={() => setAtivo(indice)}
+									onMouseLeave={() => setAtivo(null)}
+								>
+									<th scope="row">
+										{valor === null ? (
+											<>
+												{rotulo}
+												<span className="visually-hidden">
+													{' '}
+													(sem identificador, não filtrável)
+												</span>
+											</>
+										) : (
+											<button
+												type="button"
+												className="link-filtro"
+												aria-pressed={indice === indiceDestaque}
+												aria-label={`Filtrar por ${rotulo}`}
+												onFocus={() => setAtivo(indice)}
+												onBlur={() => setAtivo(null)}
+												onClick={() => onSelecionar(valor)}
+											>
+												{rotulo}
+											</button>
+										)}
+									</th>
 									{totais.map(([chave]) => (
 										<CelulaNumero key={chave} valor={grupo.totais[chave]} />
 									))}

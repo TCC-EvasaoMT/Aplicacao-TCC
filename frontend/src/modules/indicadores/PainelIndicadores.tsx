@@ -233,6 +233,7 @@ export function PainelIndicadores() {
 			<PainelEvolucao
 				anos={catalogo?.anos ?? []}
 				selecao={selecao}
+				onAnoChange={(ano) => alterar('ano', ano)}
 				atualizacao={tentativa}
 				indisponivel={carregandoCatalogo || !!erroCatalogo}
 			/>
@@ -242,6 +243,10 @@ export function PainelIndicadores() {
 				atualizacao={tentativa}
 				indisponivel={carregandoCatalogo || !!erroCatalogo}
 				onAnoChange={(ano) => alterar('ano', ano)}
+				onSelecaoChange={(proxima) => {
+					setAvisoSelecao('')
+					setSelecao(proxima)
+				}}
 			/>
 		</>
 	)

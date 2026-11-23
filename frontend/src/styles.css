@@ -5,6 +5,9 @@
 	--panel-surface: #fff;
 	--panel-background: #f5f7f7;
 	--panel-secondary: #805128;
+	--panel-chip-bg: #e8f0eb;
+	--panel-chip-border: #b9cbc3;
+	--panel-select-ring: var(--panel-ink);
 	--bs-body-font-family: 'Source Sans 3', 'Segoe UI', system-ui, sans-serif;
 	--bs-body-color: var(--panel-ink);
 	--bs-body-bg: var(--panel-background);
@@ -369,6 +372,56 @@ h3 {
 }
 .temporal-table th:first-child {
 	min-width: 65px;
+}
+/* Filtragem cruzada: linha da tabela ligada ao gráfico. */
+.temporal-table tbody tr.is-active > * {
+	--bs-table-bg-state: #f0f4f2;
+}
+.temporal-table tbody tr.is-selected > * {
+	--bs-table-bg-state: var(--panel-chip-bg);
+}
+.temporal-table tbody tr.is-selected > th {
+	/* Mantém o fundo do Bootstrap (também um box-shadow) e soma a barra. */
+	box-shadow:
+		inset 3px 0 0 var(--panel-green),
+		inset 0 0 0 9999px var(--panel-chip-bg);
+}
+/* Clique do mouse foca a área do gráfico; só o teclado mostra o anel. */
+.recharts-wrapper :focus:not(:focus-visible) {
+	outline: none;
+}
+.link-filtro {
+	padding: 0;
+	border: 0;
+	background: none;
+	color: var(--panel-green);
+	font: inherit;
+	font-weight: 600;
+	text-align: left;
+	text-decoration: underline;
+	text-decoration-thickness: 1px;
+	text-underline-offset: 3px;
+}
+.link-filtro:hover {
+	text-decoration-thickness: 2px;
+}
+.link-filtro[aria-pressed='true'] {
+	text-decoration: none;
+}
+.link-filtro[aria-pressed='true']::after {
+	content: ' ✓';
+}
+.link-filtro:focus-visible {
+	outline: 2px solid var(--panel-select-ring);
+	outline-offset: 2px;
+}
+@media (prefers-reduced-motion: no-preference) {
+	.comparison-bar {
+		transition: fill-opacity 0.15s ease;
+	}
+	.temporal-table tbody tr > * {
+		transition: background-color 0.15s ease;
+	}
 }
 .temporal-table td.text-end {
 	white-space: nowrap;

@@ -28,7 +28,7 @@ export function App() {
 				<details className="reading-note">
 					<summary>Como interpretar os dados</summary>
 					<p>
-						A base de risco corresponde aos vínculos aluno–curso, descontados os
+						A base de risco corresponde aos vínculos aluno-curso, descontados os
 						falecidos. Um estudante em dois cursos representa dois vínculos. Os
 						resultados refletem a base conectada e ajudam a descrever a evasão;
 						não identificam, isoladamente, suas causas.

@@ -29,7 +29,7 @@ export function ResumoIndicadores({ resumo }: { resumo: Resumo }) {
 			</div>
 			<div className="metrics">
 				{[
-					['Vínculos aluno–curso', resumo.totais.vinculos_total],
+					['Vínculos aluno-curso', resumo.totais.vinculos_total],
 					['Matrículas', resumo.totais.matriculas_total],
 					['Ingressantes', resumo.totais.ingressantes_total],
 					['Concluintes', resumo.totais.concluintes_total]

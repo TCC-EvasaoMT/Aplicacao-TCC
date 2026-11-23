@@ -7,6 +7,7 @@ import {
 	validarPeriodo
 } from '../src/modules/analises/periodo.ts'
 import {
+	anoNoClique,
 	avisosDoRecorte,
 	escalaTaxas,
 	formatarTaxa,
@@ -184,4 +185,17 @@ test('plural concorda com a quantidade e formata o número em pt-BR', () => {
 	assert.equal(plural(0, 'grupo', 'grupos'), '0 grupos')
 	assert.equal(plural(1, 'grupo', 'grupos'), '1 grupo')
 	assert.equal(plural(1200, 'registro', 'registros'), '1.200 registros')
+})
+
+test('ano do clique é o mais próximo na área do gráfico, com folga lateral', () => {
+	const anos = [2022, 2023, 2024]
+	// Área de 0 a 248 px, folga de 24: 2022 em 24, 2023 em 124, 2024 em 224.
+	assert.equal(anoNoClique(30, 0, 248, anos), 2022)
+	assert.equal(anoNoClique(120, 0, 248, anos), 2023)
+	assert.equal(anoNoClique(180, 0, 248, anos), 2024)
+	assert.equal(anoNoClique(0, 0, 248, anos), 2022)
+	assert.equal(anoNoClique(-1, 0, 248, anos), null)
+	assert.equal(anoNoClique(249, 0, 248, anos), null)
+	assert.equal(anoNoClique(100, 50, 300, [2023]), 2023)
+	assert.equal(anoNoClique(10, 0, 248, []), null)
 })

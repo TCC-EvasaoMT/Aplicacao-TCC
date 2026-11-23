@@ -7,6 +7,7 @@ import type { SelecaoFiltros } from '../indicadores'
 import { consultarComparacao, type Comparacao } from './api'
 import { gravarUrl, lerUrl } from '../../lib/url'
 import {
+	alternarFiltroGrupo,
 	comparacaoPadrao,
 	dimensoesComparacao,
 	grupoEmDestaque,
@@ -30,6 +31,7 @@ interface Props {
 	atualizacao: number
 	indisponivel: boolean
 	onAnoChange: (ano: string) => void
+	onSelecaoChange: (selecao: SelecaoFiltros) => void
 }
 
 // Repete "grupos" como lista; o limite é detalhe da consulta, não do recorte.
@@ -49,7 +51,8 @@ export function PainelComparacoes({
 	selecao,
 	atualizacao,
 	indisponivel,
-	onAnoChange
+	onAnoChange,
+	onSelecaoChange
 }: Props) {
 	const [aplicado, setAplicado] = useState(() => lerComparacao(lerUrl()))
 	const [rascunho, setRascunho] = useState(aplicado)
@@ -272,6 +275,12 @@ export function PainelComparacoes({
 						<GraficoComparacoes
 							grupos={dados.grupos}
 							parametros={parametrosCsv(query)}
+							destaque={destaque}
+							onSelecionar={(valor) =>
+								onSelecaoChange(
+									alternarFiltroGrupo(selecao, aplicado.agrupar_por, valor)
+								)
+							}
 						/>
 					</Suspense>
 				</LimiteErro>

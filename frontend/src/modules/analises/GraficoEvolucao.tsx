@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import {
 	CartesianGrid,
+	Dot,
 	Legend,
 	Line,
 	LineChart,
@@ -10,7 +12,13 @@ import {
 	YAxis
 } from 'recharts'
 import type { PontoTemporal } from './api'
-import { avisosDoRecorte, escalaTaxas, formatarTaxa } from './apresentacao'
+import {
+	anoNoClique,
+	avisosDoRecorte,
+	escalaTaxas,
+	formatarTaxa,
+	ordemSeries
+} from './apresentacao'
 import { CelulaNumero, CelulaTaxa, NotaTabela } from './Celulas'
 import { csvEvolucao, descreverRecorte } from './exportacao'
 
@@ -20,9 +28,58 @@ interface Props {
 	serie: PontoTemporal[]
 	// Parâmetros da consulta, usados para descrever o recorte no CSV.
 	parametros: Record<string, string>
+	// Ano do resumo e da comparação; anos do catálogo podem ser escolhidos.
+	anoSelecionado: number | null
+	anosSelecionaveis: number[]
+	onSelecionarAno: (ano: number) => void
 }
 
-export function GraficoEvolucao({ serie, parametros }: Props) {
+export function GraficoEvolucao({
+	serie,
+	parametros,
+	anoSelecionado,
+	anosSelecionaveis,
+	onSelecionarAno
+}: Props) {
+	// Ano sob o ponteiro ou com foco na tabela; liga gráfico e tabela.
+	const [ativo, setAtivo] = useState<number | null>(null)
+	const anoAtivo = ativo === null ? null : (serie[ativo]?.ano ?? null)
+	const selecionavel = (ano: number | null) =>
+		ano !== null && anosSelecionaveis.includes(ano)
+	function indiceDoEvento(estado: { activeIndex?: unknown }) {
+		if (estado.activeIndex == null) return null
+		const indice = Number(estado.activeIndex)
+		return Number.isInteger(indice) && indice >= 0 ? indice : null
+	}
+	function selecionar(indice: number | null) {
+		const ano = indice === null ? null : (serie[indice]?.ano ?? null)
+		if (ano !== null && selecionavel(ano)) onSelecionarAno(ano)
+	}
+	// Ponto do ano selecionado: maior, preenchido e com anel branco.
+	function ponto(cor: string) {
+		return (props: {
+			cx?: number
+			cy?: number
+			index?: number
+			payload?: PontoTemporal
+		}) => {
+			const chave = `${cor}-${props.index}`
+			if (props.cx == null || props.cy == null) return <g key={chave} />
+			const selecionado = props.payload?.ano === anoSelecionado
+			return (
+				<Dot
+					key={chave}
+					className="year-dot"
+					cx={props.cx}
+					cy={props.cy}
+					r={selecionado ? 6 : 4}
+					fill={selecionado ? cor : '#fff'}
+					stroke={selecionado ? '#fff' : cor}
+					strokeWidth={2}
+				/>
+			)
+		}
+	}
 	const temTaxas = serie.some(
 		(ponto) =>
 			ponto.taxas.evasao_curso !== null || ponto.taxas.evasao_ies !== null
@@ -70,6 +127,23 @@ export function GraficoEvolucao({ serie, parametros }: Props) {
 							data={serie}
 							accessibilityLayer
 							margin={{ top: 24, right: 20, bottom: 12, left: 8 }}
+							style={{ cursor: selecionavel(anoAtivo) ? 'pointer' : 'default' }}
+							onClick={(estado, evento) => {
+								// Ano pela posição do clique; o índice do tooltip fica de reserva.
+								const grade = (evento.currentTarget as Element | null)
+									?.querySelector('.recharts-cartesian-grid')
+									?.getBoundingClientRect()
+								const x = (evento as { clientX?: number }).clientX
+								const ano =
+									grade && typeof x === 'number'
+										? anoNoClique(x, grade.left, grade.width, anos)
+										: null
+								if (ano !== null) {
+									if (selecionavel(ano)) onSelecionarAno(ano)
+								} else selecionar(indiceDoEvento(estado) ?? ativo)
+							}}
+							onMouseMove={(estado) => setAtivo(indiceDoEvento(estado))}
+							onMouseLeave={() => setAtivo(null)}
 						>
 							<CartesianGrid strokeDasharray="3 3" vertical={false} />
 							<XAxis
@@ -91,7 +165,28 @@ export function GraficoEvolucao({ serie, parametros }: Props) {
 								tickFormatter={formatarTaxa}
 							/>
 							<ReferenceLine y={0} stroke="var(--panel-muted)" />
+							{anoAtivo !== null && anoAtivo !== anoSelecionado && (
+								<ReferenceLine
+									x={anoAtivo}
+									stroke="var(--panel-muted)"
+									strokeDasharray="2 4"
+								/>
+							)}
+							{anoSelecionado !== null && anos.includes(anoSelecionado) && (
+								<ReferenceLine
+									x={anoSelecionado}
+									stroke="var(--panel-ink)"
+									strokeDasharray="4 4"
+									label={{
+										value: 'Resumo',
+										position: 'top',
+										fill: 'var(--panel-ink)',
+										fontSize: 12
+									}}
+								/>
+							)}
 							<Tooltip
+								itemSorter={ordemSeries}
 								formatter={(valor) =>
 									typeof valor === 'number'
 										? formatarTaxa(valor)
@@ -106,7 +201,7 @@ export function GraficoEvolucao({ serie, parametros }: Props) {
 								type="linear"
 								stroke="var(--panel-green)"
 								strokeWidth={3}
-								dot={{ r: 4 }}
+								dot={ponto('var(--panel-green)')}
 								label={rotuloIsolado('evasao_curso', 'var(--panel-green)', -8)}
 								connectNulls={false}
 								isAnimationActive={false}
@@ -118,7 +213,7 @@ export function GraficoEvolucao({ serie, parametros }: Props) {
 								stroke="var(--panel-secondary)"
 								strokeWidth={3}
 								strokeDasharray="6 4"
-								dot={{ r: 4, strokeDasharray: '0' }}
+								dot={ponto('var(--panel-secondary)')}
 								label={rotuloIsolado(
 									'evasao_ies',
 									'var(--panel-secondary)',
@@ -131,7 +226,8 @@ export function GraficoEvolucao({ serie, parametros }: Props) {
 					</ResponsiveContainer>
 					<figcaption id="evolucao-leitura" className="filter-help">
 						Lacunas indicam taxas indisponíveis, não zero. Os valores e os
-						avisos de cada ano estão na tabela abaixo.
+						avisos de cada ano estão na tabela abaixo. Clique num ano para ver o
+						resumo e a comparação daquele ano.
 					</figcaption>
 				</figure>
 			) : (
@@ -165,11 +261,36 @@ export function GraficoEvolucao({ serie, parametros }: Props) {
 						</tr>
 					</thead>
 					<tbody>
-						{serie.map((ponto) => {
+						{serie.map((ponto, indice) => {
 							const avisos = avisosDoRecorte(ponto)
+							const classes = [
+								ponto.ano === anoSelecionado && 'is-selected',
+								indice === ativo && 'is-active'
+							].filter(Boolean)
 							return (
-								<tr key={ponto.ano}>
-									<th scope="row">{ponto.ano}</th>
+								<tr
+									key={ponto.ano}
+									className={classes.join(' ') || undefined}
+									onMouseEnter={() => setAtivo(indice)}
+									onMouseLeave={() => setAtivo(null)}
+								>
+									<th scope="row">
+										{selecionavel(ponto.ano) ? (
+											<button
+												type="button"
+												className="link-filtro"
+												aria-pressed={ponto.ano === anoSelecionado}
+												aria-label={`Ver ${ponto.ano} no resumo e na comparação`}
+												onFocus={() => setAtivo(indice)}
+												onBlur={() => setAtivo(null)}
+												onClick={() => onSelecionarAno(ponto.ano)}
+											>
+												{ponto.ano}
+											</button>
+										) : (
+											ponto.ano
+										)}
+									</th>
 									<CelulaNumero valor={ponto.base_risco} />
 									<CelulaTaxa valor={ponto.taxas.evasao_curso} />
 									<CelulaTaxa valor={ponto.taxas.evasao_ies} />
