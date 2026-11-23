@@ -9,7 +9,7 @@ import {
 	YAxis
 } from 'recharts'
 import type { PontoTemporal } from './api'
-import { avisosDoAno, formatarTaxa } from './apresentacao'
+import { avisosDoRecorte, formatarTaxa } from './apresentacao'
 
 const numero = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 })
 
@@ -117,7 +117,7 @@ export function GraficoEvolucao({ serie }: { serie: PontoTemporal[] }) {
 					</thead>
 					<tbody>
 						{serie.map((ponto) => {
-							const avisos = avisosDoAno(ponto)
+							const avisos = avisosDoRecorte(ponto)
 							return (
 								<tr key={ponto.ano}>
 									<th scope="row">{ponto.ano}</th>

@@ -7,7 +7,7 @@ import {
 	validarPeriodo
 } from '../src/modules/analises/periodo.ts'
 import {
-	avisosDoAno,
+	avisosDoRecorte,
 	formatarTaxa
 } from '../src/modules/analises/apresentacao.ts'
 import type { PontoTemporal } from '../src/modules/analises/api.ts'
@@ -127,16 +127,16 @@ test('avisos distinguem ausência, somente docentes, base zero, ruído e grupos 
 			flag_grupo_pequeno: null
 		}
 	}
-	assert.deepEqual(avisosDoAno(ponto), ['Sem dados de alunos'])
+	assert.deepEqual(avisosDoRecorte(ponto), ['Sem dados de alunos'])
 	assert.deepEqual(
-		avisosDoAno({
+		avisosDoRecorte({
 			...ponto,
 			qualidade: { ...ponto.qualidade, registros_sem_alunos: 1 }
 		}),
 		['Sem dados de alunos', '1 registro(s) sem contagens de alunos']
 	)
 	assert.deepEqual(
-		avisosDoAno({
+		avisosDoRecorte({
 			...ponto,
 			base_risco: 0,
 			qualidade: {
@@ -148,7 +148,7 @@ test('avisos distinguem ausência, somente docentes, base zero, ruído e grupos 
 		['Base inferior a 30', 'Base não positiva; taxas indisponíveis']
 	)
 	assert.deepEqual(
-		avisosDoAno({
+		avisosDoRecorte({
 			...ponto,
 			base_risco: 20.5,
 			qualidade: {
