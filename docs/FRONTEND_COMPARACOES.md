@@ -5,7 +5,7 @@ A seção **Comparação entre grupos**, abaixo da evolução temporal, consome 
 ## Como utilizar
 
 1. Execute `pnpm dev:demo` com Docker Desktop aberto e acesse `http://127.0.0.1:5173/`.
-2. Na seção de comparações, escolha **2023** em **Ano da comparação**. A demonstração começa em 2024, que contém apenas docentes.
+2. O painel abre em **2023**, o ano mais recente com dados de alunos; 2024 contém apenas docentes. **Ano da comparação** permite trocar o ano.
 3. Escolha **Agrupar por**. O padrão é categoria administrativa.
 4. Opcionalmente, abra **Selecionar grupos**, busque por nome ou código e marque até 20 opções.
 5. Clique em **Comparar grupos**. A tabela apresenta os totais, a base de risco, as duas taxas e a qualidade de cada grupo.
@@ -48,11 +48,11 @@ A URL é montada com `URLSearchParams`, preservando zeros iniciais e repetindo `
 
 - As barras seguem a ordem da API. A primeira barra de cada grupo mostra evasão do curso; a segunda, da instituição, com as mesmas cores das outras análises.
 - O eixo inclui zero e preserva taxas negativas ou superiores a 100%. A interface formata proporções, sem calcular médias nem refazer fórmulas.
-- `null` aparece como **Não disponível** na tabela e sem barra no gráfico. Um zero real permanece zero.
+- `null` aparece como `...` na tabela (convenção do IBGE; o leitor de tela ouve "Não disponível") e sem barra no gráfico. Um zero real permanece zero.
 - A tabela contém os quatro totais do resumo: vínculos, ingressantes, matrículas e concluintes, além de base, taxas e qualidade. Os demais totais continuam disponíveis na API.
 - Avisos distinguem ausência de alunos, registros sem contagens, dados incompletos, valores negativos, base inferior a 30 e base não positiva.
 - Códigos permanecem visíveis mesmo sem nome. Rótulos longos são abreviados apenas no eixo; o tooltip e a tabela preservam o texto completo.
-- Controles nativos possuem rótulos; estados são anunciados, e a tabela tem cabeçalhos de linha e coluna. Gráfico e tabela permitem foco e rolagem horizontal em telas estreitas. As barras não têm animação.
+- Controles nativos possuem rótulos; estados são anunciados, e a tabela tem cabeçalhos de linha e coluna. A tabela permite foco e rolagem horizontal em telas estreitas. Abaixo de 576 px, o nome do grupo fica acima das barras e o gráfico cabe na tela. Cada barra mostra o valor no fim. As barras não têm animação.
 
 Características institucionais podem agrupar várias IES; não há comparação nominal entre instituições. Município da sede não substitui oferta ausente em EaD. Essas análises não demonstram causa da evasão.
 
@@ -75,4 +75,4 @@ Na base de demonstração, use 2023:
 
 Na conferência local em 22/11/2026, `pnpm check` passou com 47 testes (31 backend e 16 frontend), tipos e build. O navegador foi verificado em 1280, 390 e 320 px, incluindo foco por teclado, busca sem acento, seleção máxima, docentes, base zero, ruído, ausência de grupos, filtros combinados e recuperação após reconstrução da Gold e reaplicação de permissões. Grupos sintéticos temporários permitiram conferir o aviso **20 de 33** e o bloqueio da 21ª seleção; a base original foi restaurada após a verificação.
 
-A suíte automatizada de integração do backend não foi repetida neste incremento de interface. A conferência visual utilizou a API real com PostgreSQL sintético. Dados reais, desempenho no volume da pipeline, CI remota e outras plataformas permanecem pendentes. O build continua avisando sobre o tamanho do bundle React/Recharts.
+A suíte automatizada de integração do backend não foi repetida neste incremento de interface. A conferência visual utilizou a API real com PostgreSQL sintético. Dados reais, desempenho no volume da pipeline, CI remota e outras plataformas permanecem pendentes. O aviso de tamanho do bundle foi resolvido com o carregamento sob demanda dos gráficos; veja [Finalização do frontend](FRONTEND_FINALIZACAO.md).
