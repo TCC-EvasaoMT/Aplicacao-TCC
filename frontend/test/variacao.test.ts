@@ -37,6 +37,15 @@ test('variação de total é relativa e exige base anterior positiva', () => {
 		texto: '9,1%'
 	})
 	assert.deepEqual(variacaoTotal(5, 5), { direcao: 'estavel', texto: '0%' })
+	// Alta e queda arredondam igual: 91,25% vira 91,3% nos dois sentidos.
+	assert.deepEqual(variacaoTotal(70, 800), {
+		direcao: 'queda',
+		texto: '91,3%'
+	})
+	assert.deepEqual(variacaoTotal(1530, 800), {
+		direcao: 'alta',
+		texto: '91,3%'
+	})
 	assert.equal(variacaoTotal(10, 0), null)
 	assert.equal(variacaoTotal(null, 10), null)
 	assert.equal(variacaoTotal(10, null), null)

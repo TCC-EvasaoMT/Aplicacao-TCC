@@ -58,6 +58,7 @@ export function rotuloOpcao(opcao: string | OpcaoCodigo) {
 
 export interface FiltroAtivo {
 	chave: CampoFiltro
+	valor: string
 	campo: string
 	texto: string
 }
@@ -77,6 +78,7 @@ export function filtrosAtivos(
 		return [
 			{
 				chave: campo.chave,
+				valor,
 				campo: campo.rotulo,
 				texto: opcao ? rotuloOpcao(opcao) : valor
 			}

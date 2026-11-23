@@ -12,6 +12,11 @@ const relativa = new Intl.NumberFormat('pt-BR', {
 	maximumFractionDigits: 1
 })
 
+// Arredonda pelo valor absoluto, para alta e queda arredondarem igual.
+function arredondar(valor: number, escala: number) {
+	return (Math.sign(valor) * Math.round(Math.abs(valor) * escala)) / escala
+}
+
 function direcao(valor: number): Variacao['direcao'] {
 	return valor > 0 ? 'alta' : valor < 0 ? 'queda' : 'estavel'
 }
@@ -22,7 +27,7 @@ export function variacaoTaxa(
 	anterior: number | null
 ): Variacao | null {
 	if (atual === null || anterior === null) return null
-	const diferenca = Math.round((atual - anterior) * 1000) / 10
+	const diferenca = arredondar((atual - anterior) * 100, 10)
 	return {
 		direcao: direcao(diferenca),
 		texto: `${pontos.format(Math.abs(diferenca))} p.p.`
@@ -35,7 +40,7 @@ export function variacaoTotal(
 	anterior: number | null
 ): Variacao | null {
 	if (atual === null || anterior === null || anterior <= 0) return null
-	const proporcao = Math.round(((atual - anterior) / anterior) * 1000) / 1000
+	const proporcao = arredondar((atual - anterior) / anterior, 1000)
 	return {
 		direcao: direcao(proporcao),
 		texto: relativa.format(Math.abs(proporcao))

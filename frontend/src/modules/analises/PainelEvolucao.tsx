@@ -63,6 +63,13 @@ export function PainelEvolucao({
 	const podeConsultar =
 		!indisponivel && anos.length > 0 && !validarPeriodo(aplicado)
 	const chave = `${atualizacao}:${tentativa}:${query}`
+	// Última série exibida: fica na tela, esmaecida, enquanto o novo recorte
+	// carrega, para o gráfico não sumir a cada clique.
+	const [ultima, setUltima] = useState<{
+		dados: EvolucaoTemporal
+		query: string
+		periodo: Periodo
+	} | null>(null)
 
 	useEffect(() => {
 		carregarGrafico().catch(() => {})
@@ -81,7 +88,9 @@ export function PainelEvolucao({
 		setResposta(null)
 		consultarEvolucao(query, controller.signal)
 			.then((dados) => {
-				if (!controller.signal.aborted) setResposta({ chave, dados })
+				if (controller.signal.aborted) return
+				setResposta({ chave, dados })
+				setUltima({ dados, query, periodo: aplicado })
 			})
 			.catch(() => {
 				if (!controller.signal.aborted)
@@ -95,6 +104,14 @@ export function PainelEvolucao({
 
 	const atual = resposta?.chave === chave ? resposta : null
 	const carregando = podeConsultar && !atual
+	const exibida = !podeConsultar
+		? null
+		: atual?.dados
+			? { dados: atual.dados, query, periodo: aplicado }
+			: carregando
+				? ultima
+				: null
+	const atualizando = carregando && !!ultima
 	function aplicar(event: FormEvent) {
 		event.preventDefault()
 		const erro = validarPeriodo(campos)
@@ -181,7 +198,9 @@ export function PainelEvolucao({
 				{!indisponivel && !anos.length && (
 					<p className="state">Nenhum ano está disponível na base conectada.</p>
 				)}
-				{carregando && <Carregando texto="Carregando evolução temporal…" />}
+				{carregando && !ultima && (
+					<Carregando texto="Carregando evolução temporal…" />
+				)}
 				{podeConsultar && atual?.erro && (
 					<div className="alert alert-danger" role="alert">
 						<p>{atual.erro}</p>
@@ -194,23 +213,26 @@ export function PainelEvolucao({
 					</div>
 				)}
 			</div>
-			{podeConsultar && atual?.dados && (
-				<>
+			{exibida && (
+				<div className={atualizando ? 'is-refreshing' : undefined}>
 					<p className="filter-count">
-						Período aplicado: {aplicado.ano_inicial} a {aplicado.ano_final}
+						Período aplicado: {exibida.periodo.ano_inicial} a{' '}
+						{exibida.periodo.ano_final}
 					</p>
 					<LimiteErro mensagem="Não foi possível exibir o gráfico da evolução temporal.">
 						<Suspense fallback={<GraficoCarregando />}>
 							<GraficoEvolucao
-								serie={atual.dados.serie}
-								parametros={Object.fromEntries(new URLSearchParams(query))}
+								serie={exibida.dados.serie}
+								parametros={Object.fromEntries(
+									new URLSearchParams(exibida.query)
+								)}
 								anoSelecionado={selecao.ano ? Number(selecao.ano) : null}
 								anosSelecionaveis={anos}
 								onSelecionarAno={(ano) => onAnoChange(String(ano))}
 							/>
 						</Suspense>
 					</LimiteErro>
-				</>
+				</div>
 			)}
 		</section>
 	)

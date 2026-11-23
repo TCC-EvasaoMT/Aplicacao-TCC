@@ -1,7 +1,12 @@
 import { useState } from 'react'
 import { useMedia } from '../../lib/useMedia'
-import type { Catalogo, OpcaoCodigo } from '../catalogos'
-import { camposFiltro, type SelecaoFiltros } from './filtros'
+import type { Catalogo } from '../catalogos'
+import {
+	camposFiltro,
+	filtrosAtivos,
+	rotuloOpcao,
+	type SelecaoFiltros
+} from './filtros'
 
 interface Props {
 	catalogo: Catalogo | null
@@ -10,12 +15,6 @@ interface Props {
 	indisponivel: boolean
 	onChange: (chave: keyof SelecaoFiltros, valor: string) => void
 	onLimpar: () => void
-}
-
-function rotuloOpcao(opcao: string | OpcaoCodigo) {
-	return typeof opcao === 'string'
-		? opcao
-		: `${opcao.nome ?? 'Nome não informado'} (${opcao.codigo})`
 }
 
 export function FiltrosIndicadores({
@@ -27,7 +26,7 @@ export function FiltrosIndicadores({
 	onLimpar
 }: Props) {
 	// No celular, os sete campos ocupam mais de uma tela; ficam recolhidos
-	// atrás de um botão, com os filtros ativos resumidos no cabeçalho.
+	// atrás de um botão. Os filtros ativos aparecem na faixa do recorte.
 	const estreito = useMedia('(max-width: 575px)')
 	const [aberto, setAberto] = useState(false)
 	const [avisoLink, setAvisoLink] = useState('')
@@ -41,15 +40,7 @@ export function FiltrosIndicadores({
 	}
 	const mostrarCampos = !estreito || aberto
 	const desabilitado = carregando || indisponivel || !catalogo?.anos.length
-	const ativos = camposFiltro.flatMap((campo) => {
-		const valor = selecao[campo.chave]
-		if (!valor) return []
-		const opcao = (catalogo?.[campo.catalogo] ?? []).find(
-			(item) => (typeof item === 'string' ? item : item.codigo) === valor
-		)
-		return [`${campo.rotulo}: ${opcao ? rotuloOpcao(opcao) : valor}`]
-	})
-	const quantidade = ativos.length
+	const quantidade = filtrosAtivos(selecao, catalogo).length
 	return (
 		<section
 			className="filters"
@@ -59,7 +50,7 @@ export function FiltrosIndicadores({
 			<div className="section-heading">
 				<div>
 					<h2 id="filtros-titulo">Filtros compartilhados</h2>
-					<p className="filter-count" role="status">
+					<p className="filter-count">
 						{quantidade === 0
 							? 'Todos os recortes disponíveis.'
 							: quantidade === 1
@@ -100,13 +91,6 @@ export function FiltrosIndicadores({
 			<p className="filter-help link-status" role="status">
 				{avisoLink}
 			</p>
-			{!mostrarCampos && quantidade > 0 && (
-				<ul className="active-filters">
-					{ativos.map((ativo) => (
-						<li key={ativo}>{ativo}</li>
-					))}
-				</ul>
-			)}
 			<div id="filtros-campos" hidden={!mostrarCampos}>
 				<p className="filter-help" id="filtros-ajuda">
 					Aplicados automaticamente ao resumo, à evolução temporal e às

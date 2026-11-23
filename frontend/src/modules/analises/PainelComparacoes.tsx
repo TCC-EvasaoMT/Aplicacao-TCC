@@ -63,19 +63,44 @@ export function PainelComparacoes({
 		erro?: string
 	} | null>(null)
 	const query = serializarComparacao(aplicado, selecao)
+	const [ultima, setUltima] = useState<{
+		dados: Comparacao
+		query: string
+		agrupar_por: DimensaoComparacao
+		grupos: string[]
+		ano: string
+	} | null>(null)
 	const chave = `${atualizacao}:${tentativa}:${query}`
 	const podeConsultar =
 		!indisponivel && !!catalogo?.anos.includes(Number(selecao.ano))
 	const pendente = serializarComparacao(rascunho, selecao) !== query
-	const dimensao = dimensoesComparacao[aplicado.agrupar_por]
 	const opcoes = opcoesComparacao(catalogo, rascunho.agrupar_por)
 	const atual = resposta?.chave === chave ? resposta : null
-	const dados = podeConsultar ? atual?.dados : undefined
 	const carregando = podeConsultar && !atual
-	const ausentes = dados ? gruposAusentes(aplicado.grupos, dados.grupos) : []
-	const destaque = grupoEmDestaque(aplicado.agrupar_por, selecao)
+	// Enquanto o novo recorte carrega, a última comparação fica na tela,
+	// esmaecida; rótulos e cliques seguem a dimensão dessa comparação.
+	const exibida = !podeConsultar
+		? null
+		: atual?.dados
+			? {
+					dados: atual.dados,
+					query,
+					agrupar_por: aplicado.agrupar_por,
+					grupos: aplicado.grupos,
+					ano: selecao.ano
+				}
+			: carregando
+				? ultima
+				: null
+	const atualizando = carregando && !!ultima
+	const dados = exibida?.dados
+	const dimensaoExibida = exibida?.agrupar_por ?? aplicado.agrupar_por
+	const dimensao = dimensoesComparacao[dimensaoExibida]
+	const ausentes =
+		exibida && dados ? gruposAusentes(exibida.grupos, dados.grupos) : []
+	const destaque = grupoEmDestaque(dimensaoExibida, selecao)
 	const rotuloDestaque =
-		opcoesComparacao(catalogo, aplicado.agrupar_por).find(
+		opcoesComparacao(catalogo, dimensaoExibida).find(
 			(opcao) => opcao.valor === destaque
 		)?.rotulo ?? destaque
 	const destaqueAusente =
@@ -108,7 +133,15 @@ export function PainelComparacoes({
 		setResposta(null)
 		consultarComparacao(query, controller.signal)
 			.then((dados) => {
-				if (!controller.signal.aborted) setResposta({ chave, dados })
+				if (controller.signal.aborted) return
+				setResposta({ chave, dados })
+				setUltima({
+					dados,
+					query,
+					agrupar_por: aplicado.agrupar_por,
+					grupos: aplicado.grupos,
+					ano: selecao.ano
+				})
 			})
 			.catch(() => {
 				if (!controller.signal.aborted)
@@ -211,7 +244,7 @@ export function PainelComparacoes({
 						“Atualizar dados” no resumo.
 					</p>
 				)}
-				{carregando && <Carregando texto="Carregando comparação…" />}
+				{carregando && !ultima && <Carregando texto="Carregando comparação…" />}
 				{podeConsultar && atual?.erro && (
 					<div className="alert alert-danger" role="alert">
 						<p>{atual.erro}</p>
@@ -223,10 +256,10 @@ export function PainelComparacoes({
 						</button>
 					</div>
 				)}
-				{dados && (
-					<>
+				{exibida && dados && (
+					<div className={atualizando ? 'is-refreshing' : undefined}>
 						<h3 className="comparison-result">
-							{dimensao.rotulo} em {selecao.ano}:{' '}
+							{dimensao.rotulo} em {exibida.ano}:{' '}
 							{dados.grupos.length === dados.total_grupos
 								? plural(dados.total_grupos, 'grupo', 'grupos')
 								: `${dados.grupos.length} de ${plural(dados.total_grupos, 'grupo', 'grupos')}`}
@@ -266,24 +299,26 @@ export function PainelComparacoes({
 								os filtros, o ano ou a seleção de grupos.
 							</p>
 						)}
-					</>
+					</div>
 				)}
 			</div>
-			{dados && dados.grupos.length > 0 && (
-				<LimiteErro mensagem="Não foi possível exibir o gráfico da comparação.">
-					<Suspense fallback={<GraficoCarregando />}>
-						<GraficoComparacoes
-							grupos={dados.grupos}
-							parametros={parametrosCsv(query)}
-							destaque={destaque}
-							onSelecionar={(valor) =>
-								onSelecaoChange(
-									alternarFiltroGrupo(selecao, aplicado.agrupar_por, valor)
-								)
-							}
-						/>
-					</Suspense>
-				</LimiteErro>
+			{exibida && dados && dados.grupos.length > 0 && (
+				<div className={atualizando ? 'is-refreshing' : undefined}>
+					<LimiteErro mensagem="Não foi possível exibir o gráfico da comparação.">
+						<Suspense fallback={<GraficoCarregando />}>
+							<GraficoComparacoes
+								grupos={dados.grupos}
+								parametros={parametrosCsv(exibida.query)}
+								destaque={destaque}
+								onSelecionar={(valor) =>
+									onSelecaoChange(
+										alternarFiltroGrupo(selecao, dimensaoExibida, valor)
+									)
+								}
+							/>
+						</Suspense>
+					</LimiteErro>
+				</div>
 			)}
 			<p className="filter-help">
 				Características institucionais podem reunir várias IES. Municípios de

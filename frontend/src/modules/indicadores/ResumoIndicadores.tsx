@@ -1,4 +1,5 @@
 import type { Resumo } from './api'
+import { variacaoTaxa, variacaoTotal, type Variacao } from './variacao'
 
 const numero = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 })
 const percentual = new Intl.NumberFormat('pt-BR', {
@@ -8,7 +9,58 @@ const percentual = new Intl.NumberFormat('pt-BR', {
 const formatar = (value: number | null, taxa = false) =>
 	value === null ? 'Não disponível' : (taxa ? percentual : numero).format(value)
 
-export function ResumoIndicadores({ resumo }: { resumo: Resumo }) {
+// Linha de variação contra o ano anterior. Seta em texto, cor neutra: o painel
+// não julga se a mudança é boa ou ruim.
+function LinhaVariacao({
+	variacao,
+	ano
+}: {
+	variacao: Variacao | null | undefined
+	ano: number
+}) {
+	if (variacao === undefined) return null
+	if (variacao === null)
+		return <p className="variation">sem comparação com {ano}</p>
+	if (variacao.direcao === 'estavel')
+		return <p className="variation">sem variação ante {ano}</p>
+	const pontos = variacao.texto.endsWith(' p.p.')
+	const valor = pontos ? variacao.texto.slice(0, -5) : variacao.texto
+	return (
+		<p className="variation">
+			<span aria-hidden="true">{variacao.direcao === 'alta' ? '▲' : '▼'} </span>
+			<span className="visually-hidden">
+				{variacao.direcao === 'alta' ? 'Alta de ' : 'Queda de '}
+			</span>
+			{valor}
+			{pontos && (
+				<>
+					{' '}
+					<abbr title="pontos percentuais">p.p.</abbr>
+				</>
+			)}{' '}
+			ante {ano}
+		</p>
+	)
+}
+
+interface Props {
+	resumo: Resumo
+	// Resumo do ano anterior com os mesmos filtros; undefined enquanto não há
+	// consulta, null quando ela falhou.
+	anterior?: Resumo | null
+	ano: number
+}
+
+export function ResumoIndicadores({ resumo, anterior, ano }: Props) {
+	const anoAnterior = ano - 1
+	const taxaVar = (chave: keyof Resumo['taxas']) =>
+		anterior === undefined
+			? undefined
+			: variacaoTaxa(resumo.taxas[chave], anterior?.taxas[chave] ?? null)
+	const totalVar = (chave: keyof Resumo['totais']) =>
+		anterior === undefined
+			? undefined
+			: variacaoTotal(resumo.totais[chave], anterior?.totais[chave] ?? null)
 	return (
 		<>
 			<div className="rates">
@@ -17,6 +69,7 @@ export function ResumoIndicadores({ resumo }: { resumo: Resumo }) {
 					<p className="rate-value">
 						{formatar(resumo.taxas.evasao_curso, true)}
 					</p>
+					<LinhaVariacao variacao={taxaVar('evasao_curso')} ano={anoAnterior} />
 					<p>Desvinculados e transferidos, em relação à base de risco.</p>
 				</article>
 				<article className="rate">
@@ -24,19 +77,23 @@ export function ResumoIndicadores({ resumo }: { resumo: Resumo }) {
 					<p className="rate-value">
 						{formatar(resumo.taxas.evasao_ies, true)}
 					</p>
+					<LinhaVariacao variacao={taxaVar('evasao_ies')} ano={anoAnterior} />
 					<p>Desvinculados, em relação à base de risco.</p>
 				</article>
 			</div>
 			<div className="metrics">
-				{[
-					['Vínculos aluno-curso', resumo.totais.vinculos_total],
-					['Matrículas', resumo.totais.matriculas_total],
-					['Ingressantes', resumo.totais.ingressantes_total],
-					['Concluintes', resumo.totais.concluintes_total]
-				].map(([label, value]) => (
-					<article className="metric" key={String(label)}>
-						<h3>{label}</h3>
-						<p className="metric-value">{formatar(value as number | null)}</p>
+				{(
+					[
+						['Vínculos aluno-curso', 'vinculos_total'],
+						['Matrículas', 'matriculas_total'],
+						['Ingressantes', 'ingressantes_total'],
+						['Concluintes', 'concluintes_total']
+					] as const
+				).map(([rotulo, chave]) => (
+					<article className="metric" key={chave}>
+						<h3>{rotulo}</h3>
+						<p className="metric-value">{formatar(resumo.totais[chave])}</p>
+						<LinhaVariacao variacao={totalVar(chave)} ano={anoAnterior} />
 					</article>
 				))}
 			</div>
