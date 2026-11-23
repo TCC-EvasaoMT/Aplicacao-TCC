@@ -5,7 +5,7 @@ Monorepo com React, TypeScript e Fastify. O frontend consulta a API, e o backend
 ## Organização
 
 ```text
-frontend/              React e Vite; resumo, filtros e gráfico de evolução temporal
+frontend/              React e Vite; resumo, filtros, evolução temporal e comparações
 backend/               API Fastify, regras de cálculo e acesso à Gold
 backend/src/modules/   Módulos de catálogos, indicadores e análises
 backend/src/plugins/   Recursos compartilhados e saúde da API
@@ -21,7 +21,7 @@ Leia a [arquitetura da aplicação](docs/ARQUITETURA.md), os [módulos e contrat
 
 O frontend não importa arquivos internos do backend e não acessa o banco. Ele usa HTTP/JSON em `/api/v1`. As fórmulas de evasão continuam no backend; a interface apenas formata os resultados.
 
-A interface organiza filtros compartilhados, resumo anual e evolução temporal. O ano fica junto ao resumo; o gráfico mantém seu próprio período. O tema usa Source Sans 3 servida localmente, duas taxas com igual destaque e totais em uma faixa compacta. A seção **Como interpretar os dados** reúne as explicações metodológicas.
+A interface organiza filtros compartilhados, resumo anual, evolução temporal e comparação entre grupos. Resumo e comparação compartilham o ano; o gráfico temporal mantém seu próprio período. O tema usa Source Sans 3 servida localmente, duas taxas com igual destaque e totais em uma faixa compacta. A seção **Como interpretar os dados** reúne as explicações metodológicas.
 
 A [API de evolução temporal](docs/ANALISES_TEMPORAIS.md) permite consultar séries anuais em `/api/v1/analises/evolucao-temporal`, com intervalo inclusivo de até 30 anos e os mesmos filtros de recorte. O [módulo de análises do frontend](docs/FRONTEND_ANALISES.md) apresenta as duas taxas em um gráfico Recharts e uma tabela de valores e qualidade por ano. A interface utiliza Bootstrap 5.3 para formulários, botões, grade responsiva e tabela, com CSS próprio para a identidade visual, conforme a [documentação de estilização](docs/FRONTEND_ESTILIZACAO.md).
 
@@ -51,7 +51,7 @@ O comando inicia os dois pacotes. O Vite encaminha `/api`, `/health` e `/docs` p
 
 A tela inicial exibe vínculos, matrículas, ingressantes, concluintes e taxas de evasão. Permite combinar ano, curso, área CINE, modalidade, categoria administrativa, organização acadêmica e municípios de oferta e sede. Os filtros são aplicados automaticamente; limpar mantém o ano e atualizar preserva as seleções ainda disponíveis. O gráfico temporal usa os mesmos filtros opcionais e um intervalo próprio, independente do ano do resumo. Mostra estados de carregamento, erro, ausência de dados e qualidade. Ela utiliza a base conectada, sem injetar números fictícios no frontend.
 
-A [API de comparações entre cursos e grupos](docs/COMPARACOES.md) está disponível no Swagger, em `GET /api/v1/analises/comparacoes`, sem login. Exemplo: `?ano=2023&agrupar_por=curso&grupos=001&grupos=002`. O frontend comparativo será implementado em outro incremento; rankings permanecem pendentes.
+A [API de comparações entre cursos e grupos](docs/COMPARACOES.md) está disponível no Swagger, em `GET /api/v1/analises/comparacoes`, sem login. Exemplo: `?ano=2023&agrupar_por=curso&grupos=001&grupos=002`. O [frontend de comparações](docs/FRONTEND_COMPARACOES.md) permite escolher a dimensão e até 20 grupos, com barras horizontais, tabela de totais e qualidade e avisos de truncamento ou ausência. Para testar, selecione 2023 na seção **Comparação entre grupos**. Rankings permanecem pendentes.
 
 ## Executar a versão compilada
 

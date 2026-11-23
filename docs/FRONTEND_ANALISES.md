@@ -11,13 +11,13 @@ O módulo `frontend/src/modules/analises` consulta a [API de evolução temporal
 | `periodo.ts`          | Intervalo padrão, validação e serialização dos filtros |
 | `PainelEvolucao.tsx`  | Formulário, carregamento, falha e nova tentativa       |
 | `GraficoEvolucao.tsx` | Gráfico Recharts e tabela acessível                    |
-| `apresentacao.ts`     | Formatação de taxas e avisos anuais                    |
+| `apresentacao.ts`     | Formatação de taxas e avisos dos recortes              |
 
 Os tipos de seleção e resultado são compartilhados pela entrada pública de `indicadores`, sem importar implementações internas. O cliente HTTP é o mesmo dos outros módulos. Recharts é a biblioteca de gráficos prevista no documento do TCC. Os controles de período, mensagens de erro e tabela utilizam [Bootstrap com o tema da aplicação](FRONTEND_ESTILIZACAO.md). React controla eventos, validação e carregamento.
 
 ## Período e filtros
 
-Execute `pnpm dev:demo` e abra `http://127.0.0.1:5173/`. O gráfico aparece abaixo do resumo anual, no mesmo painel. **Atualizar dados** recarrega catálogo, resumo e evolução; **Limpar filtros** mantém o ano do resumo e o intervalo do gráfico, removendo os sete filtros opcionais.
+Execute `pnpm dev:demo` e abra `http://127.0.0.1:5173/`. O gráfico aparece abaixo do resumo anual, no mesmo painel. **Atualizar dados** recarrega catálogo, resumo, evolução e comparação; **Limpar filtros** mantém o ano do resumo e o intervalo do gráfico, removendo os sete filtros opcionais.
 
 O intervalo inicial vai do menor ao maior ano do catálogo, limitado aos últimos 30 anos. Os campos aceitam anos entre 1900 e 9999, inclusive anos sem registros. **Aplicar período** valida ordem e tamanho antes de consultar; editar os campos não altera a série já aplicada. Um intervalo escolhido é preservado ao atualizar os dados.
 
@@ -58,4 +58,4 @@ Teste também um único ano, lacunas entre anos, mudança rápida de filtros, fa
 
 Na verificação atual em Windows, `pnpm check` passou com 31 testes (21 do backend e 10 do frontend), incluindo o direcionamento de foco para correção do período. Na entrega inicial do gráfico, foram conferidos no navegador curso `001`, ano único, ruído negativo, base zero, somente docentes, rejeição de intervalo superior a 30 anos, apresentação em 390 px e recuperação após parar e reconstruir a Gold de demonstração com os grants reaplicados. A revisão de layout está descrita em [Estilização do frontend](FRONTEND_ESTILIZACAO.md).
 
-O build emite um aviso de bundle JavaScript acima de 500 kB após incluir Recharts; a medição de carregamento em conexão real e eventual divisão do bundle permanecem pendentes. A verificação global de Prettier aponta uma pendência anterior em `scripts/demo.mjs`; os arquivos desta entrega passam na verificação de formatação.
+O build emite um aviso de bundle JavaScript acima de 500 kB após incluir Recharts; a medição de carregamento em conexão real e eventual divisão do bundle permanecem pendentes. A pendência de formatação em `scripts/demo.mjs` foi resolvida no incremento de proteção da API pública. A verificação global atual passa.
