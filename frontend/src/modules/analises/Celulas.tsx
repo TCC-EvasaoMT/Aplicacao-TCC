@@ -29,14 +29,45 @@ export function CelulaTaxa({ valor }: { valor: number | null }) {
 	)
 }
 
-export function NotaTabela() {
+function baixarCsv(arquivo: string, conteudo: string) {
+	// O BOM faz o Excel reconhecer UTF-8 (acentos).
+	const blob = new Blob(['﻿', conteudo], {
+		type: 'text/csv;charset=utf-8'
+	})
+	const url = URL.createObjectURL(blob)
+	const link = document.createElement('a')
+	link.href = url
+	link.download = arquivo
+	document.body.append(link)
+	link.click()
+	link.remove()
+	setTimeout(() => URL.revokeObjectURL(url), 0)
+}
+
+export function NotaTabela({
+	exportar
+}: {
+	exportar?: { arquivo: string; rotulo: string; gerar: () => string }
+}) {
 	return (
-		<p className="filter-help table-note">
-			<span aria-hidden="true">...</span> dado não disponível; não equivale a
-			zero.{' '}
-			<span className="table-scroll-help">
-				Deslize a tabela para ver todas as colunas.
-			</span>
-		</p>
+		<div className="table-footer">
+			<p className="filter-help table-note">
+				<span aria-hidden="true">...</span> dado não disponível; não equivale a
+				zero.{' '}
+				<span className="table-scroll-help">
+					Deslize a tabela para ver todas as colunas.
+				</span>
+			</p>
+			{exportar && (
+				<button
+					className="btn btn-outline-success btn-sm"
+					type="button"
+					aria-label={exportar.rotulo}
+					onClick={() => baixarCsv(exportar.arquivo, exportar.gerar())}
+				>
+					Baixar CSV
+				</button>
+			)}
+		</div>
 	)
 }

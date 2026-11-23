@@ -29,6 +29,18 @@ interface Props {
 	onAnoChange: (ano: string) => void
 }
 
+// Repete "grupos" como lista; o limite é detalhe da consulta, não do recorte.
+function parametrosCsv(query: string) {
+	const parametros = new URLSearchParams(query)
+	const grupos = parametros.getAll('grupos').join(', ')
+	parametros.delete('grupos')
+	parametros.delete('limite')
+	return {
+		...Object.fromEntries(parametros),
+		...(grupos ? { grupos } : {})
+	}
+}
+
 const inicial: SelecaoComparacao = {
 	agrupar_por: 'categoria_administrativa',
 	grupos: []
@@ -230,7 +242,10 @@ export function PainelComparacoes({
 			{dados && dados.grupos.length > 0 && (
 				<LimiteErro mensagem="Não foi possível exibir o gráfico da comparação.">
 					<Suspense fallback={<GraficoCarregando />}>
-						<GraficoComparacoes grupos={dados.grupos} />
+						<GraficoComparacoes
+							grupos={dados.grupos}
+							parametros={parametrosCsv(query)}
+						/>
 					</Suspense>
 				</LimiteErro>
 			)}

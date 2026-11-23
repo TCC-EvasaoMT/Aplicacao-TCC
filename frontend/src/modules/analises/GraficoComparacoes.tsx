@@ -14,6 +14,7 @@ import { useMedia } from '../../lib/useMedia'
 import type { GrupoComparacao } from './api'
 import { avisosDoRecorte, escalaTaxas, formatarTaxa } from './apresentacao'
 import { CelulaNumero, CelulaTaxa, NotaTabela } from './Celulas'
+import { csvComparacao, descreverRecorte } from './exportacao'
 import { rotuloGrupo } from './comparacoes'
 
 const encurtar = (texto: string, limite: number) =>
@@ -28,7 +29,13 @@ const totais = [
 	['concluintes_total', 'Concluintes']
 ] as const
 
-export function GraficoComparacoes({ grupos }: { grupos: GrupoComparacao[] }) {
+interface Props {
+	grupos: GrupoComparacao[]
+	// Parâmetros da consulta, usados para descrever o recorte no CSV.
+	parametros: Record<string, string>
+}
+
+export function GraficoComparacoes({ grupos, parametros }: Props) {
 	const dados = grupos.map((grupo) => ({
 		...grupo,
 		rotulo: rotuloGrupo(grupo.grupo)
@@ -209,7 +216,13 @@ export function GraficoComparacoes({ grupos }: { grupos: GrupoComparacao[] }) {
 					</tbody>
 				</table>
 			</div>
-			<NotaTabela />
+			<NotaTabela
+				exportar={{
+					arquivo: `evasao-mt-comparacao-${parametros.agrupar_por}-${parametros.ano}.csv`,
+					rotulo: 'Baixar CSV da comparação entre grupos',
+					gerar: () => csvComparacao(grupos, descreverRecorte(parametros))
+				}}
+			/>
 		</>
 	)
 }

@@ -373,8 +373,16 @@ h3 {
 .temporal-table td.text-end {
 	white-space: nowrap;
 }
-.table-note {
+.table-footer {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px 16px;
 	margin-top: 8px;
+}
+.table-note {
+	margin: 0;
 }
 .table-scroll-help {
 	display: none;

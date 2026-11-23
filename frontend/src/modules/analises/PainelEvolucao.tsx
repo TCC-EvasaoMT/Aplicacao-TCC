@@ -188,7 +188,10 @@ export function PainelEvolucao({
 					</p>
 					<LimiteErro mensagem="Não foi possível exibir o gráfico da evolução temporal.">
 						<Suspense fallback={<GraficoCarregando />}>
-							<GraficoEvolucao serie={atual.dados.serie} />
+							<GraficoEvolucao
+								serie={atual.dados.serie}
+								parametros={Object.fromEntries(new URLSearchParams(query))}
+							/>
 						</Suspense>
 					</LimiteErro>
 				</>

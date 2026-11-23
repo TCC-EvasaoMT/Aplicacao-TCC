@@ -12,10 +12,17 @@ import {
 import type { PontoTemporal } from './api'
 import { avisosDoRecorte, escalaTaxas, formatarTaxa } from './apresentacao'
 import { CelulaNumero, CelulaTaxa, NotaTabela } from './Celulas'
+import { csvEvolucao, descreverRecorte } from './exportacao'
 
 type Taxa = keyof PontoTemporal['taxas']
 
-export function GraficoEvolucao({ serie }: { serie: PontoTemporal[] }) {
+interface Props {
+	serie: PontoTemporal[]
+	// Parâmetros da consulta, usados para descrever o recorte no CSV.
+	parametros: Record<string, string>
+}
+
+export function GraficoEvolucao({ serie, parametros }: Props) {
 	const temTaxas = serie.some(
 		(ponto) =>
 			ponto.taxas.evasao_curso !== null || ponto.taxas.evasao_ies !== null
@@ -183,7 +190,13 @@ export function GraficoEvolucao({ serie }: { serie: PontoTemporal[] }) {
 					</tbody>
 				</table>
 			</div>
-			<NotaTabela />
+			<NotaTabela
+				exportar={{
+					arquivo: `evasao-mt-evolucao-${parametros.ano_inicial}-${parametros.ano_final}.csv`,
+					rotulo: 'Baixar CSV da evolução temporal',
+					gerar: () => csvEvolucao(serie, descreverRecorte(parametros))
+				}}
+			/>
 		</>
 	)
 }
