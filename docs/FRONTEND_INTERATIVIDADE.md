@@ -23,22 +23,23 @@ Sem essa regra, clicar numa barra deixaria uma barra só no gráfico clicado. É
 
 ## Variação contra o ano anterior
 
-Os cartões do resumo mostram a variação contra o ano anterior com os mesmos filtros. O painel consulta `GET /api/v1/indicadores/resumo` também com `ano` menos um, em paralelo. A rota responde mesmo para anos fora do catálogo, com `sem_dados`.
+Os cartões do resumo mostram a variação contra o ano anterior com os mesmos filtros. O painel consulta `GET /api/v1/indicadores/resumo` também com `ano` menos um, numa chamada separada: o resumo aparece assim que chega e a variação depois. O ano anterior só é consultado se estiver no catálogo; fora dele, os cartões mostram "sem comparação" sem chamada extra.
 
 - Taxas: diferença em pontos percentuais (`▲ 5 p.p. ante 2022`).
 - Totais: variação relativa, só com base anterior positiva (`▼ 90% ante 2022`).
 - Valor ausente em qualquer ano: "sem comparação", nunca zero. Falha na consulta do ano anterior não afeta o resumo.
+- Um clique num grupo gera três consultas (resumo, ano anterior e evolução; a comparação não muda). A API limita a 120 consultas por minuto por IP; ao receber 429, os painéis pedem para aguardar alguns segundos.
 - Setas em texto e cor neutra: o painel não classifica a mudança como boa ou ruim.
 
 É uma comparação de valores já calculados pela API; as fórmulas de evasão não mudam. Censos de anos diferentes não acompanham a mesma coorte.
 
 ## Faixa do recorte
 
-Abaixo do cartão de filtros, uma faixa fica fixa no topo ao rolar a página. Mostra o ano, os filtros ativos (removíveis) e as duas taxas do recorte. Assim, quem clica num gráfico mais abaixo vê o efeito sem voltar ao início. No celular as taxas saem da faixa e, com mais de um filtro, os excedentes ficam em **+N**. Mudanças de filtro são anunciadas numa região `role="status"`.
+Abaixo do cartão de filtros, uma faixa fica fixa no topo ao rolar a página. Mostra o ano, os filtros ativos (removíveis) e as duas taxas do recorte. Assim, quem clica num gráfico mais abaixo vê o efeito sem voltar ao início. No celular as taxas saem da faixa e, com mais de um filtro, a faixa fica numa linha: o valor do primeiro filtro (o campo fica no `title` e no ×) e **+N**. A lista aberta mostra todos os filtros e **Limpar tudo**, e recolhe ao rolar a página ou ao mudar um filtro. Mudanças feitas pela pessoa (filtro aplicado, removido ou ano escolhido) são anunciadas numa região `role="status"`; ajustes automáticos, como um link antigo saneado, não.
 
 ## Recarga sem piscar
 
-Ao mudar o recorte, cada painel mantém os dados anteriores esmaecidos (`.is-refreshing`) até a resposta chegar, em vez de trocar o conteúdo por "Carregando". O texto de carregamento só aparece na primeira consulta.
+Ao mudar o recorte, cada painel mantém os dados anteriores esmaecidos (`.is-refreshing`, com `aria-busy`) até a resposta chegar, em vez de trocar o conteúdo por "Carregando". O texto de carregamento aparece na primeira consulta e quando o último resumo exibido estava sem dados (`exibicao`, em `lib/exibicao.ts`).
 
 ## Ligação entre gráfico e tabela
 
@@ -51,11 +52,12 @@ Passar o mouse numa barra ou num ano destaca a linha da tabela; passar o mouse o
 - `variacao.ts` (indicadores): `variacaoTaxa` e `variacaoTotal`, com arredondamento simétrico.
 - `apresentacao.ts`: `anoNoClique` acha o ano pela posição horizontal do clique. O índice ativo do tooltip do Recharts chega atrasado em toques rápidos e o ponto sob o cursor é redesenhado ao passar o mouse, por isso o clique não depende dele.
 - Na comparação, o clique fica na própria barra (`onClick` do `Bar`) e no nome do grupo no eixo, que dão o índice exato.
-- `ChipsFiltros.tsx`: faixa do recorte. `PainelIndicadores` guarda o histórico das mudanças para desfazer.
+- `ChipsFiltros.tsx`: faixa do recorte. `PainelIndicadores` guarda o histórico das mudanças para desfazer (`empilhar`) e monta o anúncio (`anuncioMudanca`, em `filtros.ts`).
+- `lib/http.ts`: `ErroHttp` guarda o status; `mensagemErro` dá a orientação própria do 429.
 
 ## Verificação
 
-`pnpm test` cobre a omissão do filtro da própria dimensão, o clique que aplica e remove, grupo sem identificador, filtros ativos, ano escolhido no gráfico, ano pela posição do clique e as variações (ausência, base zero e arredondamento).
+`pnpm test` cobre a omissão do filtro da própria dimensão, o clique que aplica e remove, grupo sem identificador, filtros ativos, ano escolhido no gráfico, ano pela posição do clique, as variações (ausência, base zero e arredondamento), o anúncio das mudanças, o dado exibido durante a recarga, o histórico para desfazer e a mensagem do 429. O descarte de respostas antigas (AbortController) foi conferido no navegador, não por teste automatizado.
 
 Com a demonstração, use `?agrupar_por=curso`:
 
