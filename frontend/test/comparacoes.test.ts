@@ -83,7 +83,7 @@ test('sete dimensões usam o catálogo correto, distinguindo oferta e sede', () 
 		assert.deepEqual(opcoesComparacao(null, dimensao), [])
 	}
 	assert.deepEqual(opcoesComparacao(catalogo, 'curso'), [
-		{ valor: '001', rotulo: '001 — Pedagogia' },
+		{ valor: '001', rotulo: 'Pedagogia (001)' },
 		{ valor: '002', rotulo: '002' }
 	])
 	assert.equal(

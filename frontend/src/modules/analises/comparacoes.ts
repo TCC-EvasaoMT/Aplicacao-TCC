@@ -49,7 +49,7 @@ export function rotuloGrupo(grupo: {
 }) {
 	if (grupo.valor === null) return 'Não informado (sem identificador)'
 	return grupo.nome && grupo.nome !== grupo.valor
-		? `${grupo.valor} — ${grupo.nome}`
+		? `${grupo.nome} (${grupo.valor})`
 		: grupo.valor
 }
 

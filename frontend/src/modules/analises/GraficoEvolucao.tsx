@@ -56,7 +56,7 @@ export function GraficoEvolucao({ serie }: { serie: PontoTemporal[] }) {
 								}
 								labelFormatter={(ano) => `Ano ${ano}`}
 							/>
-							<Legend />
+							<Legend itemSorter={null} />
 							<Line
 								name="Evasão do curso"
 								dataKey="taxas.evasao_curso"

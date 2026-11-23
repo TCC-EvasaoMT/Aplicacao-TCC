@@ -83,7 +83,7 @@ export function GraficoComparacoes({ grupos }: { grupos: GrupoComparacao[] }) {
 												: 'Não disponível'
 										}
 									/>
-									<Legend />
+									<Legend itemSorter={null} />
 									<ReferenceLine x={0} stroke="var(--panel-muted)" />
 									<Bar
 										name="Evasão do curso"

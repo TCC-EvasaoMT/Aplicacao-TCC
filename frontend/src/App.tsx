@@ -7,8 +7,11 @@ export function App() {
 				Ir para o conteúdo
 			</a>
 			<header className="topbar">
-				<a className="brand" href="/" aria-label="Evasão MT, início">
-					<span className="brand-mark">MT</span> Evasão MT
+				<a className="brand" href="/">
+					<span className="brand-mark" aria-hidden="true">
+						MT
+					</span>{' '}
+					Evasão MT
 				</a>
 				<span className="project-label">Ensino superior público</span>
 			</header>
