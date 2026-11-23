@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
+import { LimiteErro } from '../../lib/LimiteErro'
 import type { Catalogo } from '../catalogos'
 import type { SelecaoFiltros } from '../indicadores'
 import { consultarComparacao, type Comparacao } from './api'
@@ -10,8 +11,13 @@ import {
 	type DimensaoComparacao,
 	type SelecaoComparacao
 } from './comparacoes'
-import { GraficoComparacoes } from './GraficoComparacoes'
 import { SeletorGrupos } from './SeletorGrupos'
+
+// Recharts fica em um chunk separado; o download começa junto com a consulta.
+const carregarGrafico = () => import('./GraficoComparacoes')
+const GraficoComparacoes = lazy(() =>
+	carregarGrafico().then((modulo) => ({ default: modulo.GraficoComparacoes }))
+)
 
 interface Props {
 	catalogo: Catalogo | null
@@ -52,6 +58,10 @@ export function PainelComparacoes({
 	const dados = podeConsultar ? atual?.dados : undefined
 	const carregando = podeConsultar && !atual
 	const ausentes = dados ? gruposAusentes(aplicado.grupos, dados.grupos) : []
+
+	useEffect(() => {
+		carregarGrafico().catch(() => {})
+	}, [])
 
 	useEffect(() => {
 		if (!podeConsultar) return
@@ -212,7 +222,11 @@ export function PainelComparacoes({
 				)}
 			</div>
 			{dados && dados.grupos.length > 0 && (
-				<GraficoComparacoes grupos={dados.grupos} />
+				<LimiteErro mensagem="Não foi possível exibir o gráfico da comparação.">
+					<Suspense fallback={<p className="state">Carregando gráfico…</p>}>
+						<GraficoComparacoes grupos={dados.grupos} />
+					</Suspense>
+				</LimiteErro>
 			)}
 			<p className="filter-help">
 				Características institucionais podem reunir várias IES. Municípios de

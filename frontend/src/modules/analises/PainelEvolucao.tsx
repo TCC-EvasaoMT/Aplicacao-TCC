@@ -1,7 +1,14 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react'
+import {
+	lazy,
+	Suspense,
+	useEffect,
+	useRef,
+	useState,
+	type FormEvent
+} from 'react'
+import { LimiteErro } from '../../lib/LimiteErro'
 import type { SelecaoFiltros } from '../indicadores'
 import { consultarEvolucao, type EvolucaoTemporal } from './api'
-import { GraficoEvolucao } from './GraficoEvolucao'
 import {
 	periodoInicial,
 	campoInvalidoPeriodo,
@@ -9,6 +16,12 @@ import {
 	validarPeriodo,
 	type Periodo
 } from './periodo'
+
+// Recharts fica em um chunk separado; o download começa junto com a consulta.
+const carregarGrafico = () => import('./GraficoEvolucao')
+const GraficoEvolucao = lazy(() =>
+	carregarGrafico().then((modulo) => ({ default: modulo.GraficoEvolucao }))
+)
 
 interface Props {
 	anos: number[]
@@ -43,6 +56,10 @@ export function PainelEvolucao({
 	const podeConsultar =
 		!indisponivel && anos.length > 0 && !validarPeriodo(aplicado)
 	const chave = `${atualizacao}:${tentativa}:${query}`
+
+	useEffect(() => {
+		carregarGrafico().catch(() => {})
+	}, [])
 
 	useEffect(() => {
 		if (!podeConsultar) return
@@ -168,7 +185,11 @@ export function PainelEvolucao({
 					<p className="filter-count">
 						Período aplicado: {aplicado.ano_inicial}–{aplicado.ano_final}
 					</p>
-					<GraficoEvolucao serie={atual.dados.serie} />
+					<LimiteErro mensagem="Não foi possível exibir o gráfico da evolução temporal.">
+						<Suspense fallback={<p className="state">Carregando gráfico…</p>}>
+							<GraficoEvolucao serie={atual.dados.serie} />
+						</Suspense>
+					</LimiteErro>
 				</>
 			)}
 		</section>
