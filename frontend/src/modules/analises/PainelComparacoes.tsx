@@ -9,6 +9,7 @@ import { gravarUrl, lerUrl } from '../../lib/url'
 import {
 	comparacaoPadrao,
 	dimensoesComparacao,
+	grupoEmDestaque,
 	gruposAusentes,
 	lerComparacao,
 	opcoesComparacao,
@@ -69,6 +70,15 @@ export function PainelComparacoes({
 	const dados = podeConsultar ? atual?.dados : undefined
 	const carregando = podeConsultar && !atual
 	const ausentes = dados ? gruposAusentes(aplicado.grupos, dados.grupos) : []
+	const destaque = grupoEmDestaque(aplicado.agrupar_por, selecao)
+	const rotuloDestaque =
+		opcoesComparacao(catalogo, aplicado.agrupar_por).find(
+			(opcao) => opcao.valor === destaque
+		)?.rotulo ?? destaque
+	const destaqueAusente =
+		!!destaque &&
+		!!dados &&
+		!dados.grupos.some(({ grupo }) => grupo.valor === destaque)
 
 	useEffect(() => {
 		carregarGrafico().catch(() => {})
@@ -221,12 +231,17 @@ export function PainelComparacoes({
 						<p className="filter-help">
 							Ordem por código ou atributo, sem ranking de evasão.
 						</p>
-						{selecao[dimensao.filtro] && (
+						{destaque && (
+							<p className="filter-help">
+								{dimensao.rotulo} {rotuloDestaque} em destaque. Os demais grupos
+								seguem visíveis para comparar; resumo e evolução mostram só esse
+								grupo.
+							</p>
+						)}
+						{destaqueAusente && (
 							<p className="quality">
-								O filtro global de {dimensao.rotulo.toLocaleLowerCase('pt-BR')}{' '}
-								está ativo ({selecao[dimensao.filtro]}). Ele limita os grupos
-								desta comparação. Ajuste-o nos filtros do painel para ampliar o
-								recorte.
+								{rotuloDestaque} não aparece nesta comparação: não tem registros
+								neste ano e recorte ou ficou fora dos grupos exibidos.
 							</p>
 						)}
 						{dados.truncado && (

@@ -1,4 +1,4 @@
-import type { Catalogo } from '../catalogos'
+import type { Catalogo, OpcaoCodigo } from '../catalogos'
 
 export const camposFiltro = [
 	{ chave: 'codigo_curso', catalogo: 'cursos', rotulo: 'Curso' },
@@ -46,6 +46,53 @@ export function limparFiltros(ano = ''): SelecaoFiltros {
 		codigo_municipio_oferta: '',
 		codigo_municipio_sede: ''
 	}
+}
+
+export type CampoFiltro = (typeof camposFiltro)[number]['chave']
+
+export function rotuloOpcao(opcao: string | OpcaoCodigo) {
+	return typeof opcao === 'string'
+		? opcao
+		: `${opcao.nome ?? 'Nome não informado'} (${opcao.codigo})`
+}
+
+export interface FiltroAtivo {
+	chave: CampoFiltro
+	campo: string
+	texto: string
+}
+
+// Filtros aplicados, na ordem dos campos, com o rótulo do catálogo
+// ("Curso: Pedagogia (001)"). Valor fora do catálogo aparece como veio.
+export function filtrosAtivos(
+	selecao: SelecaoFiltros,
+	catalogo: Catalogo | null
+): FiltroAtivo[] {
+	return camposFiltro.flatMap((campo) => {
+		const valor = selecao[campo.chave]
+		if (!valor) return []
+		const opcao = (catalogo?.[campo.catalogo] ?? []).find(
+			(item) => (typeof item === 'string' ? item : item.codigo) === valor
+		)
+		return [
+			{
+				chave: campo.chave,
+				campo: campo.rotulo,
+				texto: opcao ? rotuloOpcao(opcao) : valor
+			}
+		]
+	})
+}
+
+// Ano escolhido no gráfico: só anos do catálogo entram no resumo.
+export function selecionarAno(
+	selecao: SelecaoFiltros,
+	ano: number,
+	anos: number[]
+): SelecaoFiltros {
+	return anos.includes(ano) && selecao.ano !== String(ano)
+		? { ...selecao, ano: String(ano) }
+		: selecao
 }
 
 // Seleção inicial a partir da URL; valores fora do catálogo são removidos

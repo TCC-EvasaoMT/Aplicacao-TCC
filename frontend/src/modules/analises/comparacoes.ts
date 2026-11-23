@@ -90,12 +90,41 @@ export function alternarGrupo(grupos: string[], valor: string): string[] {
 	return grupos.length < limiteGrupos ? [...grupos, valor] : grupos
 }
 
+// Filtragem cruzada: o filtro da dimensão agrupada não restringe a própria
+// comparação. Ele destaca o grupo, e os demais seguem visíveis para comparar;
+// resumo e evolução recebem o filtro normalmente.
+export function filtroDaDimensao(dimensao: DimensaoComparacao) {
+	return dimensoesComparacao[dimensao].filtro
+}
+
+export function grupoEmDestaque(
+	dimensao: DimensaoComparacao,
+	selecao: SelecaoFiltros
+): string {
+	return selecao[filtroDaDimensao(dimensao)]
+}
+
+// Clique numa barra ou no botão da tabela: aplica o grupo como filtro e, se
+// ele já estava aplicado, remove. Grupo sem identificador não é filtrável.
+export function alternarFiltroGrupo(
+	selecao: SelecaoFiltros,
+	dimensao: DimensaoComparacao,
+	valor: string | null
+): SelecaoFiltros {
+	if (valor === null) return selecao
+	const filtro = filtroDaDimensao(dimensao)
+	return { ...selecao, [filtro]: selecao[filtro] === valor ? '' : valor }
+}
+
 export function serializarComparacao(
 	comparacao: SelecaoComparacao,
 	selecao: SelecaoFiltros
 ) {
+	const propria = filtroDaDimensao(comparacao.agrupar_por)
 	const query = new URLSearchParams(
-		Object.entries(selecao).filter(([, valor]) => valor !== '')
+		Object.entries(selecao).filter(
+			([chave, valor]) => valor !== '' && chave !== propria
+		)
 	)
 	query.set('agrupar_por', comparacao.agrupar_por)
 	query.set('limite', String(limiteGrupos))

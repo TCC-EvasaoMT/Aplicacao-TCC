@@ -1,8 +1,10 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import {
+	alternarFiltroGrupo,
 	alternarGrupo,
 	dimensoesComparacao,
+	grupoEmDestaque,
 	gruposAusentes,
 	opcoesComparacao,
 	rotuloGrupo,
@@ -25,7 +27,7 @@ const catalogo: Catalogo = {
 	organizacoes_academicas: ['Universidade']
 }
 
-test('serializa ano, sete filtros e grupos sem perder zeros ou remover filtro da dimensão', () => {
+test('serializa ano, filtros e grupos sem perder zeros; omite só o filtro da dimensão agrupada', () => {
 	const selecao = {
 		...limparFiltros('2023'),
 		codigo_curso: '001',
@@ -43,7 +45,7 @@ test('serializa ano, sete filtros e grupos sem perder zeros ou remover filtro da
 		)
 	)
 	for (const [campo, valor] of Object.entries(selecao))
-		assert.equal(query.get(campo), valor)
+		assert.equal(query.get(campo), campo === 'codigo_curso' ? null : valor)
 	assert.deepEqual(query.getAll('grupos'), ['001', '002'])
 	assert.equal(query.get('limite'), '20')
 	assert.equal(query.get('agrupar_por'), 'curso')
@@ -132,5 +134,37 @@ test('rótulos preservam código sem nome e distinguem identificador nulo do tex
 	assert.equal(
 		rotuloGrupo({ valor: 'Não informado', nome: 'Não informado' }),
 		'Não informado'
+	)
+})
+
+test('filtro da dimensão agrupada destaca o grupo sem restringir a comparação', () => {
+	const selecao = { ...limparFiltros('2023'), modalidade: 'Presencial' }
+	const porModalidade = new URLSearchParams(
+		serializarComparacao({ agrupar_por: 'modalidade', grupos: [] }, selecao)
+	)
+	assert.equal(porModalidade.get('modalidade'), null)
+	assert.equal(grupoEmDestaque('modalidade', selecao), 'Presencial')
+	const porCurso = new URLSearchParams(
+		serializarComparacao({ agrupar_por: 'curso', grupos: [] }, selecao)
+	)
+	assert.equal(porCurso.get('modalidade'), 'Presencial')
+	assert.equal(grupoEmDestaque('curso', selecao), '')
+})
+
+test('clique no grupo aplica o filtro, repetir remove e grupo sem identificador não filtra', () => {
+	const inicial = limparFiltros('2023')
+	const comCurso = alternarFiltroGrupo(inicial, 'curso', '001')
+	assert.equal(comCurso.codigo_curso, '001')
+	assert.equal(comCurso.ano, '2023')
+	assert.equal(
+		alternarFiltroGrupo(comCurso, 'curso', '002').codigo_curso,
+		'002'
+	)
+	assert.deepEqual(alternarFiltroGrupo(comCurso, 'curso', '001'), inicial)
+	assert.equal(alternarFiltroGrupo(inicial, 'area_geral', null), inicial)
+	assert.equal(
+		alternarFiltroGrupo(inicial, 'municipio_sede', '5108402')
+			.codigo_municipio_sede,
+		'5108402'
 	)
 })
