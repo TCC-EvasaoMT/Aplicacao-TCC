@@ -2,6 +2,7 @@ import {
 	Bar,
 	BarChart,
 	CartesianGrid,
+	LabelList,
 	Legend,
 	ReferenceLine,
 	ResponsiveContainer,
@@ -9,9 +10,15 @@ import {
 	XAxis,
 	YAxis
 } from 'recharts'
+import { useMedia } from '../../lib/useMedia'
 import type { GrupoComparacao } from './api'
-import { avisosDoRecorte, formatarTaxa } from './apresentacao'
+import { avisosDoRecorte, escalaTaxas, formatarTaxa } from './apresentacao'
 import { rotuloGrupo } from './comparacoes'
+
+const encurtar = (texto: string, limite: number) =>
+	texto.length > limite ? `${texto.slice(0, limite - 1)}…` : texto
+const rotuloBarra = (valor: unknown) =>
+	typeof valor === 'number' ? formatarTaxa(valor) : ''
 
 const numero = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 })
 const totais = [
@@ -29,6 +36,10 @@ export function GraficoComparacoes({ grupos }: { grupos: GrupoComparacao[] }) {
 	const temTaxas = grupos.some(
 		({ taxas }) => taxas.evasao_curso !== null || taxas.evasao_ies !== null
 	)
+	const estreito = useMedia('(max-width: 575px)')
+	const escala = escalaTaxas(
+		grupos.flatMap(({ taxas }) => [taxas.evasao_curso, taxas.evasao_ies])
+	)
 	return (
 		<>
 			{temTaxas ? (
@@ -37,72 +48,98 @@ export function GraficoComparacoes({ grupos }: { grupos: GrupoComparacao[] }) {
 					aria-label="Taxas de evasão por grupo"
 					aria-describedby="comparacao-leitura"
 				>
-					<p className="filter-help comparison-scroll-help">
-						Deslize o gráfico para ver toda a escala. A tabela abaixo também
-						permite rolagem horizontal.
-					</p>
-					<div
-						className="comparison-chart-scroll"
-						role="region"
-						aria-label="Gráfico comparativo com rolagem horizontal"
-						tabIndex={0}
+					<ResponsiveContainer
+						width="100%"
+						height={Math.max(220, grupos.length * (estreito ? 88 : 72) + 80)}
 					>
-						<div className="comparison-chart">
-							<ResponsiveContainer
-								width="100%"
-								height={Math.max(220, grupos.length * 72 + 80)}
+						<BarChart
+							data={dados}
+							layout="vertical"
+							accessibilityLayer
+							barGap={4}
+							margin={{ top: 8, right: 56, bottom: 8, left: 0 }}
+						>
+							<CartesianGrid strokeDasharray="3 3" horizontal={false} />
+							<XAxis
+								type="number"
+								domain={escala.dominio}
+								ticks={escala.marcas}
+								tickFormatter={formatarTaxa}
+							/>
+							{estreito ? (
+								// Em telas estreitas, o nome do grupo fica acima das barras,
+								// liberando a largura para a escala.
+								<YAxis
+									type="category"
+									dataKey="rotulo"
+									width={1}
+									interval={0}
+									tickLine={false}
+									tick={(props: {
+										y?: number | string
+										payload?: { value?: unknown }
+									}) => (
+										<text
+											x={4}
+											y={Number(props.y) - 26}
+											fill="var(--panel-ink)"
+											fontSize={13}
+											fontWeight={600}
+										>
+											{encurtar(String(props.payload?.value ?? ''), 38)}
+										</text>
+									)}
+								/>
+							) : (
+								<YAxis
+									type="category"
+									dataKey="rotulo"
+									width={150}
+									interval={0}
+									tickFormatter={(valor: string) => encurtar(valor, 22)}
+								/>
+							)}
+							<Tooltip
+								formatter={(valor) =>
+									typeof valor === 'number'
+										? formatarTaxa(valor)
+										: 'Não disponível'
+								}
+							/>
+							<Legend itemSorter={null} />
+							<ReferenceLine x={0} stroke="var(--panel-muted)" />
+							<Bar
+								name="Evasão do curso"
+								dataKey="taxas.evasao_curso"
+								fill="var(--panel-green)"
+								maxBarSize={20}
+								isAnimationActive={false}
 							>
-								<BarChart
-									data={dados}
-									layout="vertical"
-									accessibilityLayer
-									margin={{ top: 8, right: 36, bottom: 8, left: 0 }}
-								>
-									<CartesianGrid strokeDasharray="3 3" horizontal={false} />
-									<XAxis
-										type="number"
-										domain={([minimo, maximo]: readonly [number, number]) => [
-											Math.min(0, minimo),
-											Math.max(0, maximo)
-										]}
-										tickFormatter={formatarTaxa}
-									/>
-									<YAxis
-										type="category"
-										dataKey="rotulo"
-										width={150}
-										interval={0}
-										tickFormatter={(valor: string) =>
-											valor.length > 22 ? `${valor.slice(0, 21)}…` : valor
-										}
-									/>
-									<Tooltip
-										formatter={(valor) =>
-											typeof valor === 'number'
-												? formatarTaxa(valor)
-												: 'Não disponível'
-										}
-									/>
-									<Legend itemSorter={null} />
-									<ReferenceLine x={0} stroke="var(--panel-muted)" />
-									<Bar
-										name="Evasão do curso"
-										dataKey="taxas.evasao_curso"
-										fill="var(--panel-green)"
-										maxBarSize={18}
-										isAnimationActive={false}
-									/>
-									<Bar
-										name="Evasão da instituição"
-										dataKey="taxas.evasao_ies"
-										fill="var(--panel-secondary)"
-										maxBarSize={18}
-										isAnimationActive={false}
-									/>
-								</BarChart>
-							</ResponsiveContainer>
-						</div>
-					</div>
+								<LabelList
+									dataKey="taxas.evasao_curso"
+									position="right"
+									formatter={rotuloBarra}
+									fill="var(--panel-ink)"
+									fontSize={12}
+								/>
+							</Bar>
+							<Bar
+								name="Evasão da instituição"
+								dataKey="taxas.evasao_ies"
+								fill="var(--panel-secondary)"
+								maxBarSize={20}
+								isAnimationActive={false}
+							>
+								<LabelList
+									dataKey="taxas.evasao_ies"
+									position="right"
+									formatter={rotuloBarra}
+									fill="var(--panel-ink)"
+									fontSize={12}
+								/>
+							</Bar>
+						</BarChart>
+					</ResponsiveContainer>
 					<figcaption className="filter-help" id="comparacao-leitura">
 						Em cada grupo, a primeira barra representa a evasão do curso; a
 						segunda, da instituição. Taxas indisponíveis ficam sem barra.

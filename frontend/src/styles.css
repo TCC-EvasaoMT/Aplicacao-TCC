@@ -339,15 +339,6 @@ h3 {
 	margin: 24px 0 8px;
 	font-weight: 600;
 }
-.comparison-chart-scroll {
-	overflow-x: auto;
-}
-.comparison-scroll-help {
-	display: none;
-}
-.comparison-chart {
-	min-width: 520px;
-}
 .comparison-table th:first-child {
 	min-width: 180px;
 	max-width: 280px;
@@ -390,9 +381,6 @@ footer {
 	}
 }
 @media (max-width: 575px) {
-	.comparison-scroll-help {
-		display: block;
-	}
 	main {
 		padding-top: 24px;
 	}

@@ -3,15 +3,17 @@ import {
 	Legend,
 	Line,
 	LineChart,
+	ReferenceLine,
 	ResponsiveContainer,
 	Tooltip,
 	XAxis,
 	YAxis
 } from 'recharts'
 import type { PontoTemporal } from './api'
-import { avisosDoRecorte, formatarTaxa } from './apresentacao'
+import { avisosDoRecorte, escalaTaxas, formatarTaxa } from './apresentacao'
 
 const numero = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 })
+type Taxa = keyof PontoTemporal['taxas']
 
 export function GraficoEvolucao({ serie }: { serie: PontoTemporal[] }) {
 	const temTaxas = serie.some(
@@ -19,6 +21,35 @@ export function GraficoEvolucao({ serie }: { serie: PontoTemporal[] }) {
 			ponto.taxas.evasao_curso !== null || ponto.taxas.evasao_ies !== null
 	)
 	const anos = serie.map((ponto) => ponto.ano)
+	const escala = escalaTaxas(
+		serie.flatMap((ponto) => [ponto.taxas.evasao_curso, ponto.taxas.evasao_ies])
+	)
+	// Um ponto sem vizinhos não forma linha; o valor aparece ao lado dele.
+	function rotuloIsolado(taxa: Taxa, cor: string, deslocamento: number) {
+		return (props: {
+			x?: number | string
+			y?: number | string
+			index?: number
+		}) => {
+			const indice = props.index ?? -1
+			const valor = serie[indice]?.taxas[taxa] ?? null
+			const isolado =
+				(serie[indice - 1]?.taxas[taxa] ?? null) === null &&
+				(serie[indice + 1]?.taxas[taxa] ?? null) === null
+			if (valor === null || !isolado || props.x === undefined) return <g />
+			return (
+				<text
+					x={Number(props.x) + 10}
+					y={Number(props.y ?? 0) + deslocamento}
+					fill={cor}
+					fontSize={13}
+					fontWeight={600}
+				>
+					{formatarTaxa(valor)}
+				</text>
+			)
+		}
+	}
 	return (
 		<>
 			{temTaxas ? (
@@ -42,12 +73,17 @@ export function GraficoEvolucao({ serie }: { serie: PontoTemporal[] }) {
 								minTickGap={24}
 								allowDecimals={false}
 								tickFormatter={String}
+								padding={{ left: 24, right: 24 }}
 							/>
 							<YAxis
-								domain={['auto', 'auto']}
+								// A escala inclui o zero, como na comparação, para não
+								// ampliar diferenças pequenas entre os anos.
+								domain={escala.dominio}
+								ticks={escala.marcas}
 								width={72}
 								tickFormatter={formatarTaxa}
 							/>
+							<ReferenceLine y={0} stroke="var(--panel-muted)" />
 							<Tooltip
 								formatter={(valor) =>
 									typeof valor === 'number'
@@ -64,6 +100,7 @@ export function GraficoEvolucao({ serie }: { serie: PontoTemporal[] }) {
 								stroke="var(--panel-green)"
 								strokeWidth={3}
 								dot={{ r: 4 }}
+								label={rotuloIsolado('evasao_curso', 'var(--panel-green)', -8)}
 								connectNulls={false}
 								isAnimationActive={false}
 							/>
@@ -75,6 +112,11 @@ export function GraficoEvolucao({ serie }: { serie: PontoTemporal[] }) {
 								strokeWidth={3}
 								strokeDasharray="6 4"
 								dot={{ r: 4, strokeDasharray: '0' }}
+								label={rotuloIsolado(
+									'evasao_ies',
+									'var(--panel-secondary)',
+									18
+								)}
 								connectNulls={false}
 								isAnimationActive={false}
 							/>

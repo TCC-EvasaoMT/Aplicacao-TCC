@@ -9,6 +9,32 @@ export function formatarTaxa(valor: number | null): string {
 	return valor === null ? 'Não disponível' : percentual.format(valor)
 }
 
+// Escala dos gráficos de taxas: sempre inclui o zero e usa passos
+// arredondados (1, 2, 2,5 ou 5 vezes uma potência de 10), com até seis
+// intervalos. Não altera os valores; só define eixo e marcas.
+export function escalaTaxas(valores: (number | null)[]): {
+	dominio: [number, number]
+	marcas: number[]
+} {
+	const numeros = valores.filter(
+		(valor): valor is number => valor !== null && Number.isFinite(valor)
+	)
+	const minimo = Math.min(0, ...numeros)
+	const maximo = Math.max(0, ...numeros)
+	const bruto = (maximo - minimo) / 5 || 0.01
+	const potencia = 10 ** Math.floor(Math.log10(bruto))
+	const passo =
+		[1, 2, 2.5, 5, 10]
+			.map((fator) => fator * potencia)
+			.find((candidato) => candidato >= bruto - 1e-12) ?? 10 * potencia
+	const inicio = Math.floor(minimo / passo + 1e-9)
+	const fim = Math.max(inicio + 1, Math.ceil(maximo / passo - 1e-9))
+	const marcas: number[] = []
+	for (let indice = inicio; indice <= fim; indice++)
+		marcas.push(Number((indice * passo).toPrecision(12)))
+	return { dominio: [marcas[0] ?? 0, marcas.at(-1) ?? passo], marcas }
+}
+
 export function avisosDoRecorte(
 	ponto: Pick<Resumo, 'base_risco' | 'qualidade'>
 ): string[] {

@@ -8,6 +8,7 @@ import {
 } from '../src/modules/analises/periodo.ts'
 import {
 	avisosDoRecorte,
+	escalaTaxas,
 	formatarTaxa
 } from '../src/modules/analises/apresentacao.ts'
 import type { PontoTemporal } from '../src/modules/analises/api.ts'
@@ -161,4 +162,19 @@ test('avisos distinguem ausência, somente docentes, base zero, ruído e grupos 
 		}),
 		['Dados incompletos', 'Valores negativos na origem', 'Base inferior a 30']
 	)
+})
+
+test('escala das taxas inclui o zero, usa passos arredondados e acomoda negativos', () => {
+	assert.deepEqual(escalaTaxas([0.1, 0.09, null]), {
+		dominio: [0, 0.1],
+		marcas: [0, 0.02, 0.04, 0.06, 0.08, 0.1]
+	})
+	assert.deepEqual(escalaTaxas([0.1, 0.15]).marcas, [0, 0.05, 0.1, 0.15])
+	assert.deepEqual(escalaTaxas([0.0366, -0.122]), {
+		dominio: [-0.15, 0.05],
+		marcas: [-0.15, -0.1, -0.05, 0, 0.05]
+	})
+	assert.deepEqual(escalaTaxas([1.5]).dominio, [0, 1.5])
+	assert.deepEqual(escalaTaxas([null, null]).dominio, [0, 0.01])
+	assert.deepEqual(escalaTaxas([0]).dominio, [0, 0.01])
 })
