@@ -1,4 +1,6 @@
 import { Component, type ReactNode } from 'react'
+import { Button } from 'primereact/button'
+import { Message } from 'primereact/message'
 
 interface Props {
 	mensagem: string
@@ -17,16 +19,20 @@ export class LimiteErro extends Component<Props, { falhou: boolean }> {
 	render() {
 		if (!this.state.falhou) return this.props.children
 		return (
-			<div className="alert alert-danger" role="alert">
-				<p>{this.props.mensagem}</p>
-				<button
-					className="btn btn-outline-success btn-sm"
-					type="button"
-					onClick={() => window.location.reload()}
-				>
-					Recarregar página
-				</button>
-			</div>
+			<Message
+				severity="error"
+				content={
+					<>
+						<p className="mb-3">{this.props.mensagem}</p>
+						<Button
+							label="Recarregar página"
+							outlined
+							size="small"
+							onClick={() => window.location.reload()}
+						/>
+					</>
+				}
+			/>
 		)
 	}
 }

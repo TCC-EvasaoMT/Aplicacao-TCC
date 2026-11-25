@@ -21,7 +21,17 @@ import {
 	formatarTaxa,
 	ordemSeries
 } from './apresentacao'
-import { CelulaNumero, CelulaTaxa, NotaTabela } from './Celulas'
+import { Ajuda, classes, cx } from '../../lib/ui'
+import {
+	CelulaNumero,
+	CelulaTaxa,
+	classesLinha,
+	classesLinkFiltro,
+	classesTabela,
+	ListaAvisos,
+	NotaTabela,
+	Tabela
+} from './Celulas'
 import { csvComparacao, descreverRecorte } from './exportacao'
 import { rotuloGrupo } from './comparacoes'
 
@@ -79,7 +89,7 @@ export function GraficoComparacoes({
 		const indice = props.index ?? -1
 		const texto = String(props.payload?.value ?? '')
 		const comum = {
-			fill: 'var(--panel-ink)',
+			fill: 'var(--color-panel-ink)',
 			fontSize: 13,
 			fontWeight: indice === indiceDestaque || estreito ? 600 : 400,
 			style: { cursor: filtravel(indice) ? 'pointer' : 'default' },
@@ -113,7 +123,7 @@ export function GraficoComparacoes({
 				{...props}
 				className="comparison-bar"
 				style={{ fillOpacity: esmaecida ? 0.45 : 1 }}
-				stroke={contorno ? 'var(--panel-ink)' : 'none'}
+				stroke={contorno ? 'var(--color-panel-ink)' : 'none'}
 				strokeWidth={contorno}
 			/>
 		)
@@ -133,7 +143,7 @@ export function GraficoComparacoes({
 		<>
 			{temTaxas ? (
 				<figure
-					className="temporal-chart"
+					className="my-6 min-w-0 text-sm"
 					aria-label="Taxas de evasão por grupo"
 					aria-describedby="comparacao-leitura"
 				>
@@ -187,11 +197,11 @@ export function GraficoComparacoes({
 								}
 							/>
 							<Legend itemSorter={null} />
-							<ReferenceLine x={0} stroke="var(--panel-muted)" />
+							<ReferenceLine x={0} stroke="var(--color-panel-muted)" />
 							<Bar
 								name="Evasão do curso"
 								dataKey="taxas.evasao_curso"
-								fill="var(--panel-green)"
+								fill="var(--color-panel-green)"
 								maxBarSize={20}
 								isAnimationActive={false}
 								shape={forma}
@@ -202,14 +212,14 @@ export function GraficoComparacoes({
 									dataKey="taxas.evasao_curso"
 									position="right"
 									formatter={rotuloBarra}
-									fill="var(--panel-ink)"
+									fill="var(--color-panel-ink)"
 									fontSize={12}
 								/>
 							</Bar>
 							<Bar
 								name="Evasão da instituição"
 								dataKey="taxas.evasao_ies"
-								fill="var(--panel-secondary)"
+								fill="var(--color-panel-secondary)"
 								maxBarSize={20}
 								isAnimationActive={false}
 								shape={forma}
@@ -220,115 +230,116 @@ export function GraficoComparacoes({
 									dataKey="taxas.evasao_ies"
 									position="right"
 									formatter={rotuloBarra}
-									fill="var(--panel-ink)"
+									fill="var(--color-panel-ink)"
 									fontSize={12}
 								/>
 							</Bar>
 						</BarChart>
 					</ResponsiveContainer>
-					<figcaption className="filter-help" id="comparacao-leitura">
-						Em cada grupo, a primeira barra representa a evasão do curso; a
-						segunda, da instituição. Taxas indisponíveis ficam sem barra. Clique
-						num grupo, aqui ou na tabela, para filtrar o resumo e a evolução;
-						clique de novo para remover.
+					<figcaption id="comparacao-leitura">
+						<Ajuda>
+							Em cada grupo, a primeira barra representa a evasão do curso; a
+							segunda, da instituição. Taxas indisponíveis ficam sem barra.
+							Clique num grupo, aqui ou na tabela, para filtrar o resumo e a
+							evolução; clique de novo para remover.
+						</Ajuda>
 					</figcaption>
 				</figure>
 			) : (
-				<p className="state" role="status">
+				<p className={cx(classes.estado, 'my-6')} role="status">
 					Não há taxas disponíveis neste recorte. Consulte os totais, as bases e
 					os avisos abaixo.
 				</p>
 			)}
-			<div
-				className="temporal-table comparison-table table-responsive"
-				role="region"
-				aria-label="Tabela de comparação entre grupos"
-				tabIndex={0}
+			<Tabela
+				rotulo="Tabela de comparação entre grupos"
+				legenda="Totais, taxas e qualidade por grupo"
 			>
-				<table className="table caption-top align-top">
-					<caption>Totais, taxas e qualidade por grupo</caption>
-					<thead>
-						<tr>
-							<th scope="col">Grupo</th>
-							{totais.map(([chave, rotulo]) => (
-								<th key={chave} scope="col" className="text-end">
-									{rotulo}
-								</th>
-							))}
-							<th scope="col" className="text-end">
-								Base de risco
+				<thead>
+					<tr>
+						<th scope="col" className={classesTabela.cabecalho}>
+							Grupo
+						</th>
+						{totais.map(([chave, rotulo]) => (
+							<th
+								key={chave}
+								scope="col"
+								className={classesTabela.cabecalhoNumero}
+							>
+								{rotulo}
 							</th>
-							<th scope="col" className="text-end">
-								Evasão do curso
-							</th>
-							<th scope="col" className="text-end">
-								Evasão da instituição
-							</th>
-							<th scope="col">Qualidade</th>
-						</tr>
-					</thead>
-					<tbody>
-						{grupos.map((grupo, indice) => {
-							const avisos = avisosDoRecorte(grupo)
-							const rotulo = rotuloGrupo(grupo.grupo)
-							const valor = grupo.grupo.valor
-							const classes = [
-								indice === indiceDestaque && 'is-selected',
-								indice === ativo && 'is-active'
-							].filter(Boolean)
-							return (
-								<tr
-									key={valor ?? '__sem_identificador__'}
-									className={classes.join(' ') || undefined}
-									onMouseEnter={() => setAtivo(indice)}
-									onMouseLeave={() => setAtivo(null)}
+						))}
+						<th scope="col" className={classesTabela.cabecalhoNumero}>
+							Base de risco
+						</th>
+						<th scope="col" className={classesTabela.cabecalhoNumero}>
+							Evasão do curso
+						</th>
+						<th scope="col" className={classesTabela.cabecalhoNumero}>
+							Evasão da instituição
+						</th>
+						<th scope="col" className={classesTabela.cabecalho}>
+							Qualidade
+						</th>
+					</tr>
+				</thead>
+				<tbody>
+					{grupos.map((grupo, indice) => {
+						const rotulo = rotuloGrupo(grupo.grupo)
+						const valor = grupo.grupo.valor
+						return (
+							<tr
+								key={valor ?? '__sem_identificador__'}
+								className={classesLinha(
+									indice === indiceDestaque,
+									indice === ativo
+								)}
+								onMouseEnter={() => setAtivo(indice)}
+								onMouseLeave={() => setAtivo(null)}
+							>
+								<th
+									scope="row"
+									className={cx(
+										classesTabela.linhaCabecalho,
+										'min-w-[180px] max-w-[280px] wrap-anywhere'
+									)}
 								>
-									<th scope="row">
-										{valor === null ? (
-											<>
-												{rotulo}
-												<span className="visually-hidden">
-													{' '}
-													(sem identificador, não filtrável)
-												</span>
-											</>
-										) : (
-											<button
-												type="button"
-												className="link-filtro"
-												aria-pressed={indice === indiceDestaque}
-												aria-label={`Filtrar por ${rotulo}`}
-												onFocus={() => setAtivo(indice)}
-												onBlur={() => setAtivo(null)}
-												onClick={() => onSelecionar(valor)}
-											>
-												{rotulo}
-											</button>
-										)}
-									</th>
-									{totais.map(([chave]) => (
-										<CelulaNumero key={chave} valor={grupo.totais[chave]} />
-									))}
-									<CelulaNumero valor={grupo.base_risco} />
-									<CelulaTaxa valor={grupo.taxas.evasao_curso} />
-									<CelulaTaxa valor={grupo.taxas.evasao_ies} />
-									<td>
-										{avisos.length ? (
-											<ul className="annual-notes">
-												{avisos.map((aviso) => (
-													<li key={aviso}>{aviso}</li>
-												))}
-											</ul>
-										) : (
-											'Sem sinalizações'
-										)}
-									</td>
-								</tr>
-							)
-						})}
-					</tbody>
-				</table>
-			</div>
+									{valor === null ? (
+										<>
+											{rotulo}
+											<span className="sr-only">
+												{' '}
+												(sem identificador, não filtrável)
+											</span>
+										</>
+									) : (
+										<button
+											type="button"
+											className={classesLinkFiltro}
+											aria-pressed={indice === indiceDestaque}
+											aria-label={`Filtrar por ${rotulo}`}
+											onFocus={() => setAtivo(indice)}
+											onBlur={() => setAtivo(null)}
+											onClick={() => onSelecionar(valor)}
+										>
+											{rotulo}
+										</button>
+									)}
+								</th>
+								{totais.map(([chave]) => (
+									<CelulaNumero key={chave} valor={grupo.totais[chave]} />
+								))}
+								<CelulaNumero valor={grupo.base_risco} />
+								<CelulaTaxa valor={grupo.taxas.evasao_curso} />
+								<CelulaTaxa valor={grupo.taxas.evasao_ies} />
+								<td className={classesTabela.texto}>
+									<ListaAvisos avisos={avisosDoRecorte(grupo)} />
+								</td>
+							</tr>
+						)
+					})}
+				</tbody>
+			</Tabela>
 			<NotaTabela
 				exportar={{
 					arquivo: `evasao-mt-comparacao-${parametros.agrupar_por}-${parametros.ano}.csv`,

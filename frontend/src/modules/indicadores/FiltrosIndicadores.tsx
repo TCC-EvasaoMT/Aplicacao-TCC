@@ -1,4 +1,7 @@
 import { useState } from 'react'
+import { Button } from 'primereact/button'
+import { CampoLista } from '../../lib/CampoLista'
+import { Ajuda, classes, cx } from '../../lib/ui'
 import { useMedia } from '../../lib/useMedia'
 import type { Catalogo } from '../catalogos'
 import {
@@ -7,6 +10,9 @@ import {
 	rotuloOpcao,
 	type SelecaoFiltros
 } from './filtros'
+
+// Listas longas (cursos, municípios) ganham busca por nome ou código.
+const LIMITE_SEM_BUSCA = 10
 
 interface Props {
 	catalogo: Catalogo | null
@@ -43,14 +49,14 @@ export function FiltrosIndicadores({
 	const quantidade = filtrosAtivos(selecao, catalogo).length
 	return (
 		<section
-			className="filters"
+			className="mb-6 rounded-lg border border-panel-line bg-panel-surface p-4 sm:px-6"
 			aria-labelledby="filtros-titulo"
 			aria-busy={carregando}
 		>
-			<div className="section-heading">
+			<div className={cx(classes.cabecalhoSecao, 'mb-2')}>
 				<div>
 					<h2 id="filtros-titulo">Filtros compartilhados</h2>
-					<p className="filter-count">
+					<p className="mt-1 text-sm text-panel-muted">
 						{quantidade === 0
 							? 'Todos os recortes disponíveis.'
 							: quantidade === 1
@@ -58,98 +64,91 @@ export function FiltrosIndicadores({
 								: `${quantidade} filtros aplicados.`}
 					</p>
 				</div>
-				<div className="filters-actions">
+				<div className="flex flex-wrap gap-2">
 					{estreito && (
-						<button
-							className="btn btn-outline-success btn-sm"
-							type="button"
+						<Button
+							label={aberto ? 'Ocultar filtros' : 'Mostrar filtros'}
+							outlined
+							size="small"
 							aria-expanded={aberto}
 							aria-controls="filtros-campos"
 							onClick={() => setAberto((valor) => !valor)}
-						>
-							{aberto ? 'Ocultar filtros' : 'Mostrar filtros'}
-						</button>
+						/>
 					)}
-					<button
-						className="btn btn-outline-success btn-sm"
-						type="button"
+					<Button
+						label="Limpar filtros"
+						outlined
+						size="small"
 						disabled={desabilitado || quantidade === 0}
 						onClick={onLimpar}
-					>
-						Limpar filtros
-					</button>
-					<button
-						className="btn btn-outline-success btn-sm"
-						type="button"
+					/>
+					<Button
+						label="Copiar link"
+						outlined
+						size="small"
 						disabled={desabilitado}
 						onClick={copiarLink}
-					>
-						Copiar link
-					</button>
+					/>
 				</div>
 			</div>
-			<p className="filter-help link-status" role="status">
+			<Ajuda className="empty:hidden" role="status">
 				{avisoLink}
-			</p>
+			</Ajuda>
 			<div id="filtros-campos" hidden={!mostrarCampos}>
-				<p className="filter-help" id="filtros-ajuda">
+				<Ajuda id="filtros-ajuda">
 					Aplicados automaticamente ao resumo, à evolução temporal e às
 					comparações. Os resultados atendem a todos os filtros selecionados.
-				</p>
+				</Ajuda>
 				<div
-					className="row g-3 align-items-end"
+					className="grid grid-cols-1 items-end gap-4 sm:grid-cols-2 md:grid-cols-4"
 					aria-describedby="filtros-ajuda"
 				>
 					{camposFiltro.map((campo) => {
 						const opcoes = catalogo?.[campo.catalogo] ?? []
+						const itens = [
+							{
+								value: '',
+								label: opcoes.length ? 'Todos' : 'Sem opções disponíveis'
+							},
+							...opcoes.map((opcao) => ({
+								value: typeof opcao === 'string' ? opcao : opcao.codigo,
+								label: rotuloOpcao(opcao)
+							}))
+						]
 						return (
 							<div
 								className={
-									campo.chave === 'codigo_curso'
-										? 'col-12 col-md-6'
-										: 'col-12 col-sm-6 col-md-3'
+									campo.chave === 'codigo_curso' ? 'sm:col-span-2' : undefined
 								}
 								key={campo.chave}
 							>
-								<label className="form-label" htmlFor={campo.chave}>
+								<label className={classes.rotulo} htmlFor={campo.chave}>
 									{campo.rotulo}
 								</label>
-								<select
-									className="form-select"
-									id={campo.chave}
-									name={campo.chave}
+								<CampoLista
+									inputId={campo.chave}
 									value={selecao[campo.chave]}
+									options={itens}
 									disabled={desabilitado || !opcoes.length}
+									filter={opcoes.length > LIMITE_SEM_BUSCA}
+									filterPlaceholder="Buscar por nome ou código"
+									filterInputAutoFocus
+									resetFilterOnHide
 									aria-describedby={
 										campo.chave.includes('municipio')
 											? 'municipios-ajuda'
 											: undefined
 									}
-									onChange={(event) =>
-										onChange(campo.chave, event.target.value)
-									}
-								>
-									<option value="">
-										{opcoes.length ? 'Todos' : 'Sem opções disponíveis'}
-									</option>
-									{opcoes.map((opcao) => {
-										const valor =
-											typeof opcao === 'string' ? opcao : opcao.codigo
-										return (
-											<option key={valor} value={valor}>
-												{rotuloOpcao(opcao)}
-											</option>
-										)
-									})}
-								</select>
+									onChange={(valor) => onChange(campo.chave, valor)}
+								/>
 							</div>
 						)
 					})}
 				</div>
-				<p className="filter-help" id="municipios-ajuda">
+				<Ajuda id="municipios-ajuda">
 					Oferta é o local do curso; sede é o local da instituição. Em EaD, a
 					sede não substitui a oferta ausente.
-				</p>
+				</Ajuda>
 			</div>
 		</section>
 	)

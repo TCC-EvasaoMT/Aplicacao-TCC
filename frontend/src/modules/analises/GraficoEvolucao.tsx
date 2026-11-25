@@ -20,7 +20,17 @@ import {
 	formatarTaxa,
 	ordemSeries
 } from './apresentacao'
-import { CelulaNumero, CelulaTaxa, NotaTabela } from './Celulas'
+import { Ajuda, classes, cx } from '../../lib/ui'
+import {
+	CelulaNumero,
+	CelulaTaxa,
+	classesLinha,
+	classesLinkFiltro,
+	classesTabela,
+	ListaAvisos,
+	NotaTabela,
+	Tabela
+} from './Celulas'
 import { csvEvolucao, descreverRecorte } from './exportacao'
 
 type Taxa = keyof PontoTemporal['taxas']
@@ -119,7 +129,7 @@ export function GraficoEvolucao({
 		<>
 			{temTaxas ? (
 				<figure
-					className="temporal-chart"
+					className="my-6 min-w-0 text-sm"
 					aria-label="Taxas anuais de evasão"
 					aria-describedby="evolucao-leitura"
 				>
@@ -165,23 +175,23 @@ export function GraficoEvolucao({
 								width={72}
 								tickFormatter={formatarTaxa}
 							/>
-							<ReferenceLine y={0} stroke="var(--panel-muted)" />
+							<ReferenceLine y={0} stroke="var(--color-panel-muted)" />
 							{anoAtivo !== null && anoAtivo !== anoSelecionado && (
 								<ReferenceLine
 									x={anoAtivo}
-									stroke="var(--panel-muted)"
+									stroke="var(--color-panel-muted)"
 									strokeDasharray="2 4"
 								/>
 							)}
 							{anoSelecionado !== null && anos.includes(anoSelecionado) && (
 								<ReferenceLine
 									x={anoSelecionado}
-									stroke="var(--panel-ink)"
+									stroke="var(--color-panel-ink)"
 									strokeDasharray="4 4"
 									label={{
 										value: 'Resumo',
 										position: 'top',
-										fill: 'var(--panel-ink)',
+										fill: 'var(--color-panel-ink)',
 										fontSize: 12
 									}}
 								/>
@@ -200,10 +210,14 @@ export function GraficoEvolucao({
 								name="Evasão do curso"
 								dataKey="taxas.evasao_curso"
 								type="linear"
-								stroke="var(--panel-green)"
+								stroke="var(--color-panel-green)"
 								strokeWidth={3}
-								dot={ponto('var(--panel-green)')}
-								label={rotuloIsolado('evasao_curso', 'var(--panel-green)', -8)}
+								dot={ponto('var(--color-panel-green)')}
+								label={rotuloIsolado(
+									'evasao_curso',
+									'var(--color-panel-green)',
+									-8
+								)}
 								connectNulls={false}
 								isAnimationActive={false}
 							/>
@@ -211,13 +225,13 @@ export function GraficoEvolucao({
 								name="Evasão da instituição"
 								dataKey="taxas.evasao_ies"
 								type="linear"
-								stroke="var(--panel-secondary)"
+								stroke="var(--color-panel-secondary)"
 								strokeWidth={3}
 								strokeDasharray="6 4"
-								dot={ponto('var(--panel-secondary)')}
+								dot={ponto('var(--color-panel-secondary)')}
 								label={rotuloIsolado(
 									'evasao_ies',
-									'var(--panel-secondary)',
+									'var(--color-panel-secondary)',
 									18
 								)}
 								connectNulls={false}
@@ -225,93 +239,85 @@ export function GraficoEvolucao({
 							/>
 						</LineChart>
 					</ResponsiveContainer>
-					<figcaption id="evolucao-leitura" className="filter-help">
-						Lacunas indicam taxas indisponíveis, não zero. Os valores e os
-						avisos de cada ano estão na tabela abaixo. Clique num ano para ver o
-						resumo e a comparação daquele ano.
+					<figcaption id="evolucao-leitura">
+						<Ajuda>
+							Lacunas indicam taxas indisponíveis, não zero. Os valores e os
+							avisos de cada ano estão na tabela abaixo. Clique num ano para ver
+							o resumo e a comparação daquele ano.
+						</Ajuda>
 					</figcaption>
 				</figure>
 			) : (
-				<p className="state" role="status">
+				<p className={cx(classes.estado, 'my-6')} role="status">
 					{serie.every((ponto) => ponto.qualidade.sem_dados)
 						? 'Não há dados de alunos neste período e recorte.'
 						: 'Não há taxas disponíveis neste período e recorte. Consulte as bases e os avisos abaixo.'}
 				</p>
 			)}
-			<div
-				className="temporal-table table-responsive"
-				role="region"
-				aria-label="Tabela da evolução temporal"
-				tabIndex={0}
+			<Tabela
+				rotulo="Tabela da evolução temporal"
+				legenda="Valores anuais e qualidade dos dados"
 			>
-				<table className="table caption-top align-top">
-					<caption>Valores anuais e qualidade dos dados</caption>
-					<thead>
-						<tr>
-							<th scope="col">Ano</th>
-							<th scope="col" className="text-end">
-								Base de risco
+				<thead>
+					<tr>
+						<th scope="col" className={cx(classesTabela.cabecalho, 'min-w-16')}>
+							Ano
+						</th>
+						<th scope="col" className={classesTabela.cabecalhoNumero}>
+							Base de risco
+						</th>
+						<th scope="col" className={classesTabela.cabecalhoNumero}>
+							Evasão do curso
+						</th>
+						<th scope="col" className={classesTabela.cabecalhoNumero}>
+							Evasão da instituição
+						</th>
+						<th scope="col" className={classesTabela.cabecalho}>
+							Qualidade
+						</th>
+					</tr>
+				</thead>
+				<tbody>
+					{serie.map((ponto, indice) => (
+						<tr
+							key={ponto.ano}
+							className={classesLinha(
+								ponto.ano === anoSelecionado,
+								indice === ativo
+							)}
+							onMouseEnter={() => setAtivo(indice)}
+							onMouseLeave={() => setAtivo(null)}
+						>
+							<th
+								scope="row"
+								className={cx(classesTabela.linhaCabecalho, 'min-w-16')}
+							>
+								{selecionavel(ponto.ano) ? (
+									<button
+										type="button"
+										className={classesLinkFiltro}
+										aria-pressed={ponto.ano === anoSelecionado}
+										aria-label={`Ver ${ponto.ano} no resumo e na comparação`}
+										onFocus={() => setAtivo(indice)}
+										onBlur={() => setAtivo(null)}
+										onClick={() => onSelecionarAno(ponto.ano)}
+									>
+										{ponto.ano}
+									</button>
+								) : (
+									ponto.ano
+								)}
 							</th>
-							<th scope="col" className="text-end">
-								Evasão do curso
-							</th>
-							<th scope="col" className="text-end">
-								Evasão da instituição
-							</th>
-							<th scope="col">Qualidade</th>
+							<CelulaNumero valor={ponto.base_risco} />
+							<CelulaTaxa valor={ponto.taxas.evasao_curso} />
+							<CelulaTaxa valor={ponto.taxas.evasao_ies} />
+							<td className={classesTabela.texto}>
+								<ListaAvisos avisos={avisosDoRecorte(ponto)} />
+							</td>
 						</tr>
-					</thead>
-					<tbody>
-						{serie.map((ponto, indice) => {
-							const avisos = avisosDoRecorte(ponto)
-							const classes = [
-								ponto.ano === anoSelecionado && 'is-selected',
-								indice === ativo && 'is-active'
-							].filter(Boolean)
-							return (
-								<tr
-									key={ponto.ano}
-									className={classes.join(' ') || undefined}
-									onMouseEnter={() => setAtivo(indice)}
-									onMouseLeave={() => setAtivo(null)}
-								>
-									<th scope="row">
-										{selecionavel(ponto.ano) ? (
-											<button
-												type="button"
-												className="link-filtro"
-												aria-pressed={ponto.ano === anoSelecionado}
-												aria-label={`Ver ${ponto.ano} no resumo e na comparação`}
-												onFocus={() => setAtivo(indice)}
-												onBlur={() => setAtivo(null)}
-												onClick={() => onSelecionarAno(ponto.ano)}
-											>
-												{ponto.ano}
-											</button>
-										) : (
-											ponto.ano
-										)}
-									</th>
-									<CelulaNumero valor={ponto.base_risco} />
-									<CelulaTaxa valor={ponto.taxas.evasao_curso} />
-									<CelulaTaxa valor={ponto.taxas.evasao_ies} />
-									<td>
-										{avisos.length ? (
-											<ul className="annual-notes">
-												{avisos.map((aviso) => (
-													<li key={aviso}>{aviso}</li>
-												))}
-											</ul>
-										) : (
-											'Sem sinalizações'
-										)}
-									</td>
-								</tr>
-							)
-						})}
-					</tbody>
-				</table>
-			</div>
+					))}
+				</tbody>
+			</Tabela>
 			<NotaTabela
 				exportar={{
 					arquivo: `evasao-mt-evolucao-${parametros.ano_inicial}-${parametros.ano_final}.csv`,

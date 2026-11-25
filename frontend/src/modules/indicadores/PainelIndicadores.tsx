@@ -1,8 +1,12 @@
 import { useEffect, useState } from 'react'
+import { Button } from 'primereact/button'
+import { Message } from 'primereact/message'
 import { PainelComparacoes, PainelEvolucao } from '../analises'
 import { Carregando } from '../../lib/Estados'
 import { empilhar, exibicao } from '../../lib/exibicao'
 import { mensagemErro } from '../../lib/http'
+import { CampoLista } from '../../lib/CampoLista'
+import { Ajuda, classes, cx } from '../../lib/ui'
 import { gravarUrl, lerUrl } from '../../lib/url'
 import { consultarCatalogo, type Catalogo } from '../catalogos'
 import { consultarResumo, type Resumo } from './api'
@@ -213,60 +217,57 @@ export function PainelIndicadores() {
 				onRemover={(chave: CampoFiltro) => alterar(chave, '')}
 				onLimpar={limpar}
 			/>
-			{avisoSelecao && (
-				<p className="filter-help" role="status">
-					{avisoSelecao}
-				</p>
-			)}
+			{avisoSelecao && <Ajuda role="status">{avisoSelecao}</Ajuda>}
 			{anoAutomatico &&
 				anosPulados.length > 0 &&
 				resumo &&
 				!resumo.qualidade.sem_dados && (
-					<p className="filter-help" role="status">
+					<Ajuda role="status">
 						{anosPulados.join(', ')} ainda não{' '}
 						{anosPulados.length === 1 ? 'tem' : 'têm'} dados de alunos. Exibindo{' '}
 						{selecao.ano}, o ano mais recente com dados.
-					</p>
+					</Ajuda>
 				)}
 			<section aria-labelledby="resumo-titulo" aria-busy={carregando}>
-				<div className="section-heading">
+				<div className={classes.cabecalhoSecao}>
 					<h2 id="resumo-titulo">Resumo anual</h2>
-					<div className="summary-controls">
-						<div className="summary-year">
-							<label className="form-label" htmlFor="ano">
+					<div className="flex flex-wrap items-end gap-4">
+						<div className={classes.campoAno}>
+							<label className={classes.rotulo} htmlFor="ano">
 								Ano do resumo
 							</label>
-							<select
-								className="form-select"
-								id="ano"
-								name="ano"
+							<CampoLista
+								inputId="ano"
+								className="max-w-[260px]"
 								value={selecao.ano}
+								options={
+									catalogo?.anos.length
+										? catalogo.anos.map((ano) => ({
+												value: String(ano),
+												label: String(ano)
+											}))
+										: [
+												{
+													value: '',
+													label: carregandoCatalogo
+														? 'Carregando…'
+														: 'Sem anos disponíveis'
+												}
+											]
+								}
 								disabled={
 									carregandoCatalogo || !!erroCatalogo || !catalogo?.anos.length
 								}
-								onChange={(event) => alterar('ano', event.target.value)}
-							>
-								{!catalogo?.anos.length && (
-									<option value="">
-										{carregandoCatalogo
-											? 'Carregando…'
-											: 'Sem anos disponíveis'}
-									</option>
-								)}
-								{catalogo?.anos.map((ano) => (
-									<option key={ano} value={ano}>
-										{ano}
-									</option>
-								))}
-							</select>
+								onChange={(valor) => alterar('ano', valor)}
+							/>
 						</div>
-						<button
-							className="btn btn-outline-success btn-sm"
+						<Button
+							label="Atualizar dados"
+							outlined
+							size="small"
 							disabled={carregando}
 							onClick={() => setTentativa((value) => value + 1)}
-						>
-							Atualizar dados
-						</button>
+						/>
 					</div>
 				</div>
 				<div aria-live="polite">
@@ -274,52 +275,50 @@ export function PainelIndicadores() {
 						<Carregando texto="Carregando indicadores…" />
 					)}
 					{!carregando && erro && (
-						<p className="state error" role="alert">
-							{erro} Use “Atualizar dados” para tentar novamente.
-						</p>
+						<Message
+							severity="error"
+							text={`${erro} Use “Atualizar dados” para tentar novamente.`}
+						/>
 					)}
 					{!carregando && !erro && !catalogo?.anos.length && (
-						<p className="state">
+						<p className={classes.estado}>
 							Nenhum ano está disponível na base conectada.
 						</p>
 					)}
 					{!carregando && !erro && resumo?.qualidade.sem_dados && (
-						<div className="state state-empty">
-							<h3>Sem dados de alunos em {selecao.ano}</h3>
-							<p>
+						<div className={classes.estadoVazio}>
+							<h3 className="mb-1">Sem dados de alunos em {selecao.ano}</h3>
+							<p className="mb-3 text-panel-muted">
 								{filtrosAtivos
 									? `Nenhum registro de alunos com ${ativos
 											.map((filtro) => `${filtro.campo}: ${filtro.texto}`)
 											.join(' e ')}.`
 									: 'A base não tem registros de alunos neste ano.'}
 							</p>
-							<div className="state-actions">
+							<div className="flex flex-wrap gap-2">
 								{historico.length > 0 && (
-									<button
-										className="btn btn-outline-success btn-sm"
-										type="button"
+									<Button
+										label="Desfazer última mudança"
+										outlined
+										size="small"
 										onClick={desfazer}
-									>
-										Desfazer última mudança
-									</button>
+									/>
 								)}
 								{anoAnterior !== undefined && (
-									<button
-										className="btn btn-outline-success btn-sm"
-										type="button"
+									<Button
+										label={`Ver ${anoAnterior}`}
+										outlined
+										size="small"
 										onClick={() => alterar('ano', String(anoAnterior))}
-									>
-										Ver {anoAnterior}
-									</button>
+									/>
 								)}
 								{filtrosAtivos && (
-									<button
-										className="btn btn-outline-success btn-sm"
-										type="button"
+									<Button
+										label="Limpar filtros"
+										outlined
+										size="small"
 										onClick={limpar}
-									>
-										Limpar filtros
-									</button>
+									/>
 								)}
 							</div>
 						</div>
@@ -327,7 +326,7 @@ export function PainelIndicadores() {
 				</div>
 				{!erro && vista.dado && !vista.dado.dados.qualidade.sem_dados && (
 					<div
-						className={vista.atualizando ? 'is-refreshing' : undefined}
+						className={cx(vista.atualizando && classes.atualizando)}
 						aria-busy={vista.atualizando || undefined}
 					>
 						<ResumoIndicadores
