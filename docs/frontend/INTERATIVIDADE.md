@@ -39,7 +39,7 @@ Abaixo do cartão de filtros, uma faixa fica fixa no topo ao rolar a página. Mo
 
 ## Recarga sem piscar
 
-Ao mudar o recorte, cada painel mantém os dados anteriores esmaecidos (`.is-refreshing`, com `aria-busy`) até a resposta chegar, em vez de trocar o conteúdo por "Carregando". O texto de carregamento aparece na primeira consulta e quando o último resumo exibido estava sem dados (`exibicao`, em `lib/exibicao.ts`).
+Ao mudar o recorte, cada painel mantém os dados anteriores esmaecidos (`classes.atualizando`, em `lib/ui.tsx`, com `aria-busy`) até a resposta chegar, em vez de trocar o conteúdo por "Carregando". O texto de carregamento aparece na primeira consulta e quando o último resumo exibido estava sem dados (`exibicao`, em `lib/exibicao.ts`).
 
 A faixa do recorte tem uma limitação: durante uma consulta lenta, ela já mostra os novos filtros, mas pode manter as taxas anteriores sem sinalizar a espera. O resultado correto aparece após a resposta. Esse ajuste está adiado; a revisão o reproduziu com atraso controlado na base sintética.
 

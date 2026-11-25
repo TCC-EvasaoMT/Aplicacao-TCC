@@ -37,7 +37,7 @@ Na comparação, o CSV contém apenas os grupos carregados. Se houver truncament
 
 ## Desempenho
 
-Os componentes dos gráficos usam `React.lazy`, e o download começa em paralelo com a primeira consulta. Enquanto carregam, a interface reserva espaço para o gráfico. A distribuição dos arquivos depende do build; na revisão de 23/11/2026, os dois maiores arquivos JavaScript tinham cerca de 493 e 447 kB, sem o aviso de chunk acima de 500 kB. Isso não comprova carregamento rápido numa conexão real.
+Os componentes dos gráficos usam `React.lazy`, e o download começa em paralelo com a primeira consulta. Enquanto carregam, a interface reserva espaço para o gráfico. A distribuição dos arquivos depende do build. O PrimeReact fica num arquivo próprio (`manualChunks` em `vite.config.ts`). Na revisão de 24/11/2026, após a migração, os maiores arquivos JavaScript tinham cerca de 449 kB (Recharts e código compartilhado), 256 kB (aplicação e React) e 219 kB (PrimeReact), sem o aviso de chunk acima de 500 kB; o CSS caiu de cerca de 244 para 31 kB. Isso não comprova carregamento rápido numa conexão real.
 
 `LimiteErro` impede que uma falha do componente derrube o restante do painel. Porém, gráfico, tabela e CSV pertencem ao mesmo componente lazy: uma falha nesse arquivo também oculta a tabela e a exportação da seção. Filtros e resumo permanecem disponíveis. Separar esses elementos é um ajuste adiado, registrado no [guia de validação](../operacao/VALIDACAO.md#ajustes-adiados).
 
@@ -48,8 +48,9 @@ Os componentes dos gráficos usam `React.lazy`, e o download começa em paralelo
 | `lib/url.ts`                                 | Leitura e gravação das chaves de cada painel na URL          |
 | `lib/useMedia.ts`                            | Media query como estado React (layout do celular)            |
 | `lib/Estados.tsx`                            | Indicador de carregamento e espaço reservado do gráfico      |
+| `lib/ui.tsx`                                 | Blocos, textos auxiliares, avisos e esmaecimento na recarga  |
 | `lib/LimiteErro.tsx`                         | Limite de erro dos gráficos carregados sob demanda           |
-| `analises/Celulas.tsx`                       | Células numéricas, ausência `...`, nota e botão de CSV       |
+| `analises/Celulas.tsx`                       | Tabela, células numéricas, ausência `...` e botão de CSV     |
 | `analises/exportacao.ts`                     | Geração do CSV e descrição do recorte                        |
 | `analises/apresentacao.ts`                   | Também `escalaTaxas` (eixo dos gráficos) e `plural`          |
 | `filtros.ts`, `periodo.ts`, `comparacoes.ts` | `lerSelecao`, `lerPeriodo` e `lerComparacao` a partir da URL |
