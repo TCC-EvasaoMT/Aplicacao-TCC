@@ -15,6 +15,12 @@ import { registrarFrontend } from './frontend.js'
 import { registrarSeguranca } from './plugins/seguranca.js'
 import { randomUUID } from 'node:crypto'
 import {
+	registrarAcesso,
+	registrarAutenticacao,
+	type RepositorioAutenticacao
+} from './modules/autenticacao/index.js'
+import type { ConfigAutenticacao } from './config/autenticacao.js'
+import {
 	codigoErroSeguro,
 	configurarLogger,
 	registrarLogs
@@ -25,6 +31,10 @@ export interface Dependencias {
 	catalogos: ConsultasCatalogos
 	analises: ConsultasAnalises
 	health: () => Promise<void>
+	autenticacao?: {
+		config: ConfigAutenticacao
+		repositorio: RepositorioAutenticacao
+	}
 }
 
 export async function buildApp(
@@ -51,8 +61,7 @@ export async function buildApp(
 		if (error.validation || error.statusCode === 400) {
 			return reply.code(400).send({
 				erro: 'PARAMETROS_INVALIDOS',
-				mensagem:
-					'Confira os parâmetros e envie um único valor para cada filtro.'
+				mensagem: 'Confira os campos e parâmetros enviados.'
 			})
 		}
 		if (error.code === 'GOLD_INDISPONIVEL') {
@@ -84,6 +93,7 @@ export async function buildApp(
 	})
 	registrarLogs(app)
 	await registrarSeguranca(app, options.maxRequisicoes)
+	await registrarAcesso(app, dependencias.autenticacao)
 	if (!options.frontendDir) {
 		app.setNotFoundHandler((_request, reply) =>
 			reply
@@ -95,6 +105,11 @@ export async function buildApp(
 	if (options.docs) {
 		await app.register(swagger, {
 			openapi: {
+				components: {
+					securitySchemes: {
+						bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }
+					}
+				},
 				info: {
 					title: 'Evasão no ensino superior público de MT',
 					version: '0.1.0',
@@ -102,6 +117,7 @@ export async function buildApp(
 						'API de consulta à Gold da pipeline SEDAP+. Indicadores agregados por vínculo aluno–curso.'
 				},
 				tags: [
+					{ name: 'Autenticação' },
 					{ name: 'Indicadores' },
 					{ name: 'Catálogos' },
 					{ name: 'Análises' },
@@ -120,6 +136,12 @@ export async function buildApp(
 					.replace(' validator.swagger.io', '')
 		})
 	}
+	if (dependencias.autenticacao)
+		await registrarAutenticacao(
+			app,
+			dependencias.autenticacao.repositorio,
+			dependencias.autenticacao.config
+		)
 	await app.register(health, { consultar: dependencias.health })
 	await app.register(catalogos, { consultas: dependencias.catalogos })
 	await app.register(indicadores, { consultas: dependencias.indicadores })

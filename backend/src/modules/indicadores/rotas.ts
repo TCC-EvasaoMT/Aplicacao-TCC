@@ -13,6 +13,7 @@ export function registrarRotas(
 	app.get<{ Querystring: Filtros }>(
 		'/api/v1/indicadores/resumo',
 		{
+			config: { acesso: 'publico' },
 			schema: {
 				tags: ['Indicadores'],
 				summary: 'Calcula o resumo de um ano com filtros combinados por E.',

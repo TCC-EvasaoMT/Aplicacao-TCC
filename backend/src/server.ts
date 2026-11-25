@@ -6,8 +6,15 @@ import { criarConsultasIndicadores } from './modules/indicadores/index.js'
 import { criarConsultasCatalogos } from './modules/catalogos/index.js'
 import { criarHealth } from './plugins/health.js'
 import { criarConsultasAnalises } from './modules/analises/index.js'
+import { criarRepositorioAutenticacao } from './modules/autenticacao/index.js'
 
 const config = readConfig()
+const authPool = config.autenticacao
+	? new Pool({
+			...config.autenticacao.database,
+			application_name: 'tcc-evasao-auth'
+		})
+	: undefined
 const pool = new Pool({
 	...config.database,
 	max: 5,
@@ -18,6 +25,13 @@ const pool = new Pool({
 })
 const app = await buildApp(
 	{
+		autenticacao:
+			authPool && config.autenticacao
+				? {
+						config: config.autenticacao,
+						repositorio: criarRepositorioAutenticacao(authPool)
+					}
+				: undefined,
 		indicadores: criarConsultasIndicadores(pool),
 		catalogos: criarConsultasCatalogos(pool),
 		analises: criarConsultasAnalises(pool),
@@ -35,8 +49,12 @@ const app = await buildApp(
 pool.on('error', () =>
 	app.log.error('Conexão ociosa com o PostgreSQL foi interrompida')
 )
+authPool?.on('error', () =>
+	app.log.error('Conexão ociosa de autenticação foi interrompida')
+)
 app.addHook('onClose', async () => {
 	await pool.end()
+	await authPool?.end()
 })
 for (const signal of ['SIGINT', 'SIGTERM'] as const) {
 	process.once(signal, () => {
