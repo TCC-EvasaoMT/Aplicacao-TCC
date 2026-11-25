@@ -19,7 +19,7 @@ Os tipos de seleção e resultado são compartilhados pela entrada pública de `
 
 ## Período e filtros
 
-Execute `pnpm dev:demo` e abra `http://127.0.0.1:5173/`. O gráfico aparece abaixo do resumo anual, no mesmo painel. **Atualizar dados** recarrega catálogo, resumo, evolução e comparação; **Limpar filtros** mantém o ano do resumo e o intervalo do gráfico, removendo os sete filtros opcionais.
+Execute `pnpm dev:demo` e abra `http://127.0.0.1:5173/`. O gráfico fica na aba **Evolução temporal**, a primeira do cabeçalho, abaixo do resumo anual. **Atualizar dados** recarrega catálogo, resumo, evolução e comparação; **Limpar filtros** mantém o ano do resumo e o intervalo do gráfico, removendo os sete filtros opcionais.
 
 O intervalo inicial vem da URL, quando válido; caso contrário, vai do menor ao maior ano do catálogo, limitado aos últimos 30 anos. Os campos aceitam anos entre 1900 e 9999, inclusive anos sem registros. **Aplicar período** valida ordem e tamanho antes de consultar; editar os campos mantém a série aplicada. O período é preservado ao atualizar os dados e pode ser compartilhado pela URL.
 

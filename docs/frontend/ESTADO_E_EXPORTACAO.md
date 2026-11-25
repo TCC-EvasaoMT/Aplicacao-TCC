@@ -8,7 +8,7 @@ Sem ano escolhido e sem filtros, o painel abre no ano mais recente com dados de 
 
 Em qualquer largura de tela, os sete filtros ficam numa gaveta aberta pelo botão **Filtros**, que mostra a contagem. As seleções ficam na faixa do recorte, descrita em [interatividade](INTERATIVIDADE.md).
 
-Ano, filtros, período e comparação aplicada ficam na URL. Recarregar restaura a seleção; **Copiar link**, no fim da gaveta de filtros, copia o endereço. Cada tabela oferece **Baixar CSV**, gerado no navegador com os dados já carregados.
+Ano, filtros, período, comparação aplicada e aba do gráfico ficam na URL. Recarregar restaura a seleção; **Copiar link**, no fim da gaveta de filtros, copia o endereço. Cada tabela oferece **Baixar CSV**, gerado no navegador com os dados já carregados.
 
 Os gráficos incluem zero no eixo e preservam valores negativos. A evolução mostra valores junto aos pontos isolados. A comparação mostra o valor de cada barra e, no celular, o nome do grupo acima delas. Dados ausentes aparecem como `...` nas tabelas, acompanhados do texto acessível "Não disponível" e de uma nota explicativa. As colunas numéricas não quebram linha.
 
@@ -21,6 +21,7 @@ Os rótulos seguem o formato `Nome (código)`, e os textos distinguem singular e
 | `ano` e os sete filtros de recorte | Resumo     | Saneados pelo catálogo, como em **Atualizar dados**    |
 | `ano_inicial`, `ano_final`         | Evolução   | Só quando um período foi aplicado; inválido é ignorado |
 | `agrupar_por`, `grupos` (repetido) | Comparação | Só quando difere do padrão; até 20 grupos, sem repetir |
+| `aba`                              | Cabeçalho  | `comparacao`; a evolução é o padrão e não é gravada    |
 
 Cada painel grava apenas as próprias chaves com `history.replaceState`, sem criar entradas no histórico. Um ano fora do catálogo é ajustado ao mais recente disponível, com aviso. Sem filtros, a seleção automática pode recuar até um ano com dados de alunos.
 

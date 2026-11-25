@@ -4,6 +4,8 @@ Resumo, evolução e comparação compartilham o recorte. Clicar num grupo aplic
 
 ## O que cada clique faz
 
+Evolução e comparação ficam em abas no cabeçalho. Um clique numa delas altera o recorte também da outra aba, que é atualizada mesmo oculta.
+
 | Onde                                   | Efeito                                                               |
 | -------------------------------------- | -------------------------------------------------------------------- |
 | Barra ou nome de grupo na comparação   | Aplica o grupo como filtro (ex.: `codigo_curso=001`); repetir remove |

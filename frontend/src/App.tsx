@@ -1,9 +1,18 @@
+import { useEffect, useState } from 'react'
 import { Accordion, AccordionTab } from 'primereact/accordion'
+import { TabMenu } from 'primereact/tabmenu'
+import { gravarUrl, lerUrl } from './lib/url'
+import { abasAnalise, lerAba } from './modules/analises'
 import { PainelIndicadores } from './modules/indicadores'
 
 const notaLeitura = 'mt-3 max-w-[78ch] text-sm text-panel-muted'
 
 export function App() {
+	const [aba, setAba] = useState(() => lerAba(lerUrl()))
+	const indice = abasAnalise.findIndex((item) => item.id === aba)
+	useEffect(() => {
+		gravarUrl(['aba'], aba === abasAnalise[0].id ? [] : [['aba', aba]])
+	}, [aba])
 	return (
 		<>
 			<a
@@ -13,7 +22,7 @@ export function App() {
 				Ir para o conteúdo
 			</a>
 			<header className="bg-panel-green text-white">
-				<div className="mx-auto max-w-[1440px] px-[4%] pt-3 pb-8 sm:pb-10">
+				<div className="mx-auto max-w-[1440px] px-[4%] pt-3">
 					<div className="flex min-h-12 items-center justify-between gap-4">
 						<a
 							className="inline-flex items-center gap-3 text-xl font-bold no-underline"
@@ -35,6 +44,23 @@ export function App() {
 					<p className="max-w-[75ch] text-white/80">
 						Instituições públicas com sede em Mato Grosso.
 					</p>
+					{/* O TabMenu se declara menu de navegação; aqui ele controla os
+					    painéis da página, então segue o padrão de abas. */}
+					<TabMenu
+						className="mt-6 sm:mt-8"
+						model={[...abasAnalise]}
+						activeIndex={indice}
+						onTabChange={(evento) => setAba(abasAnalise[evento.index]!.id)}
+						pt={{
+							menu: { role: 'tablist', 'aria-label': 'Gráficos' },
+							action: (opcoes) => ({
+								role: 'tab',
+								id: `aba-${opcoes?.context.item.id}`,
+								'aria-selected': opcoes?.context.index === indice,
+								'aria-controls': `painel-${opcoes?.context.item.id}`
+							})
+						}}
+					/>
 				</div>
 			</header>
 			<main
@@ -42,7 +68,7 @@ export function App() {
 				tabIndex={-1}
 				className="mx-auto max-w-[1440px] px-[4%] pt-4 pb-10"
 			>
-				<PainelIndicadores />
+				<PainelIndicadores aba={aba} />
 				<Accordion className="mt-10 rounded-lg border border-panel-line bg-panel-surface px-4 py-3 sm:px-6">
 					<AccordionTab header="Como interpretar os dados">
 						<p className={notaLeitura}>

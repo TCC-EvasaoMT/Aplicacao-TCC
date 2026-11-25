@@ -1,6 +1,6 @@
 # Comparações na interface
 
-A seção **Comparação entre grupos**, abaixo da evolução temporal, consome `GET /api/v1/analises/comparacoes`. Permite comparar cursos, áreas gerais CINE, municípios de oferta ou sede, modalidades, categorias administrativas e organizações acadêmicas. A consulta permanece pública, sem login. O [contrato da API](../api/COMPARACOES.md) não mudou.
+A seção **Comparação entre grupos**, na segunda aba do cabeçalho, abaixo do resumo anual, consome `GET /api/v1/analises/comparacoes`. Permite comparar cursos, áreas gerais CINE, municípios de oferta ou sede, modalidades, categorias administrativas e organizações acadêmicas. A consulta permanece pública, sem login. O [contrato da API](../api/COMPARACOES.md) não mudou.
 
 ## Como utilizar
 

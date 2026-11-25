@@ -209,6 +209,21 @@ export const tema: PrimeReactPTOptions = {
 			}
 		}
 	},
+	// Abas dos gráficos sobre a faixa verde do cabeçalho: a ativa assume a cor
+	// do fundo da página, como uma pasta aberta sobre o conteúdo.
+	tabmenu: {
+		menu: { className: 'm-0 flex list-none gap-1 p-0' },
+		menuitem: { className: 'flex flex-1 sm:flex-none' },
+		inkbar: { className: 'hidden' },
+		action: (opcoes) => ({
+			className: classNames(
+				'flex flex-1 items-center justify-center rounded-t-lg px-3 py-3 text-center text-sm leading-tight font-semibold no-underline transition-colors duration-150 focus-visible:-outline-offset-4 motion-reduce:transition-none sm:px-5 sm:text-base',
+				opcoes?.props.activeIndex === opcoes?.context.index
+					? 'bg-panel-background text-panel-green focus-visible:outline-panel-green'
+					: 'text-white/85 hover:bg-white/10 hover:text-white focus-visible:outline-white'
+			)
+		})
+	},
 	accordion: {
 		root: { className: 'm-0' },
 		accordiontab: {

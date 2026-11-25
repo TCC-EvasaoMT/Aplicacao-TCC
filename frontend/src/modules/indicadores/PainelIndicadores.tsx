@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Button } from 'primereact/button'
 import { Message } from 'primereact/message'
-import { PainelComparacoes, PainelEvolucao } from '../analises'
+import { PainelComparacoes, PainelEvolucao, type AbaAnalise } from '../analises'
 import { Carregando } from '../../lib/Estados'
 import { empilhar, exibicao } from '../../lib/exibicao'
 import { mensagemErro } from '../../lib/http'
@@ -24,7 +24,7 @@ import {
 import { FiltrosIndicadores } from './FiltrosIndicadores'
 import { ResumoIndicadores } from './ResumoIndicadores'
 
-export function PainelIndicadores() {
+export function PainelIndicadores({ aba }: { aba: AbaAnalise }) {
 	const [catalogo, setCatalogo] = useState<Catalogo | null>(null)
 	const [selecao, setSelecao] = useState(() => lerSelecao(lerUrl()))
 	const [carregandoCatalogo, setCarregandoCatalogo] = useState(true)
@@ -344,21 +344,37 @@ export function PainelIndicadores() {
 					</div>
 				)}
 			</section>
-			<PainelEvolucao
-				anos={catalogo?.anos ?? []}
-				selecao={selecao}
-				onAnoChange={(ano) => alterar('ano', ano)}
-				atualizacao={tentativa}
-				indisponivel={carregandoCatalogo || !!erroCatalogo}
-			/>
-			<PainelComparacoes
-				catalogo={catalogo}
-				selecao={selecao}
-				atualizacao={tentativa}
-				indisponivel={carregandoCatalogo || !!erroCatalogo}
-				onAnoChange={(ano) => alterar('ano', ano)}
-				onSelecaoChange={aplicar}
-			/>
+			{/* Os dois painéis ficam montados: trocar de aba não refaz consultas
+			    nem perde o rascunho da comparação. */}
+			<div
+				role="tabpanel"
+				id="painel-evolucao"
+				aria-labelledby="aba-evolucao"
+				hidden={aba !== 'evolucao'}
+			>
+				<PainelEvolucao
+					anos={catalogo?.anos ?? []}
+					selecao={selecao}
+					onAnoChange={(ano) => alterar('ano', ano)}
+					atualizacao={tentativa}
+					indisponivel={carregandoCatalogo || !!erroCatalogo}
+				/>
+			</div>
+			<div
+				role="tabpanel"
+				id="painel-comparacao"
+				aria-labelledby="aba-comparacao"
+				hidden={aba !== 'comparacao'}
+			>
+				<PainelComparacoes
+					catalogo={catalogo}
+					selecao={selecao}
+					atualizacao={tentativa}
+					indisponivel={carregandoCatalogo || !!erroCatalogo}
+					onAnoChange={(ano) => alterar('ano', ano)}
+					onSelecaoChange={aplicar}
+				/>
+			</div>
 		</>
 	)
 }
