@@ -56,6 +56,7 @@ export function PainelIndicadores() {
 	} | null>(null)
 	// Mudanças feitas pela pessoa, para desfazer a última.
 	const [historico, setHistorico] = useState<SelecaoFiltros[]>([])
+	const [filtrosAbertos, setFiltrosAbertos] = useState(false)
 	const query = serializarFiltros(selecao)
 	const chave = `${tentativa}:${query}`
 
@@ -206,6 +207,8 @@ export function PainelIndicadores() {
 				selecao={selecao}
 				carregando={carregandoCatalogo}
 				indisponivel={!!erroCatalogo}
+				aberto={filtrosAbertos}
+				onFechar={() => setFiltrosAbertos(false)}
 				onChange={alterar}
 				onLimpar={limpar}
 			/>
@@ -214,6 +217,8 @@ export function PainelIndicadores() {
 				ativos={ativos}
 				resumo={vista.dado?.dados}
 				anuncio={anuncio}
+				filtrosAbertos={filtrosAbertos}
+				onAbrirFiltros={() => setFiltrosAbertos(true)}
 				onRemover={(chave: CampoFiltro) => alterar(chave, '')}
 				onLimpar={limpar}
 			/>
@@ -230,7 +235,9 @@ export function PainelIndicadores() {
 				)}
 			<section aria-labelledby="resumo-titulo" aria-busy={carregando}>
 				<div className={classes.cabecalhoSecao}>
-					<h2 id="resumo-titulo">Resumo anual</h2>
+					<h2 id="resumo-titulo" className={classes.titulo}>
+						Resumo anual
+					</h2>
 					<div className="flex flex-wrap items-end gap-4">
 						<div className={classes.campoAno}>
 							<label className={classes.rotulo} htmlFor="ano">

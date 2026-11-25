@@ -6,9 +6,9 @@ O painel permite compartilhar o estado da tela pela URL e exportar os dados carr
 
 Sem ano escolhido e sem filtros, o painel abre no ano mais recente com dados de alunos. Se o último ano do catálogo só tem docentes, a tela recua e informa o ano pulado. Escolher um ano desliga esse ajuste. Recortes sem alunos mostram uma explicação e ações para voltar ao ano anterior, desfazer a última mudança ou limpar filtros, quando aplicáveis.
 
-Abaixo de 576 px, os sete filtros ficam recolhidos em **Mostrar filtros**. A contagem aparece no cabeçalho do bloco e as seleções ficam na faixa do recorte, descrita em [interatividade](INTERATIVIDADE.md).
+Em qualquer largura de tela, os sete filtros ficam numa gaveta aberta pelo botão **Filtros**, que mostra a contagem. As seleções ficam na faixa do recorte, descrita em [interatividade](INTERATIVIDADE.md).
 
-Ano, filtros, período e comparação aplicada ficam na URL. Recarregar restaura a seleção; **Copiar link** copia o endereço. Cada tabela oferece **Baixar CSV**, gerado no navegador com os dados já carregados.
+Ano, filtros, período e comparação aplicada ficam na URL. Recarregar restaura a seleção; **Copiar link**, no fim da gaveta de filtros, copia o endereço. Cada tabela oferece **Baixar CSV**, gerado no navegador com os dados já carregados.
 
 Os gráficos incluem zero no eixo e preservam valores negativos. A evolução mostra valores junto aos pontos isolados. A comparação mostra o valor de cada barra e, no celular, o nome do grupo acima delas. Dados ausentes aparecem como `...` nas tabelas, acompanhados do texto acessível "Não disponível" e de uma nota explicativa. As colunas numéricas não quebram linha.
 

@@ -39,10 +39,15 @@ O PrimeReact ainda injeta uma folha de estilo pequena com `.p-hidden-accessible`
 | `Message`                  | Erros de consulta, de período e do limite de erro dos gráficos                         |
 | `ProgressSpinner`          | Indicador de carregamento                                                              |
 | `Accordion`/`AccordionTab` | “Selecionar grupos” e “Como interpretar os dados”                                      |
+| `Sidebar`                  | Gaveta dos filtros, aberta pelo botão **Filtros** da faixa do recorte                  |
 
 Alguns elementos continuam nativos, estilizados com Tailwind: as tabelas, que precisam de `caption`, cabeçalhos de linha (`th scope="row"`) e da ligação com os gráficos, recursos que o `DataTable` do PrimeReact não oferece da mesma forma; os chips da faixa do recorte, cujo botão de remoção precisa de nome acessível e de área de toque de 44 px; e os botões de ano e grupo dentro das tabelas. Os avisos de qualidade usam `Aviso` em vez de `Message` porque não são alertas: `Message` sempre anuncia o conteúdo como `role="alert"`.
 
 Listas com mais de dez opções, como cursos e municípios, ganham busca por nome ou código dentro da lista aberta. A busca ignora acentos e maiúsculas.
+
+### Acessibilidade da gaveta de filtros
+
+O `Sidebar` do PrimeReact 10 se declara `complementary`, não prende o foco e não o devolve ao fechar. O tema o anuncia como `role="dialog"` com `aria-modal`, rotulado pelo título “Filtros”. `FiltrosIndicadores` deixa o restante da página inerte (`inert` em `#root`; a gaveta fica fora dele, no fim do `body`) e devolve o foco ao botão **Filtros** ao fechar. Ao abrir, o foco vai para **Fechar**. Esc fecha a gaveta, exceto quando uma lista está aberta: nesse caso fecha só a lista. Clicar na máscara também fecha.
 
 ### Acessibilidade das listas
 
@@ -56,24 +61,27 @@ Os rótulos continuam associados por `<label for>` ao campo com foco. Ao usar no
 
 ## Identidade visual
 
-O cabeçalho apresenta “Evasão no ensino superior” e o contexto institucional. A sequência da página é filtros, resumo, evolução e comparação. O link “Ir para o conteúdo” aparece ao receber foco de teclado. As explicações metodológicas ficam em “Como interpretar os dados”, um painel recolhível.
+O cabeçalho é uma faixa verde com a marca, “Evasão no ensino superior” e o contexto institucional; o rodapé repete a faixa. Logo abaixo fica a faixa do recorte, fixa no topo ao rolar, com o botão **Filtros**. A sequência da página é recorte, resumo, evolução e comparação. O link “Ir para o conteúdo” aparece ao receber foco de teclado. As explicações metodológicas ficam em “Como interpretar os dados”, um painel recolhível.
+
+O refinamento de 24/11/2026 reduziu o branco da tela e destacou os gráficos sem sair da paleta: fundo da página levemente esverdeado, cartões das taxas tingidos com a cor de cada série (valor na mesma cor), títulos de seção com marcador verde, gráficos em moldura com degradê suave e altura maior (400 px no desktop e 300 px no celular) e cabeçalho das tabelas em verde. Os controles de período ficam no cabeçalho da seção de evolução, e o agrupamento da comparação divide a linha com **Comparar grupos**, para que os gráficos apareçam mais cedo.
 
 Os tokens ficam em `@theme static` dentro de `styles.css`. Cada token gera utilitários Tailwind (`bg-panel-green`, `text-panel-muted`, `border-panel-line`) e uma variável CSS (`--color-panel-green`), usada pelos gráficos do Recharts. A opção `static` mantém todas as variáveis no CSS, mesmo as que só aparecem no código dos gráficos.
 
-| Token                      | Valor     | Uso                                         |
-| -------------------------- | --------- | ------------------------------------------- |
-| `--color-panel-green`      | `#153F35` | Marca, ações, foco e primeira taxa          |
-| `--color-panel-ink`        | `#172E29` | Texto principal                             |
-| `--color-panel-muted`      | `#52675F` | Rótulos e informações auxiliares            |
-| `--color-panel-background` | `#F5F7F7` | Fundo da aplicação e cabeçalho das tabelas  |
-| `--color-panel-surface`    | `#FFFFFF` | Áreas de leitura e controles                |
-| `--color-panel-secondary`  | `#805128` | Segunda taxa e série                        |
-| `--color-panel-line`       | `#DCE5E1` | Divisórias e bordas dos blocos              |
-| `--color-panel-border`     | `#B9CBC3` | Bordas de controles, chips e tabelas        |
-| `--color-panel-chip`       | `#E8F0EB` | Chips, item selecionado e linha selecionada |
-| `--color-panel-warning-*`  | âmbar     | Avisos de qualidade                         |
-| `--color-panel-danger-*`   | vermelho  | Mensagens de erro                           |
-| `--color-panel-invalid`    | `#B42318` | Campo com valor inválido                    |
+| Token                          | Valor     | Uso                                         |
+| ------------------------------ | --------- | ------------------------------------------- |
+| `--color-panel-green`          | `#153F35` | Marca, ações, foco e primeira taxa          |
+| `--color-panel-ink`            | `#172E29` | Texto principal                             |
+| `--color-panel-muted`          | `#52675F` | Rótulos e informações auxiliares            |
+| `--color-panel-background`     | `#E9EFEC` | Fundo da aplicação                          |
+| `--color-panel-surface`        | `#FFFFFF` | Áreas de leitura e controles                |
+| `--color-panel-secondary`      | `#805128` | Segunda taxa e série                        |
+| `--color-panel-secondary-soft` | `#F6ECE2` | Fundo do cartão da segunda taxa             |
+| `--color-panel-line`           | `#DCE5E1` | Divisórias e bordas dos blocos              |
+| `--color-panel-border`         | `#B9CBC3` | Bordas de controles, chips e tabelas        |
+| `--color-panel-chip`           | `#E8F0EB` | Chips, item selecionado e linha selecionada |
+| `--color-panel-warning-*`      | âmbar     | Avisos de qualidade                         |
+| `--color-panel-danger-*`       | vermelho  | Mensagens de erro                           |
+| `--color-panel-invalid`        | `#B42318` | Campo com valor inválido                    |
 
 As quebras responsivas foram ajustadas para manter as larguras da versão anterior: `sm` em 576 px e `lg` em 992 px; `md` permanece em 768 px. O hook `useMedia('(max-width: 575px)')` usa a mesma referência.
 
@@ -81,8 +89,8 @@ A escala tipográfica usa título de 28 a 32 px, seções de 20 px, texto de 16 
 
 ## Uso nos módulos
 
-- **Indicadores:** a grade de filtros usa uma coluna abaixo de 576 px, duas colunas até 767 px, com o curso numa linha própria, e quatro colunas a partir de 768 px, com o curso em meia linha. O seletor de ano fica no cabeçalho do resumo.
-- **Análises:** os campos de período e o botão de aplicação ficam numa grade de duas colunas no celular e numa linha a partir de 576 px. O campo inválido recebe borda vermelha, `aria-invalid` e foco; o erro aparece numa `Message`. As tabelas têm rolagem horizontal própria, sem ampliar a página, e legenda antes dos dados. A comparação usa um painel recolhível para a seleção opcional de grupos e barras horizontais nas mesmas cores das taxas. Abaixo de 576 px, o gráfico de comparação coloca o nome do grupo acima das barras. Estados vazio, carregando e erro, botões principais sólidos e filtros recolhidos no celular estão em [Estado e exportação](ESTADO_E_EXPORTACAO.md). Veja [Comparações na interface](COMPARACOES.md).
+- **Indicadores:** os sete filtros ficam numa gaveta lateral (`Sidebar`), em uma coluna, com **Ver resultados**, **Limpar filtros** e **Copiar link** ao final. Ela ocupa a largura da tela no celular e 416 px a partir de 576 px. O botão **Filtros**, na faixa do recorte, mostra quantos filtros estão aplicados. O seletor de ano fica no cabeçalho do resumo. Os cartões das taxas usam `bg-panel-chip` e `bg-panel-secondary-soft`.
+- **Análises:** os campos de período e o botão de aplicação ficam no cabeçalho da seção, à direita do título, e passam para baixo dele em telas estreitas. Os gráficos usam `classes.quadroGrafico`, de `lib/ui.tsx`. O campo inválido recebe borda vermelha, `aria-invalid` e foco; o erro aparece numa `Message`. As tabelas têm rolagem horizontal própria, sem ampliar a página, e legenda antes dos dados. A comparação usa um painel recolhível para a seleção opcional de grupos e barras horizontais nas mesmas cores das taxas. Abaixo de 576 px, o gráfico de comparação coloca o nome do grupo acima das barras. Estados vazio, carregando e erro, botões principais sólidos e filtros recolhidos no celular estão em [Estado e exportação](ESTADO_E_EXPORTACAO.md). Veja [Comparações na interface](COMPARACOES.md).
 - **Tema:** o fundo, a cor do texto, a tipografia dos títulos e o contorno de foco estão em `@layer base`. As únicas regras fora das camadas tratam de elementos internos do Recharts e da animação de entrada dos chips.
 
 A migração não alterou os contratos HTTP, os cálculos, o comportamento dos filtros, a serialização da URL, o CSV ou as responsabilidades dos módulos. As funções puras e seus testes permanecem iguais.
@@ -99,8 +107,10 @@ Para novos controles, use os componentes do PrimeReact já configurados e acresc
 
 Após atualizar a branch, execute `pnpm install --frozen-lockfile`. Para conferir a interface com dados sintéticos, execute `pnpm dev:demo` e abra `http://127.0.0.1:5173/`.
 
-`pnpm check` verifica tipos, testes e build. Para mudanças de estilo, confira também no navegador: grade de filtros em desktop e celular, abertura das listas pelo teclado, busca nas listas longas, foco, campos desabilitados, intervalo inválido, tabela com rolagem e gráficos.
+`pnpm check` verifica tipos, testes e build. Para mudanças de estilo, confira também no navegador: gaveta de filtros em desktop e celular (foco, Esc e retorno ao botão), abertura das listas pelo teclado, busca nas listas longas, foco, campos desabilitados, intervalo inválido, tabela com rolagem e gráficos.
 
 A conferência da migração em 24/11/2026 registrou 35 testes do frontend, tipos, build e formatação aprovados. Com a API e PostgreSQL sintético, a interface foi comparada lado a lado com a versão anterior em 1280 px e conferida em 390 e 320 px, sem rolagem lateral da página nem erros no console. Foram exercitados: listas pelo teclado, busca sem acento, aplicação de filtros e ano, período inválido com foco no ano final, seleção e limite de grupos, clique na tabela para filtrar, painel de leitura, erro `429` e erro da evolução. axe-core não reportou violações em 1280 e 390 px, inclusive com lista e seleção de grupos abertas; a versão anterior também não tinha violações na mesma página. O build compilado foi servido pelo Fastify com a CSP de produção. Leitor de tela real, outros navegadores e dados reais permanecem pendentes; consulte o [registro de validação](../operacao/VALIDACAO.md).
+
+O refinamento visual da mesma data foi conferido em 1280, 390 e 320 px, sem rolagem lateral nem erros no console, com axe-core sem violações com a gaveta fechada e aberta, inclusive com uma lista aberta dentro dela. Os contrastes dos novos fundos ficaram entre 5,2:1 (texto auxiliar) e 12,4:1 (texto principal).
 
 Referências oficiais: [PrimeReact 10 em modo sem estilo](https://v10.primereact.org/unstyled/), [pass-through](https://v10.primereact.org/passthrough/) e [Tailwind CSS com Vite](https://tailwindcss.com/docs/installation/using-vite).

@@ -5,39 +5,45 @@ const notaLeitura = 'mt-3 max-w-[78ch] text-sm text-panel-muted'
 
 export function App() {
 	return (
-		<div className="mx-auto max-w-[1440px]">
+		<>
 			<a
-				className="fixed top-2 left-4 z-50 -translate-y-[150%] bg-panel-green px-4 py-3 text-white focus:translate-y-0"
+				className="fixed top-2 left-4 z-50 -translate-y-[150%] rounded bg-panel-surface px-4 py-3 font-semibold text-panel-green shadow-lg focus:translate-y-0"
 				href="#conteudo"
 			>
 				Ir para o conteúdo
 			</a>
-			<header className="flex min-h-16 items-center justify-between gap-4 border-b border-panel-line px-[4%] py-3">
-				<a
-					className="inline-flex items-center gap-3 text-xl font-bold no-underline"
-					href="/"
-				>
-					<span
-						className="rounded bg-panel-green p-2 text-base leading-none text-white"
-						aria-hidden="true"
-					>
-						MT
-					</span>{' '}
-					Evasão MT
-				</a>
-				<span className="hidden text-sm text-panel-muted sm:inline">
-					Ensino superior público
-				</span>
-			</header>
-			<main id="conteudo" tabIndex={-1} className="px-[4%] pt-6 pb-8 sm:pt-8">
-				<div className="mb-6">
-					<h1 className="mb-2">Evasão no ensino superior</h1>
-					<p className="max-w-[75ch] text-panel-muted">
+			<header className="bg-panel-green text-white">
+				<div className="mx-auto max-w-[1440px] px-[4%] pt-3 pb-8 sm:pb-10">
+					<div className="flex min-h-12 items-center justify-between gap-4">
+						<a
+							className="inline-flex items-center gap-3 text-xl font-bold no-underline"
+							href="/"
+						>
+							<span
+								className="rounded bg-panel-surface p-2 text-base leading-none text-panel-green"
+								aria-hidden="true"
+							>
+								MT
+							</span>{' '}
+							Evasão MT
+						</a>
+						<span className="hidden text-sm text-white/80 sm:inline">
+							Ensino superior público
+						</span>
+					</div>
+					<h1 className="mt-6 mb-2">Evasão no ensino superior</h1>
+					<p className="max-w-[75ch] text-white/80">
 						Instituições públicas com sede em Mato Grosso.
 					</p>
 				</div>
+			</header>
+			<main
+				id="conteudo"
+				tabIndex={-1}
+				className="mx-auto max-w-[1440px] px-[4%] pt-4 pb-10"
+			>
 				<PainelIndicadores />
-				<Accordion className="mt-6 border-t border-panel-line pt-4">
+				<Accordion className="mt-10 rounded-lg border border-panel-line bg-panel-surface px-4 py-3 sm:px-6">
 					<AccordionTab header="Como interpretar os dados">
 						<p className={notaLeitura}>
 							A base de risco corresponde aos vínculos aluno-curso, descontados
@@ -60,14 +66,16 @@ export function App() {
 					</AccordionTab>
 				</Accordion>
 			</main>
-			<footer className="flex flex-wrap justify-between gap-4 border-t border-panel-line px-[4%] py-4 text-sm text-panel-muted">
-				<span>Projeto de conclusão de curso · Evasão MT</span>
-				{import.meta.env.DEV && (
-					<a className="underline" href="/docs/">
-						Documentação da API
-					</a>
-				)}
+			<footer className="bg-panel-green text-sm text-white/80">
+				<div className="mx-auto flex max-w-[1440px] flex-wrap justify-between gap-4 px-[4%] py-5">
+					<span>Projeto de conclusão de curso · Evasão MT</span>
+					{import.meta.env.DEV && (
+						<a className="text-white underline" href="/docs/">
+							Documentação da API
+						</a>
+					)}
+				</div>
 			</footer>
-		</div>
+		</>
 	)
 }

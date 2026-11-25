@@ -143,7 +143,7 @@ export function GraficoComparacoes({
 		<>
 			{temTaxas ? (
 				<figure
-					className="my-6 min-w-0 text-sm"
+					className={classes.quadroGrafico}
 					aria-label="Taxas de evasão por grupo"
 					aria-describedby="comparacao-leitura"
 				>
@@ -160,7 +160,11 @@ export function GraficoComparacoes({
 							onMouseMove={(estado) => setAtivo(indiceDoEvento(estado))}
 							onMouseLeave={() => setAtivo(null)}
 						>
-							<CartesianGrid strokeDasharray="3 3" horizontal={false} />
+							<CartesianGrid
+								strokeDasharray="3 3"
+								stroke="var(--color-panel-border)"
+								horizontal={false}
+							/>
 							<XAxis
 								type="number"
 								domain={escala.dominio}

@@ -8,7 +8,10 @@ const numero = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 })
 // Classes das tabelas da evolução e da comparação.
 const celula =
 	'min-w-20 border-b border-panel-border p-2 sm:min-w-[105px] sm:p-3 motion-safe:transition-colors motion-safe:duration-150'
-const cabecalho = cx(celula, 'bg-panel-background align-bottom font-semibold')
+const cabecalho = cx(
+	celula,
+	'border-panel-green bg-panel-green align-bottom font-semibold text-white'
+)
 const corpo = cx(celula, 'bg-panel-surface align-top')
 export const classesTabela = {
 	cabecalho: cx(cabecalho, 'text-left'),

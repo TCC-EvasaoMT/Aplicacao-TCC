@@ -141,53 +141,57 @@ export function PainelEvolucao({
 			aria-labelledby="evolucao-titulo"
 			aria-busy={carregando}
 		>
-			<h2 id="evolucao-titulo">Evolução temporal</h2>
-			<Ajuda>
-				Compare as taxas no período abaixo. Os filtros são compartilhados; o ano
-				do resumo não limita este gráfico.
-			</Ajuda>
-			<form
-				className="mt-4 grid grid-cols-2 items-end gap-4 sm:flex sm:flex-wrap"
-				onSubmit={aplicar}
-				noValidate
-				aria-describedby="periodo-ajuda"
-			>
-				{(['ano_inicial', 'ano_final'] as const).map((campo) => (
-					<div className="sm:w-40" key={campo}>
-						<label className={classes.rotulo} htmlFor={campo}>
-							{campo === 'ano_inicial' ? 'Ano inicial' : 'Ano final'}
-						</label>
-						<InputText
-							id={campo}
-							name={campo}
-							autoComplete="off"
-							ref={(elemento) => {
-								camposPeriodo.current[campo] = elemento
-							}}
-							inputMode="numeric"
-							keyfilter="pint"
-							maxLength={4}
-							required
-							value={campos[campo]}
-							disabled={indisponivel || !anos.length}
-							invalid={campoComErro === campo}
-							aria-invalid={campoComErro === campo}
-							aria-describedby={erroPeriodo ? 'periodo-erro' : 'periodo-ajuda'}
-							onChange={(event) => {
-								setRascunho({ ...campos, [campo]: event.target.value })
-								setErroPeriodo('')
-							}}
-						/>
-					</div>
-				))}
-				<div className="col-span-2 sm:col-span-1">
+			<div className={classes.cabecalhoSecao}>
+				<h2 id="evolucao-titulo" className={classes.titulo}>
+					Evolução temporal
+				</h2>
+				<form
+					className="flex flex-wrap items-end gap-3"
+					onSubmit={aplicar}
+					noValidate
+					aria-describedby="periodo-ajuda"
+				>
+					{(['ano_inicial', 'ano_final'] as const).map((campo) => (
+						<div className="w-28" key={campo}>
+							<label className={classes.rotulo} htmlFor={campo}>
+								{campo === 'ano_inicial' ? 'Ano inicial' : 'Ano final'}
+							</label>
+							<InputText
+								id={campo}
+								name={campo}
+								autoComplete="off"
+								ref={(elemento) => {
+									camposPeriodo.current[campo] = elemento
+								}}
+								inputMode="numeric"
+								keyfilter="pint"
+								maxLength={4}
+								required
+								value={campos[campo]}
+								disabled={indisponivel || !anos.length}
+								invalid={campoComErro === campo}
+								aria-invalid={campoComErro === campo}
+								aria-describedby={
+									erroPeriodo ? 'periodo-erro' : 'periodo-ajuda'
+								}
+								onChange={(event) => {
+									setRascunho({ ...campos, [campo]: event.target.value })
+									setErroPeriodo('')
+								}}
+							/>
+						</div>
+					))}
 					<Button
 						type="submit"
 						label="Aplicar período"
 						disabled={indisponivel || !anos.length}
 					/>
-				</div>
-			</form>
+				</form>
+			</div>
+			<Ajuda>
+				As taxas de cada ano no período escolhido. Os filtros são
+				compartilhados; o ano do resumo não limita este gráfico.
+			</Ajuda>
 			<Ajuda id="periodo-ajuda">
 				De 1 a 30 anos, incluindo os extremos. Anos sem dados permanecem como
 				lacunas.

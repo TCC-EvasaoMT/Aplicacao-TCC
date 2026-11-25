@@ -176,7 +176,9 @@ export function PainelComparacoes({
 			aria-busy={carregando}
 		>
 			<div className={classes.cabecalhoSecao}>
-				<h2 id="comparacao-titulo">Comparação entre grupos</h2>
+				<h2 id="comparacao-titulo" className={classes.titulo}>
+					Comparação entre grupos
+				</h2>
 				<div className={classes.campoAno}>
 					<label className={classes.rotulo} htmlFor="comparacao-ano">
 						Ano da comparação
@@ -205,21 +207,28 @@ export function PainelComparacoes({
 			>
 				<fieldset disabled={!podeConsultar}>
 					<legend className="sr-only">Configurar comparação</legend>
-					<div className="max-w-[360px]">
-						<label className={classes.rotulo} htmlFor="comparacao-dimensao">
-							Agrupar por
-						</label>
-						<CampoLista
-							inputId="comparacao-dimensao"
-							value={rascunho.agrupar_por}
-							options={opcoesDimensao}
+					<div className="flex flex-wrap items-end gap-3">
+						<div className="w-full max-w-[360px]">
+							<label className={classes.rotulo} htmlFor="comparacao-dimensao">
+								Agrupar por
+							</label>
+							<CampoLista
+								inputId="comparacao-dimensao"
+								value={rascunho.agrupar_por}
+								options={opcoesDimensao}
+								disabled={!podeConsultar}
+								onChange={(valor) =>
+									setRascunho({
+										agrupar_por: valor as DimensaoComparacao,
+										grupos: []
+									})
+								}
+							/>
+						</div>
+						<Button
+							type="submit"
+							label="Comparar grupos"
 							disabled={!podeConsultar}
-							onChange={(valor) =>
-								setRascunho({
-									agrupar_por: valor as DimensaoComparacao,
-									grupos: []
-								})
-							}
 						/>
 					</div>
 					<SeletorGrupos
@@ -228,11 +237,6 @@ export function PainelComparacoes({
 						grupos={rascunho.grupos}
 						desabilitado={!podeConsultar}
 						onChange={(grupos) => setRascunho({ ...rascunho, grupos })}
-					/>
-					<Button
-						type="submit"
-						label="Comparar grupos"
-						disabled={!podeConsultar}
 					/>
 				</fieldset>
 			</form>

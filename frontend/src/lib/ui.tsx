@@ -10,8 +10,14 @@ export const classes = {
 	// Bloco de seção: evolução, comparação e filtros.
 	secao:
 		'min-w-0 rounded-lg border border-panel-line bg-panel-surface p-4 sm:px-6 sm:pt-6 sm:pb-8',
-	cabecalhoSecao: 'mb-4 flex flex-wrap items-center justify-between gap-4',
+	cabecalhoSecao: 'mb-2 flex flex-wrap items-end justify-between gap-4',
 	rotulo: 'mb-1 block text-sm font-semibold',
+	// Título de seção com marcador na cor da marca.
+	titulo:
+		"flex items-center gap-2 before:h-5 before:w-1 before:rounded-full before:bg-panel-green before:content-['']",
+	// Moldura dos gráficos: dá destaque sem competir com as cores das séries.
+	quadroGrafico:
+		'my-6 min-w-0 rounded-lg border border-panel-line bg-linear-to-b from-panel-chip to-panel-surface p-3 text-sm sm:p-4',
 	// Ano no cabeçalho do resumo e da comparação.
 	campoAno: 'min-w-36',
 	// Dados anteriores visíveis enquanto o novo recorte carrega.

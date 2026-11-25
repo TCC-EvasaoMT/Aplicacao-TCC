@@ -101,7 +101,7 @@ export const tema: PrimeReactPTOptions = {
 		select: { 'aria-hidden': true },
 		panel: {
 			className:
-				'mt-1 max-w-[calc(100vw-1rem)] rounded border border-panel-line bg-panel-surface text-panel-ink shadow-lg'
+				'mt-1 max-w-[calc(100vw-1rem)] min-w-full rounded border border-panel-line bg-panel-surface text-panel-ink shadow-lg'
 		},
 		header: { className: 'border-b border-panel-line p-2' },
 		filterContainer: { className: 'relative' },
@@ -175,6 +175,38 @@ export const tema: PrimeReactPTOptions = {
 		circle: {
 			className:
 				'stroke-current [stroke-dasharray:90_150] [stroke-linecap:round]'
+		}
+	},
+	// Gaveta dos filtros. O Sidebar do PrimeReact 10 se declara "complementary";
+	// como cobre a página com máscara, é anunciado como diálogo modal.
+	sidebar: {
+		mask: { className: 'bg-panel-ink/45' },
+		root: {
+			className:
+				'flex h-full w-full flex-col bg-panel-surface text-panel-ink shadow-xl sm:w-[26rem]',
+			role: 'dialog',
+			'aria-modal': true
+		},
+		header: {
+			className:
+				'flex items-center justify-between gap-4 bg-panel-green px-5 py-4 text-white'
+		},
+		closeButton: {
+			className:
+				'inline-flex size-10 items-center justify-center rounded text-white hover:bg-white/15 focus-visible:outline-white'
+		},
+		closeIcon: { className: 'size-4' },
+		content: { className: 'flex-1 overflow-y-auto overscroll-contain p-5' },
+		transition: {
+			timeout: 200,
+			classNames: {
+				enter: 'translate-x-full',
+				enterActive:
+					'translate-x-0 transition-transform duration-200 ease-out motion-reduce:transition-none',
+				exit: 'translate-x-0',
+				exitActive:
+					'translate-x-full transition-transform duration-150 ease-in motion-reduce:transition-none'
+			}
 		}
 	},
 	accordion: {

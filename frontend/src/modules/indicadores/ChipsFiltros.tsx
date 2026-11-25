@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Button } from 'primereact/button'
 import { cx } from '../../lib/ui'
 import { useMedia } from '../../lib/useMedia'
 import type { Resumo } from './api'
@@ -24,6 +25,8 @@ interface Props {
 	resumo?: Resumo
 	// Texto para leitores de tela sobre a última mudança feita pela pessoa.
 	anuncio: string
+	filtrosAbertos: boolean
+	onAbrirFiltros: () => void
 	onRemover: (chave: CampoFiltro) => void
 	onLimpar: () => void
 }
@@ -36,6 +39,8 @@ export function ChipsFiltros({
 	ativos,
 	resumo,
 	anuncio,
+	filtrosAbertos,
+	onAbrirFiltros,
 	onRemover,
 	onLimpar
 }: Props) {
@@ -73,6 +78,14 @@ export function ChipsFiltros({
 			role="region"
 			aria-label="Recorte atual"
 		>
+			<Button
+				label={ativos.length ? `Filtros (${ativos.length})` : 'Filtros'}
+				size="small"
+				className="flex-none"
+				aria-haspopup="dialog"
+				aria-expanded={filtrosAbertos}
+				onClick={onAbrirFiltros}
+			/>
 			<span className="flex-none border-r border-panel-line pr-2 font-bold tabular-nums sm:pr-3">
 				{ano ? `Ano ${ano}` : 'Ano'}
 			</span>

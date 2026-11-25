@@ -63,13 +63,15 @@ const taxas = [
 		chave: 'evasao_curso',
 		titulo: 'Evasão do curso',
 		descricao: 'Desvinculados e transferidos, em relação à base de risco.',
-		cor: 'border-t-panel-green'
+		cor: 'border-t-panel-green bg-panel-chip',
+		valor: 'text-panel-green'
 	},
 	{
 		chave: 'evasao_ies',
 		titulo: 'Evasão da instituição',
 		descricao: 'Desvinculados, em relação à base de risco.',
-		cor: 'border-t-panel-secondary'
+		cor: 'border-t-panel-secondary bg-panel-secondary-soft',
+		valor: 'text-panel-secondary'
 	}
 ] as const
 
@@ -96,7 +98,7 @@ export function ResumoIndicadores({ resumo, anterior, ano }: Props) {
 				{taxas.map((taxa) => (
 					<article
 						className={cx(
-							'rounded-b-lg border border-t-[3px] border-panel-line bg-panel-surface p-4 shadow-[0_1px_2px_rgb(23_46_41/6%)] sm:px-6 sm:pt-4 sm:pb-5',
+							'rounded-b-lg border border-t-4 border-panel-line p-4 shadow-[0_1px_2px_rgb(23_46_41/6%)] sm:px-6 sm:pt-4 sm:pb-5',
 							taxa.cor
 						)}
 						key={taxa.chave}
@@ -105,6 +107,7 @@ export function ResumoIndicadores({ resumo, anterior, ano }: Props) {
 						<p
 							className={cx(
 								valorDestacado,
+								taxa.valor,
 								'mt-2 mb-1 text-[clamp(2.25rem,4vw,2.75rem)] tracking-[-0.01em]'
 							)}
 						>

@@ -21,6 +21,7 @@ import {
 	ordemSeries
 } from './apresentacao'
 import { Ajuda, classes, cx } from '../../lib/ui'
+import { useMedia } from '../../lib/useMedia'
 import {
 	CelulaNumero,
 	CelulaTaxa,
@@ -54,6 +55,7 @@ export function GraficoEvolucao({
 }: Props) {
 	// Ano sob o ponteiro ou com foco na tabela; liga gráfico e tabela.
 	const [ativo, setAtivo] = useState<number | null>(null)
+	const estreito = useMedia('(max-width: 575px)')
 	const anoAtivo = ativo === null ? null : (serie[ativo]?.ano ?? null)
 	const selecionavel = (ano: number | null) =>
 		ano !== null && anosSelecionaveis.includes(ano)
@@ -129,11 +131,11 @@ export function GraficoEvolucao({
 		<>
 			{temTaxas ? (
 				<figure
-					className="my-6 min-w-0 text-sm"
+					className={classes.quadroGrafico}
 					aria-label="Taxas anuais de evasão"
 					aria-describedby="evolucao-leitura"
 				>
-					<ResponsiveContainer width="100%" height={320}>
+					<ResponsiveContainer width="100%" height={estreito ? 300 : 400}>
 						<LineChart
 							data={serie}
 							accessibilityLayer
@@ -156,7 +158,11 @@ export function GraficoEvolucao({
 							onMouseMove={(estado) => setAtivo(indiceDoEvento(estado))}
 							onMouseLeave={() => setAtivo(null)}
 						>
-							<CartesianGrid strokeDasharray="3 3" vertical={false} />
+							<CartesianGrid
+								strokeDasharray="3 3"
+								stroke="var(--color-panel-border)"
+								vertical={false}
+							/>
 							<XAxis
 								dataKey="ano"
 								type="number"
