@@ -80,20 +80,26 @@ ${read('backend/sql/permissoes.sql')}
 		)
 
 		if (action === 'dev') {
-			if (!process.env.npm_execpath)
-				throw new Error('Inicie com pnpm dev:demo.')
-			run(process.execPath, [process.env.npm_execpath, 'dev'], {
-				env: {
-					...env,
-					NODE_ENV: 'development',
-					PORT: '3000',
-					POSTGRES_HOST: '127.0.0.1',
-					POSTGRES_PORT: '55433',
-					POSTGRES_DB: 'postgres',
-					POSTGRES_USER: 'tcc_demo',
-					POSTGRES_PASSWORD: 'tcc_demo_local'
+			const pnpmPath = process.env.npm_execpath
+			if (!pnpmPath) throw new Error('Inicie com pnpm dev:demo.')
+			// O pnpm pode ser um script JavaScript ou um executável nativo.
+			const isJavaScript = /\.(?:cjs|mjs|js)$/i.test(pnpmPath)
+			run(
+				isJavaScript ? process.execPath : pnpmPath,
+				isJavaScript ? [pnpmPath, 'dev'] : ['dev'],
+				{
+					env: {
+						...env,
+						NODE_ENV: 'development',
+						PORT: '3000',
+						POSTGRES_HOST: '127.0.0.1',
+						POSTGRES_PORT: '55433',
+						POSTGRES_DB: 'postgres',
+						POSTGRES_USER: 'tcc_demo',
+						POSTGRES_PASSWORD: 'tcc_demo_local'
+					}
 				}
-			})
+			)
 		}
 	}
 } catch (error) {
