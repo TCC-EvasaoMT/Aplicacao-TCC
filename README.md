@@ -37,7 +37,7 @@ pnpm install --frozen-lockfile
 
 Se `backend/.env` ainda não existir, crie-o a partir de `backend/.env.example` e configure o usuário de leitura do banco. A [documentação do backend](backend/README.md) explica as permissões e a carga da Gold. Uma configuração local já existente é preservada ao migrar para o monorepo.
 
-O painel continua público. O backend também oferece [autenticação administrativa JWT/Bearer](docs/arquitetura/AUTORIZACAO.md), habilitada por configuração. O [guia do banco da aplicação](docs/arquitetura/BANCO_APLICACAO.md) explica a criação do schema `app`, migrações e primeiro administrador no PostgreSQL existente, sem alterar a pipeline. A tela de login será implementada em outro incremento.
+O painel continua público. O backend também oferece [autenticação administrativa JWT/Bearer](docs/arquitetura/AUTORIZACAO.md), habilitada por configuração. O [guia do banco da aplicação](docs/arquitetura/BANCO_APLICACAO.md) explica a criação do schema `app`, migrações e primeiro administrador no PostgreSQL existente, sem alterar a pipeline. O cabeçalho do painel tem o botão **Entrar**, que abre o login administrativo.
 
 Pare os servidores antigos antes de iniciar o conjunto, para liberar as portas 3000 e 5173:
 

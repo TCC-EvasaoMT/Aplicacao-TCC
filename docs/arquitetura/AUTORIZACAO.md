@@ -1,6 +1,6 @@
 # Acesso ao painel e à administração
 
-O painel é público. A autenticação administrativa do backend usa credenciais locais, JWT no cabeçalho `Authorization: Bearer <token>` e sessões no schema `app` do mesmo PostgreSQL. Não depende de provedor externo. A tela de login e a administração do ETL ainda não foram implementadas.
+O painel é público. A autenticação administrativa do backend usa credenciais locais, JWT no cabeçalho `Authorization: Bearer <token>` e sessões no schema `app` do mesmo PostgreSQL. Não depende de provedor externo. O painel tem login no cabeçalho; a administração do ETL ainda não foi implementada.
 
 ## Preparação
 
@@ -54,9 +54,9 @@ Em toda requisição protegida, o backend também consulta `app`: sessão precis
 
 O refresh é um valor aleatório de 256 bits, entregue somente em cookie `HttpOnly`, `SameSite=Strict`, com caminho `/api/v1/autenticacao`. Em produção, usa `Secure` e nome `__Secure-tcc_refresh`; localmente, `tcc_refresh`. O banco armazena somente seu hash SHA-256. O cookie não é aceito como token de acesso.
 
-A sessão expira sete dias após o login, sem prorrogação na renovação. Cada renovação consome o refresh anterior em uma transação com lock da sessão. Reutilizar um refresh consumido revoga toda a sessão, inclusive o token emitido na primeira renovação. O frontend deverá serializar as renovações, inclusive entre abas: duas renovações simultâneas com o mesmo cookie provocam revogação. Depois disso, é necessário novo login.
+A sessão expira sete dias após o login, sem prorrogação na renovação. Cada renovação consome o refresh anterior em uma transação com lock da sessão. Reutilizar um refresh consumido revoga toda a sessão, inclusive o token emitido na primeira renovação. Por isso o frontend serializa as renovações: na mesma aba, chamadas simultâneas compartilham uma única renovação; entre abas, a Web Locks API as enfileira, e cada aba envia o cookie já rotacionado pela anterior. Depois de uma revogação, é necessário novo login.
 
-O logout revoga a sessão identificada pelo cookie e todos os seus JWTs; não encerra outras sessões do usuário. Apagar apenas o token do frontend não efetua logout. O frontend futuro deverá manter o JWT em memória, enviar Bearer e usar o cookie para recuperar uma sessão após recarregar a página, sem persistir o JWT em `localStorage`.
+O logout revoga a sessão identificada pelo cookie e todos os seus JWTs; não encerra outras sessões do usuário. Apagar apenas o token do frontend não efetua logout. O frontend mantém o JWT só em memória e usa o cookie para recuperar a sessão ao recarregar a página. Para não chamar `/renovar` em toda visita anônima, guarda em `localStorage` apenas uma marca sem conteúdo sensível indicando que há sessão a restaurar. Login e logout são avisados às outras abas por `BroadcastChannel`.
 
 ## Autorização por rota
 
@@ -107,8 +107,12 @@ Na base sintética, execute `pnpm dev:demo:auth` e defina a senha de `admin@demo
 
 O Swagger continua disponível somente em desenvolvimento. Não guarde tokens em exemplos versionados.
 
+## Login no painel
+
+O botão **Entrar**, no cabeçalho, abre uma gaveta com e-mail e senha, no mesmo padrão de foco e `inert` da gaveta de filtros. Com sessão ativa, o cabeçalho mostra o e-mail e o botão **Sair**. O módulo `frontend/src/modules/autenticacao` reúne o cliente HTTP (`api.ts`), o controle da sessão (`sessao.ts`) e o hook `useSessao`. Futuras telas administrativas obtêm o Bearer por `tokenAcesso()`, que renova o JWT a menos de um minuto da expiração. Exibir ou ocultar controles não concede acesso: o servidor confere sessão e permissões em cada chamada.
+
 ## Validação e próximos incrementos
 
 Os testes usam PostgreSQL 17 sintético, roles restritas e bancos temporários. Cobrem migração repetida, preservação de contas após reconstrução da Gold, privilégios SQL, credenciais, Bearer, claims inválidas, expiração, logout, mudança de permissões, desativação, CSRF, rotação/reuso concorrente, limites e ausência de segredos nos logs. As consultas públicas são testadas com autenticação habilitada.
 
-Permanecem para próximas entregas: tela de login, recuperação de senha, MFA, gestão de usuários, integração e auditoria do ETL, limpeza agendada de sessões e configuração HTTPS/proxy em produção. Logs HTTP existentes registram rota, status e duração; não são uma trilha de auditoria de ações administrativas. A aplicação continua local e nenhum acesso a dados reais foi validado nesta entrega.
+Permanecem para próximas entregas: recuperação de senha, MFA, gestão de usuários, integração e auditoria do ETL, limpeza agendada de sessões e configuração HTTPS/proxy em produção. Logs HTTP existentes registram rota, status e duração; não são uma trilha de auditoria de ações administrativas. A aplicação continua local e nenhum acesso a dados reais foi validado nesta entrega.

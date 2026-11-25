@@ -3,6 +3,7 @@ import { Accordion, AccordionTab } from 'primereact/accordion'
 import { TabMenu } from 'primereact/tabmenu'
 import { gravarUrl, lerUrl } from './lib/url'
 import { abasPainel, lerAba, PainelIndicadores } from './modules/indicadores'
+import { AcessoAdministrativo } from './modules/autenticacao'
 
 const notaLeitura = 'mt-3 max-w-[78ch] text-sm text-panel-muted'
 
@@ -35,9 +36,12 @@ export function App() {
 							</span>{' '}
 							Evasão MT
 						</a>
-						<span className="hidden text-sm text-white/80 sm:inline">
-							Ensino superior público
-						</span>
+						<div className="flex min-w-0 items-center gap-4">
+							<span className="hidden text-sm text-white/80 lg:inline">
+								Ensino superior público
+							</span>
+							<AcessoAdministrativo />
+						</div>
 					</div>
 					<h1 className="mt-6 mb-2">Evasão no ensino superior</h1>
 					<p className="max-w-[75ch] text-white/80">
