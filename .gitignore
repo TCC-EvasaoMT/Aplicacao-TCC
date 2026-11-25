@@ -10,5 +10,7 @@ coverage/
 !.env.example
 dados/
 /docs-codex/
+/backend/AGENTS.md
+/frontend/AGENTS.md
 .DS_Store
 Thumbs.db
