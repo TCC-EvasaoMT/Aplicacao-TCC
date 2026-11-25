@@ -70,7 +70,7 @@ O objetivo geral menciona fatores associados à evasão. As telas atuais são de
 2. Conciliar com o grupo e o orientador as fontes, fórmulas, instituições, cartões e tecnologias descritos no Word.
 3. Implementar a dispersão do RF10 no módulo de análises, começando pelo contrato da API e pelos critérios das linhas de referência.
 4. Definir e implementar a visão simultânea de áreas/modalidades do RF12, sem confundir ordem por código com ranking.
-5. Retomar autenticação antes das rotas administrativas dos RF13 e RF14; definir o contrato de execução com a pipeline.
+5. Definir o contrato de execução com a pipeline e criar as rotas administrativas dos RF13 e RF14 sobre a autenticação existente, com as permissões `etl:consultar` e `etl:reprocessar` e auditoria.
 6. Planejar implantação, custos, continuidade, logs, licenças e testes de aceitação com evidências reproduzíveis.
 
-A autenticação e os dois ajustes de resiliência do frontend permanecem adiados. Esta revisão não implementa novas funcionalidades nem altera o documento acadêmico.
+A autenticação administrativa foi integrada em 25/11/2026, com login no painel e troca de senha; os dois ajustes de resiliência do frontend permanecem adiados. Esta revisão não implementa novas funcionalidades nem altera o documento acadêmico.

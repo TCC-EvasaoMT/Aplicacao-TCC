@@ -32,7 +32,7 @@ O módulo também fornece `GET /api/v1/analises/comparacoes`, com `ano` e `agrup
 
 ## Autenticação
 
-`backend/src/modules/autenticacao` implementa login, renovação, logout e consulta de identidade em `/api/v1/autenticacao`. `rotas.ts` coordena HTTP e cookies; `schemas.ts` define contratos; `senhas.ts` trata Argon2id; `repositorio.ts` concentra o SQL e as transações de sessão; `acesso.ts` valida Bearer e aplica permissões consultadas no banco. Sua entrada pública exporta o registro de rotas, o controle transversal e a fábrica do repositório.
+`backend/src/modules/autenticacao` implementa login, renovação, logout, consulta de identidade e troca da própria senha em `/api/v1/autenticacao`. `rotas.ts` coordena HTTP e cookies; `schemas.ts` define contratos; `senhas.ts` trata Argon2id; `repositorio.ts` concentra o SQL e as transações de sessão; `acesso.ts` valida Bearer, aplica permissões consultadas no banco e expõe `request.identidade` e `request.sessaoId` às rotas. Sua entrada pública exporta o registro de rotas, o controle transversal e a fábrica do repositório.
 
 O módulo usa exclusivamente o schema `app`, com outra role de conexão. `database/` contém as migrações e o provisionamento de administrador, executados fora do servidor HTTP. Veja [contrato de autenticação](AUTORIZACAO.md) e [preparação do banco](BANCO_APLICACAO.md). Nenhuma rota de ETL está implementada; os testes registram rotas próprias para verificar `etl:consultar` e `etl:reprocessar`.
 

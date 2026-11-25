@@ -34,12 +34,12 @@ O PrimeReact ainda injeta uma folha de estilo pequena com `.p-hidden-accessible`
 | -------------------------- | -------------------------------------------------------------------------------------- |
 | `Button`                   | Todas as ações; `outlined` para as secundárias, sólido para aplicar período e comparar |
 | `Dropdown` (`CampoLista`)  | Ano do resumo e da comparação, sete filtros e agrupamento                              |
-| `InputText`                | Anos do período (`keyfilter="pint"`) e busca de grupos                                 |
+| `InputText`                | Anos do período (`keyfilter="pint"`), busca de grupos e campos de login e senha        |
 | `Checkbox`                 | Seleção de até 20 grupos                                                               |
 | `Message`                  | Erros de consulta, de período e do limite de erro dos gráficos                         |
 | `ProgressSpinner`          | Indicador de carregamento                                                              |
 | `Accordion`/`AccordionTab` | “Selecionar grupos” e “Como interpretar os dados”                                      |
-| `Sidebar`                  | Gaveta dos filtros, aberta pelo botão **Filtros** da faixa do recorte                  |
+| `Sidebar`                  | Gaveta dos filtros e gavetas de login e de alteração de senha                          |
 | `TabMenu`                  | Abas do painel no cabeçalho                                                            |
 
 Alguns elementos continuam nativos, estilizados com Tailwind: as tabelas, que precisam de `caption`, cabeçalhos de linha (`th scope="row"`) e da ligação com os gráficos, recursos que o `DataTable` do PrimeReact não oferece da mesma forma; os chips da faixa do recorte, cujo botão de remoção precisa de nome acessível e de área de toque de 44 px; e os botões de ano e grupo dentro das tabelas. Os avisos de qualidade usam `Aviso` em vez de `Message` porque não são alertas: `Message` sempre anuncia o conteúdo como `role="alert"`.

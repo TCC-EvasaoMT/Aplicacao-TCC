@@ -1,6 +1,6 @@
 # Proteção da API pública
 
-O painel e as consultas são públicos. A aplicação limita requisições, aplica cabeçalhos HTTP e controla os campos dos logs. Login, sessão e permissões administrativas aguardam integração, conforme o [modelo de acesso](../arquitetura/AUTORIZACAO.md). O servidor local usa HTTP; HTTPS depende da implantação.
+O painel e as consultas são públicos. A aplicação limita requisições, aplica cabeçalhos HTTP e controla os campos dos logs. Login, sessão, permissões e seus limites próprios estão no [modelo de acesso](../arquitetura/AUTORIZACAO.md). O servidor local usa HTTP; HTTPS depende da implantação.
 
 ## Organização
 
@@ -31,11 +31,11 @@ O contador fica na memória de cada processo, com cache limitado a 5000 chaves p
 
 `trustProxy` permanece desativado. Cabeçalhos como `X-Forwarded-For` não mudam a identidade usada na limitação. Atrás do Vite ou de outro proxy, a API observa o IP desse proxy; os visitantes podem compartilhar a mesma cota. Antes da implantação, definir os proxies confiáveis e bloquear acesso direto indevido ao backend. Não habilitar confiança irrestrita para resolver esse agrupamento.
 
-O Fastify aceita corpos de até **16 KiB** nas rotas que processam corpo e configura **10 segundos para recebimento da requisição**. O timeout de recebimento não cancela handlers nem consultas em execução. O Node verifica timeouts periodicamente; não é um cronômetro preciso por chamada. As rotas de negócio atuais são consultas GET e não recebem corpo.
+O Fastify aceita corpos de até **16 KiB** nas rotas que processam corpo e configura **10 segundos para recebimento da requisição**. O timeout de recebimento não cancela handlers nem consultas em execução. O Node verifica timeouts periodicamente; não é um cronômetro preciso por chamada. As consultas são GET e não recebem corpo; apenas login e troca de senha recebem JSON.
 
-Excesso de corpo retorna `413`, tipo de conteúdo não suportado retorna `415`, e erros HTTP reconhecidos preservam `400`, `401`, `403`, `404`, `408` e `429` com mensagens controladas. O `408` gerado diretamente pelo servidor HTTP pode ter formato próprio, antes do handler. Suportar `401`/`403` no tratamento de erros não implementa autenticação. Falhas da Gold continuam como `503`; erros inesperados retornam `500` sem detalhes internos.
+Excesso de corpo retorna `413`, tipo de conteúdo não suportado retorna `415`, e erros HTTP reconhecidos preservam `400`, `401`, `403`, `404`, `408` e `429` com mensagens controladas. O `408` gerado diretamente pelo servidor HTTP pode ter formato próprio, antes do handler. `401` e `403` são produzidos pelo controle de acesso; `422` indica senha atual incorreta na troca de senha. Falhas da Gold continuam como `503`; erros inesperados retornam `500` sem detalhes internos.
 
-O pool mantém cinco conexões, espera de conexão de dois segundos e timeout SQL de 2,5 segundos. Nenhum desses limites comprova a meta de resposta com dados reais.
+O pool de leitura da Gold mantém cinco conexões, espera de conexão de dois segundos e timeout SQL de 2,5 segundos. Com autenticação habilitada, outro pool, restrito ao schema `app`, usa até três conexões e os mesmos timeouts. Nenhum desses limites comprova a meta de resposta com dados reais.
 
 ## Cabeçalhos e política de conteúdo
 

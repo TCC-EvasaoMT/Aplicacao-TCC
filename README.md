@@ -37,7 +37,7 @@ pnpm install --frozen-lockfile
 
 Se `backend/.env` ainda não existir, crie-o a partir de `backend/.env.example` e configure o usuário de leitura do banco. A [documentação do backend](backend/README.md) explica as permissões e a carga da Gold. Uma configuração local já existente é preservada ao migrar para o monorepo.
 
-O painel continua público. O backend também oferece [autenticação administrativa JWT/Bearer](docs/arquitetura/AUTORIZACAO.md), habilitada por configuração. O [guia do banco da aplicação](docs/arquitetura/BANCO_APLICACAO.md) explica a criação do schema `app`, migrações e primeiro administrador no PostgreSQL existente, sem alterar a pipeline. O cabeçalho do painel tem o botão **Entrar**, que abre o login administrativo.
+O painel continua público. O backend também oferece [autenticação administrativa JWT/Bearer](docs/arquitetura/AUTORIZACAO.md), habilitada por configuração. O [guia do banco da aplicação](docs/arquitetura/BANCO_APLICACAO.md) explica a criação do schema `app`, migrações e primeiro administrador no PostgreSQL existente, sem alterar a pipeline. O cabeçalho do painel tem os botões **Entrar**, **Alterar senha** e **Sair**, descritos em [login e sessão no painel](docs/frontend/AUTENTICACAO.md).
 
 Pare os servidores antigos antes de iniciar o conjunto, para liberar as portas 3000 e 5173:
 
@@ -122,13 +122,24 @@ pnpm dev:demo:auth
 
 O comando cria as roles técnicas de manutenção e autenticação, prepara `app`, executa as migrações reais do backend e aplica as permissões. Na primeira execução, pede senha e confirmação para **`admin@demo.local`** (15 a 128 caracteres, entrada oculta). Não há senha padrão de administrador. Nas próximas execuções, preserva a senha, o estado e as permissões dessa conta. A Gold sintética continua sendo recarregada.
 
+No painel, em [http://127.0.0.1:5173/](http://127.0.0.1:5173/):
+
+1. Clique em **Entrar** e informe `admin@demo.local` e a senha cadastrada. O cabeçalho passa a mostrar **Alterar senha** e **Sair**.
+2. Recarregue a página: a sessão é restaurada pelo cookie, sem novo login.
+3. Em **Alterar senha**, informe a senha atual e uma nova. As outras sessões da conta são encerradas; esta continua.
+4. Clique em **Sair**. Outras abas abertas do painel também saem.
+
+Use sempre `127.0.0.1`: em `localhost` a origem é outra e o login responde que não está disponível neste endereço.
+
+Pelo Swagger:
+
 1. Abra [Swagger pelo Vite](http://127.0.0.1:5173/docs/). Use esse endereço: a origem da demonstração autenticada é `http://127.0.0.1:5173`.
 2. Em **Autenticação → POST /api/v1/autenticacao/login**, envie `email: admin@demo.local`, a senha cadastrada e `X-CSRF-Protection: 1`. O navegador envia `Origin` automaticamente.
 3. Copie o `access_token` retornado para **Authorize**, sem escrever `Bearer`. Consulte **GET /api/v1/autenticacao/me**: deve retornar o e-mail e as duas permissões de ETL.
 4. Execute **POST /api/v1/autenticacao/renovar** com `X-CSRF-Protection: 1`. O navegador envia o cookie; copie o novo JWT para **Authorize**.
 5. Execute **POST /api/v1/autenticacao/logout** com o mesmo header. Uma nova chamada a `/me` deve receber `401`, inclusive usando o último JWT.
 
-A tela React permanece pública e ainda não possui formulário de login. As consultas de filtros, resumo e evolução temporal continuam disponíveis sem autenticação.
+As consultas de filtros, resumo, evolução temporal e comparações continuam disponíveis sem autenticação.
 
 Não é necessário editar `.env`, instalar `psql` localmente ou alterar o Compose da pipeline. O destino é fixo: projeto Docker `tcc-demo`, banco `postgres`, porta `55433`. O segredo JWT é aleatório e existe somente no processo iniciado; ao reiniciar o comando, JWTs anteriores deixam de valer. Faça login novamente ou renove a sessão pelo cookie ainda válido. `pnpm dev:demo` continua iniciando somente o painel público, com autenticação desabilitada, independentemente do `.env`.
 
@@ -152,6 +163,6 @@ O workflow do GitHub Actions está configurado para executar `pnpm check` e a in
 
 ## Colaboração
 
-A [proteção da API pública](docs/operacao/SEGURANCA_API.md) documenta cabeçalhos de segurança, limites HTTP e a cota de consultas configurável por `HTTP_RATE_LIMIT_MAX`. O painel permanece público; o [acesso administrativo](docs/arquitetura/AUTORIZACAO.md) será implementado separadamente.
+A [proteção da API pública](docs/operacao/SEGURANCA_API.md) documenta cabeçalhos de segurança, limites HTTP e a cota de consultas configurável por `HTTP_RATE_LIMIT_MAX`. O painel permanece público; o [acesso administrativo](docs/arquitetura/AUTORIZACAO.md) usa login próprio, ainda sem telas de administração do ETL.
 
 Use uma branch curta por tarefa, PR para `main` e Conventional Commits em português. O [guia de contribuição](CONTRIBUTING.md) explica nomes de branches, commits, revisão e a primeira publicação. Frontend e backend pertencem ao mesmo repositório; a pipeline permanece separada.

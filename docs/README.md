@@ -1,20 +1,20 @@
 # Documentação da aplicação
 
-A aplicação consulta a Gold da pipeline e apresenta indicadores de evasão num painel público. Esta documentação descreve o código integrado à `main`; funcionalidades de branches adiadas são identificadas nos respectivos documentos.
+A aplicação consulta a Gold da pipeline e apresenta indicadores de evasão num painel público. Esta documentação descreve o código integrado à `main`; funcionalidades pendentes são identificadas nos respectivos documentos.
 
 Para instalar e executar, comece pelo [README da raiz](../README.md). Para entender as diferenças entre o sistema e o projeto acadêmico, consulte a [matriz de requisitos do TCC](tcc/RASTREABILIDADE.md).
 
 ## Por assunto
 
-| Pasta          | Conteúdo                                                              |
-| -------------- | --------------------------------------------------------------------- |
-| `arquitetura/` | Monólito modular, responsabilidades, dependências e decisão de acesso |
-| `api/`         | Contratos das análises, parâmetros, respostas e exemplos              |
-| `frontend/`    | Filtros, gráficos, interação, exportação e estilos                    |
-| `metodologia/` | Fontes, recorte, definições e contrato esperado da Gold               |
-| `operacao/`    | Proteção HTTP, logs, testes e validação com dados reais               |
-| `tcc/`         | Rastreabilidade de RF01 a RF15 e RNF01 a RNF15                        |
-| `imagens/`     | Capturas usadas na documentação                                       |
+| Pasta          | Conteúdo                                                                 |
+| -------------- | ------------------------------------------------------------------------ |
+| `arquitetura/` | Monólito modular, responsabilidades, dependências, acesso e schema `app` |
+| `api/`         | Contratos das análises, parâmetros, respostas e exemplos                 |
+| `frontend/`    | Filtros, gráficos, interação, exportação, estilos e login                |
+| `metodologia/` | Fontes, recorte, definições e contrato esperado da Gold                  |
+| `operacao/`    | Proteção HTTP, logs, testes e validação com dados reais                  |
+| `tcc/`         | Rastreabilidade de RF01 a RF15 e RNF01 a RNF15                           |
+| `imagens/`     | Capturas usadas na documentação                                          |
 
 ## Guias
 
@@ -23,8 +23,8 @@ Para instalar e executar, comece pelo [README da raiz](../README.md). Para enten
 - [Preparação do backend, catálogo, resumo e fórmulas](../backend/README.md).
 - [API de evolução temporal](api/ANALISES_TEMPORAIS.md) e [API de comparações](api/COMPARACOES.md).
 - [Filtros do painel](frontend/FILTROS.md), [evolução temporal](frontend/ANALISES.md) e [comparações](frontend/COMPARACOES.md).
-- [Interatividade](frontend/INTERATIVIDADE.md), [estado e exportação](frontend/ESTADO_E_EXPORTACAO.md) e [estilização](frontend/ESTILIZACAO.md).
-- [Proteção da API e logs](operacao/SEGURANCA_API.md), [acesso administrativo adiado](arquitetura/AUTORIZACAO.md) e [validação](operacao/VALIDACAO.md).
+- [Interatividade](frontend/INTERATIVIDADE.md), [estado e exportação](frontend/ESTADO_E_EXPORTACAO.md) , [estilização](frontend/ESTILIZACAO.md) e [login e sessão](frontend/AUTENTICACAO.md).
+- [Proteção da API e logs](operacao/SEGURANCA_API.md), [acesso administrativo](arquitetura/AUTORIZACAO.md), [banco da aplicação](arquitetura/BANCO_APLICACAO.md) e [validação](operacao/VALIDACAO.md).
 - [Requisitos do TCC e lacunas](tcc/RASTREABILIDADE.md).
 - [Branches, commits e revisão](../CONTRIBUTING.md).
 

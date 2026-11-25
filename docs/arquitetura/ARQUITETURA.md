@@ -8,7 +8,7 @@ No frontend, PrimeReact 10 fornece os controles interativos (botões, listas, ca
 
 O backend é um monólito modular organizado por funcionalidade. Cada módulo separa entrada HTTP, consultas SQL e regras de negócio. A composição recebe as dependências como argumentos.
 
-Todos os módulos executam na mesma aplicação Fastify, compartilham o pool PostgreSQL e são compilados e implantados juntos. Esse é o limite do monólito.
+Todos os módulos executam na mesma aplicação Fastify e são compilados e implantados juntos. Os módulos de consulta compartilham um pool de leitura da Gold; a autenticação usa um segundo pool no mesmo PostgreSQL, com credenciais restritas ao schema `app`. Esse é o limite do monólito.
 
 O código se divide por responsabilidade do negócio. Cada módulo concentra rotas, contratos, consultas e regras específicas, com uma entrada pública em `index.ts`. Uma mudança na evolução temporal, por exemplo, começa em `modules/analises`.
 
@@ -28,6 +28,7 @@ flowchart LR
   P --> G[(PostgreSQL / Gold)]
   G --> B[API Fastify / leitura]
   B --> F[Interface React]
+  B <--> A[(PostgreSQL / app: contas e sessões)]
 ```
 
 ## Execução
@@ -36,21 +37,25 @@ Em desenvolvimento, `pnpm dev` inicia Fastify na porta 3000 e Vite na 5173. O na
 
 `pnpm dev:demo` prepara um PostgreSQL separado na porta 55433, carrega as fixtures e inicia os dois pacotes usando um login de leitura. Cada execução recria a Gold sintética desse container. O comando não altera o `.env` nem prepara o banco da pipeline.
 
+`pnpm dev:demo:auth` acrescenta a preparação de `app` com as mesmas migrações e grants do backend, provisiona o administrador se ausente e inicia os servidores com autenticação habilitada e origem `http://127.0.0.1:5173`. Repetir a preparação preserva contas e permissões. O segredo JWT é gerado em memória a cada execução.
+
 ## Limites de responsabilidade
 
 - A pipeline extrai, transforma e grava dados; a API não executa essas etapas.
 - A API valida os parâmetros, agrega medidas em SQL e calcula taxas sobre os totais.
 - O frontend consulta HTTP/JSON e formata os resultados. Não importa código do backend, não acessa o PostgreSQL e não recalcula taxas.
 - Cada módulo do backend expõe um `index.ts`. A composição da aplicação usa essas entradas; módulos não importam arquivos internos uns dos outros.
-- `plugins/` reúne acesso compartilhado à Gold, saúde e contratos de erro. `config/` valida o ambiente. O pool e seu encerramento são coordenados em `server.ts`.
+- `plugins/` reúne acesso compartilhado à Gold, saúde, proteção HTTP, logs e contratos de erro. `config/` valida o ambiente. Os pools e seu encerramento são coordenados em `server.ts`.
+- O backend mantém migrações próprias somente de `app`, executadas por comando de manutenção. A pipeline não cria contas administrativas; a API não migra as camadas analíticas.
 
 ## Módulos existentes
 
-| Módulo        | Responsabilidade                                                   | Entrada HTTP                                                                  |
-| ------------- | ------------------------------------------------------------------ | ----------------------------------------------------------------------------- |
-| `catalogos`   | Listar opções disponíveis para filtros                             | `GET /api/v1/filtros`                                                         |
-| `indicadores` | Agregar um recorte anual e calcular seus totais, taxas e qualidade | `GET /api/v1/indicadores/resumo`                                              |
-| `analises`    | Consultar evolução anual e comparar grupos no mesmo ano            | `GET /api/v1/analises/evolucao-temporal` e `GET /api/v1/analises/comparacoes` |
+| Módulo         | Responsabilidade                                                           | Entrada HTTP                                                                  |
+| -------------- | -------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `catalogos`    | Listar opções disponíveis para filtros                                     | `GET /api/v1/filtros`                                                         |
+| `indicadores`  | Agregar um recorte anual e calcular seus totais, taxas e qualidade         | `GET /api/v1/indicadores/resumo`                                              |
+| `analises`     | Consultar evolução anual e comparar grupos no mesmo ano                    | `GET /api/v1/analises/evolucao-temporal` e `GET /api/v1/analises/comparacoes` |
+| `autenticacao` | Autenticar, renovar e revogar sessões, trocar a senha e aplicar permissões | `/api/v1/autenticacao/*`                                                      |
 
 Saúde da aplicação, tratamento de erros e documentação da API são recursos transversais. `GET /health` pertence a `plugins/health.ts`; não é uma responsabilidade do módulo de indicadores. O controle de acesso é instalado na raiz do Fastify pelo módulo de autenticação, antes das rotas, conforme o [modelo de acesso](AUTORIZACAO.md).
 
@@ -62,6 +67,8 @@ backend/src/
     catalogos/       Opções disponíveis para filtros
     indicadores/    Resumo, agregações e taxas
     analises/       Evolução temporal e comparações entre grupos
+    autenticacao/   Login, JWT, sessões, permissões e troca de senha
+  database/         Migrações de app e provisionamento por CLI
   plugins/
     gold.ts         Junções da Gold e tratamento de falhas de consulta
     health.ts       Verificação de acesso às tabelas utilizadas
@@ -70,9 +77,10 @@ backend/src/
     logs.ts         Campos permitidos e correlação dos logs
   config/
     index.ts        Leitura e validação de variáveis de ambiente
+    autenticacao.ts Configuração da autenticação e do pool de app
   app.ts            Composição dos plugins e tratamento HTTP de erros
   frontend.ts       Serviço de arquivos estáticos e navegação da SPA
-  server.ts         Pool, inicialização e encerramento do processo
+  server.ts         Pools, inicialização e encerramento do processo
 ```
 
 O fragmento SQL em `plugins/gold.ts` define as junções comuns com a fato e as seis dimensões consumidas. Os módulos definem seleções, filtros e agregações. Alterações nesse fragmento afetam catálogo, resumo, evolução, comparações e saúde e devem passar pelos testes de integração.
@@ -127,7 +135,7 @@ Se os parâmetros forem inválidos, a consulta é rejeitada com `400`. Falhas de
 
 ## Comunicação e dependências entre módulos
 
-A composição em `app.ts` registra cada módulo usando `app.register`. Os módulos são plugins encapsulados do Fastify: seus hooks e configurações locais podem ter escopo próprio, herdando o contexto de seus pais. Esse encapsulamento organiza a aplicação; não representa isolamento de processos nem substitui autorização.
+A composição em `app.ts` registra cada módulo usando `app.register`. Os módulos são plugins encapsulados do Fastify: seus hooks e configurações locais podem ter escopo próprio, herdando o contexto de seus pais. Esse encapsulamento organiza a aplicação; não representa isolamento de processos nem substitui autorização. A autenticação é a exceção: instala o controle de acesso na raiz, para alcançar todas as rotas protegidas, e depois registra seus endpoints.
 
 Quando um módulo precisa reutilizar regras de outro, importa sua **entrada pública**:
 
@@ -155,9 +163,9 @@ Essas fronteiras são convenções de organização e revisão do código. Ainda
 
 ## Injeção de dependências manual
 
-O ponto de composição da infraestrutura é `server.ts`. Ele lê a configuração, cria **um pool PostgreSQL por processo**, constrói as consultas e entrega essas dependências a `buildApp`. Em seguida, inicia a escuta HTTP e configura o encerramento do pool.
+O ponto de composição da infraestrutura é `server.ts`. Ele lê a configuração, cria **um pool de leitura da Gold e, com autenticação habilitada, um pool restrito ao schema `app`**, constrói as consultas e o repositório de autenticação e entrega essas dependências a `buildApp`. Em seguida, inicia a escuta HTTP e configura o encerramento dos pools. A credencial de migração não é usada pelo servidor.
 
-Trecho simplificado da composição, após a criação de `config` e `pool`:
+Trecho simplificado da composição das consultas públicas, após a criação de `config` e `pool`:
 
 ```typescript
 const app = await buildApp(
@@ -187,9 +195,11 @@ A integração também testa a recuperação após reconstrução da Gold e reap
 
 O módulo `analises` oferece a API de evolução temporal e utiliza o contrato público de indicadores para manter as mesmas regras de agregação e cálculo. No frontend, `modules/analises` consulta essa API e apresenta gráfico Recharts e tabela acessível; o painel de indicadores compõe sua entrada pública e compartilha os sete filtros de recorte. Apenas tipos públicos de indicadores são importados por análises. O intervalo temporal é independente do ano do resumo e as taxas não são recalculadas no cliente.
 
+No frontend, `modules/autenticacao` reúne o login, a restauração e a renovação da sessão e a alteração de senha, com controles no cabeçalho. Não importa outros módulos do painel. Veja [login e sessão no painel](../frontend/AUTENTICACAO.md).
+
 Comparações entre cursos e grupos institucionais estão implementadas na API e no frontend de análises. `PainelComparacoes` recebe catálogo, filtros e ano do resumo; mantém rascunho e seleção aplicada próprios, consulta cancelável, gráfico e tabela. O frontend omite o filtro da dimensão agrupada para manter os outros grupos visíveis; essa regra não modifica a API. Veja [comparações na interface](../frontend/COMPARACOES.md).
 
-A Gold consumida não fornece nomes ou siglas de IES nem identificadores institucionais permanentes para comparação individual. Administração do ETL depende de um contrato externo para execuções e reprocessamentos. A proteção HTTP e os logs já estão na aplicação; a autenticação permanece em branches adiadas, e a integração com monitoramento externo está pendente. Os módulos futuros serão criados junto de suas funcionalidades.
+A Gold consumida não fornece nomes ou siglas de IES nem identificadores institucionais permanentes para comparação individual. Administração do ETL depende de um contrato externo para execuções e reprocessamentos. A proteção HTTP, os logs e a autenticação já estão na aplicação; as rotas do ETL e a integração com monitoramento externo estão pendentes. Os módulos futuros serão criados junto de suas funcionalidades.
 
 ## Documentação relacionada
 
@@ -204,6 +214,8 @@ O [modelo de autorização](AUTORIZACAO.md) mantém o painel público e a admini
 - [Estado e exportação](../frontend/ESTADO_E_EXPORTACAO.md)
 - [Interatividade e filtragem cruzada](../frontend/INTERATIVIDADE.md)
 - [Acesso ao painel e à administração](AUTORIZACAO.md)
+- [Banco da aplicação](BANCO_APLICACAO.md)
+- [Login e sessão no painel](../frontend/AUTENTICACAO.md)
 - [Execução, permissões e fórmulas](../../backend/README.md)
 - [Comandos do monorepo](../../README.md)
 - [Branches, commits e revisões](../../CONTRIBUTING.md)
