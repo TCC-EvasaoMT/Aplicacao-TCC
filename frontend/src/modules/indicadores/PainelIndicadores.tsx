@@ -1,10 +1,15 @@
 import { useEffect, useState } from 'react'
+import { Button } from 'primereact/button'
+import { Message } from 'primereact/message'
 import { PainelComparacoes, PainelEvolucao } from '../analises'
 import { Carregando } from '../../lib/Estados'
 import { empilhar, exibicao } from '../../lib/exibicao'
 import { mensagemErro } from '../../lib/http'
+import { CampoLista } from '../../lib/CampoLista'
+import { Ajuda, classes, cx } from '../../lib/ui'
 import { gravarUrl, lerUrl } from '../../lib/url'
 import { consultarCatalogo, type Catalogo } from '../catalogos'
+import type { AbaPainel } from './abas'
 import { consultarResumo, type Resumo } from './api'
 import { ChipsFiltros } from './ChipsFiltros'
 import {
@@ -20,7 +25,7 @@ import {
 import { FiltrosIndicadores } from './FiltrosIndicadores'
 import { ResumoIndicadores } from './ResumoIndicadores'
 
-export function PainelIndicadores() {
+export function PainelIndicadores({ aba }: { aba: AbaPainel }) {
 	const [catalogo, setCatalogo] = useState<Catalogo | null>(null)
 	const [selecao, setSelecao] = useState(() => lerSelecao(lerUrl()))
 	const [carregandoCatalogo, setCarregandoCatalogo] = useState(true)
@@ -52,6 +57,7 @@ export function PainelIndicadores() {
 	} | null>(null)
 	// Mudanças feitas pela pessoa, para desfazer a última.
 	const [historico, setHistorico] = useState<SelecaoFiltros[]>([])
+	const [filtrosAbertos, setFiltrosAbertos] = useState(false)
 	const query = serializarFiltros(selecao)
 	const chave = `${tentativa}:${query}`
 
@@ -202,6 +208,8 @@ export function PainelIndicadores() {
 				selecao={selecao}
 				carregando={carregandoCatalogo}
 				indisponivel={!!erroCatalogo}
+				aberto={filtrosAbertos}
+				onFechar={() => setFiltrosAbertos(false)}
 				onChange={alterar}
 				onLimpar={limpar}
 			/>
@@ -210,149 +218,173 @@ export function PainelIndicadores() {
 				ativos={ativos}
 				resumo={vista.dado?.dados}
 				anuncio={anuncio}
+				filtrosAbertos={filtrosAbertos}
+				onAbrirFiltros={() => setFiltrosAbertos(true)}
 				onRemover={(chave: CampoFiltro) => alterar(chave, '')}
 				onLimpar={limpar}
 			/>
-			{avisoSelecao && (
-				<p className="filter-help" role="status">
-					{avisoSelecao}
-				</p>
-			)}
+			{avisoSelecao && <Ajuda role="status">{avisoSelecao}</Ajuda>}
 			{anoAutomatico &&
 				anosPulados.length > 0 &&
 				resumo &&
 				!resumo.qualidade.sem_dados && (
-					<p className="filter-help" role="status">
+					<Ajuda role="status">
 						{anosPulados.join(', ')} ainda não{' '}
 						{anosPulados.length === 1 ? 'tem' : 'têm'} dados de alunos. Exibindo{' '}
 						{selecao.ano}, o ano mais recente com dados.
-					</p>
+					</Ajuda>
 				)}
-			<section aria-labelledby="resumo-titulo" aria-busy={carregando}>
-				<div className="section-heading">
-					<h2 id="resumo-titulo">Resumo anual</h2>
-					<div className="summary-controls">
-						<div className="summary-year">
-							<label className="form-label" htmlFor="ano">
-								Ano do resumo
-							</label>
-							<select
-								className="form-select"
-								id="ano"
-								name="ano"
-								value={selecao.ano}
-								disabled={
-									carregandoCatalogo || !!erroCatalogo || !catalogo?.anos.length
-								}
-								onChange={(event) => alterar('ano', event.target.value)}
-							>
-								{!catalogo?.anos.length && (
-									<option value="">
-										{carregandoCatalogo
-											? 'Carregando…'
-											: 'Sem anos disponíveis'}
-									</option>
-								)}
-								{catalogo?.anos.map((ano) => (
-									<option key={ano} value={ano}>
-										{ano}
-									</option>
-								))}
-							</select>
-						</div>
-						<button
-							className="btn btn-outline-success btn-sm"
-							disabled={carregando}
-							onClick={() => setTentativa((value) => value + 1)}
-						>
-							Atualizar dados
-						</button>
-					</div>
-				</div>
-				<div aria-live="polite">
-					{carregando && !vista.atualizando && (
-						<Carregando texto="Carregando indicadores…" />
-					)}
-					{!carregando && erro && (
-						<p className="state error" role="alert">
-							{erro} Use “Atualizar dados” para tentar novamente.
-						</p>
-					)}
-					{!carregando && !erro && !catalogo?.anos.length && (
-						<p className="state">
-							Nenhum ano está disponível na base conectada.
-						</p>
-					)}
-					{!carregando && !erro && resumo?.qualidade.sem_dados && (
-						<div className="state state-empty">
-							<h3>Sem dados de alunos em {selecao.ano}</h3>
-							<p>
-								{filtrosAtivos
-									? `Nenhum registro de alunos com ${ativos
-											.map((filtro) => `${filtro.campo}: ${filtro.texto}`)
-											.join(' e ')}.`
-									: 'A base não tem registros de alunos neste ano.'}
-							</p>
-							<div className="state-actions">
-								{historico.length > 0 && (
-									<button
-										className="btn btn-outline-success btn-sm"
-										type="button"
-										onClick={desfazer}
-									>
-										Desfazer última mudança
-									</button>
-								)}
-								{anoAnterior !== undefined && (
-									<button
-										className="btn btn-outline-success btn-sm"
-										type="button"
-										onClick={() => alterar('ano', String(anoAnterior))}
-									>
-										Ver {anoAnterior}
-									</button>
-								)}
-								{filtrosAtivos && (
-									<button
-										className="btn btn-outline-success btn-sm"
-										type="button"
-										onClick={limpar}
-									>
-										Limpar filtros
-									</button>
-								)}
+			<div
+				role="tabpanel"
+				id="painel-resumo"
+				aria-labelledby="aba-resumo"
+				hidden={aba !== 'resumo'}
+			>
+				<section aria-labelledby="resumo-titulo" aria-busy={carregando}>
+					<div className={classes.cabecalhoSecao}>
+						<h2 id="resumo-titulo" className={classes.titulo}>
+							Resumo anual
+						</h2>
+						<div className="flex flex-wrap items-end gap-4">
+							<div className={classes.campoAno}>
+								<label className={classes.rotulo} htmlFor="ano">
+									Ano do resumo
+								</label>
+								<CampoLista
+									inputId="ano"
+									className="max-w-[260px]"
+									value={selecao.ano}
+									options={
+										catalogo?.anos.length
+											? catalogo.anos.map((ano) => ({
+													value: String(ano),
+													label: String(ano)
+												}))
+											: [
+													{
+														value: '',
+														label: carregandoCatalogo
+															? 'Carregando…'
+															: 'Sem anos disponíveis'
+													}
+												]
+									}
+									disabled={
+										carregandoCatalogo ||
+										!!erroCatalogo ||
+										!catalogo?.anos.length
+									}
+									onChange={(valor) => alterar('ano', valor)}
+								/>
 							</div>
+							<Button
+								label="Atualizar dados"
+								outlined
+								size="small"
+								disabled={carregando}
+								onClick={() => setTentativa((value) => value + 1)}
+							/>
+						</div>
+					</div>
+					<div aria-live="polite">
+						{carregando && !vista.atualizando && (
+							<Carregando texto="Carregando indicadores…" />
+						)}
+						{!carregando && erro && (
+							<Message
+								severity="error"
+								text={`${erro} Use “Atualizar dados” para tentar novamente.`}
+							/>
+						)}
+						{!carregando && !erro && !catalogo?.anos.length && (
+							<p className={classes.estado}>
+								Nenhum ano está disponível na base conectada.
+							</p>
+						)}
+						{!carregando && !erro && resumo?.qualidade.sem_dados && (
+							<div className={classes.estadoVazio}>
+								<h3 className="mb-1">Sem dados de alunos em {selecao.ano}</h3>
+								<p className="mb-3 text-panel-muted">
+									{filtrosAtivos
+										? `Nenhum registro de alunos com ${ativos
+												.map((filtro) => `${filtro.campo}: ${filtro.texto}`)
+												.join(' e ')}.`
+										: 'A base não tem registros de alunos neste ano.'}
+								</p>
+								<div className="flex flex-wrap gap-2">
+									{historico.length > 0 && (
+										<Button
+											label="Desfazer última mudança"
+											outlined
+											size="small"
+											onClick={desfazer}
+										/>
+									)}
+									{anoAnterior !== undefined && (
+										<Button
+											label={`Ver ${anoAnterior}`}
+											outlined
+											size="small"
+											onClick={() => alterar('ano', String(anoAnterior))}
+										/>
+									)}
+									{filtrosAtivos && (
+										<Button
+											label="Limpar filtros"
+											outlined
+											size="small"
+											onClick={limpar}
+										/>
+									)}
+								</div>
+							</div>
+						)}
+					</div>
+					{!erro && vista.dado && !vista.dado.dados.qualidade.sem_dados && (
+						<div
+							className={cx(vista.atualizando && classes.atualizando)}
+							aria-busy={vista.atualizando || undefined}
+						>
+							<ResumoIndicadores
+								resumo={vista.dado.dados}
+								anterior={vista.dado.anterior}
+								ano={Number(vista.dado.ano)}
+							/>
 						</div>
 					)}
-				</div>
-				{!erro && vista.dado && !vista.dado.dados.qualidade.sem_dados && (
-					<div
-						className={vista.atualizando ? 'is-refreshing' : undefined}
-						aria-busy={vista.atualizando || undefined}
-					>
-						<ResumoIndicadores
-							resumo={vista.dado.dados}
-							anterior={vista.dado.anterior}
-							ano={Number(vista.dado.ano)}
-						/>
-					</div>
-				)}
-			</section>
-			<PainelEvolucao
-				anos={catalogo?.anos ?? []}
-				selecao={selecao}
-				onAnoChange={(ano) => alterar('ano', ano)}
-				atualizacao={tentativa}
-				indisponivel={carregandoCatalogo || !!erroCatalogo}
-			/>
-			<PainelComparacoes
-				catalogo={catalogo}
-				selecao={selecao}
-				atualizacao={tentativa}
-				indisponivel={carregandoCatalogo || !!erroCatalogo}
-				onAnoChange={(ano) => alterar('ano', ano)}
-				onSelecaoChange={aplicar}
-			/>
+				</section>
+			</div>
+			{/* Os painéis ficam montados: trocar de aba não refaz consultas
+			    nem perde o rascunho da comparação. */}
+			<div
+				role="tabpanel"
+				id="painel-evolucao"
+				aria-labelledby="aba-evolucao"
+				hidden={aba !== 'evolucao'}
+			>
+				<PainelEvolucao
+					anos={catalogo?.anos ?? []}
+					selecao={selecao}
+					onAnoChange={(ano) => alterar('ano', ano)}
+					atualizacao={tentativa}
+					indisponivel={carregandoCatalogo || !!erroCatalogo}
+				/>
+			</div>
+			<div
+				role="tabpanel"
+				id="painel-comparacao"
+				aria-labelledby="aba-comparacao"
+				hidden={aba !== 'comparacao'}
+			>
+				<PainelComparacoes
+					catalogo={catalogo}
+					selecao={selecao}
+					atualizacao={tentativa}
+					indisponivel={carregandoCatalogo || !!erroCatalogo}
+					onAnoChange={(ano) => alterar('ano', ano)}
+					onSelecaoChange={aplicar}
+				/>
+			</div>
 		</>
 	)
 }

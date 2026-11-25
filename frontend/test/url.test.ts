@@ -5,6 +5,7 @@ import {
 	limparFiltros
 } from '../src/modules/indicadores/filtros.ts'
 import { lerPeriodo } from '../src/modules/analises/periodo.ts'
+import { lerAba } from '../src/modules/indicadores/abas.ts'
 import {
 	comparacaoPadrao,
 	lerComparacao
@@ -54,4 +55,11 @@ test('comparação da URL valida a dimensão, remove repetidos e limita a 20 gru
 	)
 	muitos.set('agrupar_por', 'modalidade')
 	assert.equal(lerComparacao(muitos).grupos.length, 20)
+})
+
+test('aba da URL aceita só as abas existentes', () => {
+	assert.equal(lerAba(new URLSearchParams('aba=comparacao')), 'comparacao')
+	assert.equal(lerAba(new URLSearchParams('aba=evolucao')), 'evolucao')
+	assert.equal(lerAba(new URLSearchParams('aba=outra')), 'resumo')
+	assert.equal(lerAba(new URLSearchParams('')), 'resumo')
 })

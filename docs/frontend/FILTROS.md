@@ -4,7 +4,7 @@
 
 Execute `pnpm dev:demo` na raiz, com Docker Desktop aberto, e acesse `http://127.0.0.1:5173/`. A demonstração usa apenas dados sintéticos. Para usar a Gold da pipeline, configure `backend/.env` e execute `pnpm dev`.
 
-O painel apresenta sete filtros compartilhados: curso, área geral CINE, modalidade, categoria administrativa, organização acadêmica, município de oferta e município da sede. O seletor **Ano do resumo** fica junto ao título **Resumo anual**. **Todos** significa ausência de restrição naquele campo. Os códigos aparecem junto dos nomes e são enviados como texto, preservando zeros iniciais.
+O painel apresenta sete filtros compartilhados: curso, área geral CINE, modalidade, categoria administrativa, organização acadêmica, município de oferta e município da sede. Eles ficam numa gaveta lateral, aberta pelo botão **Filtros** da faixa do recorte; o botão mostra quantos estão aplicados, e **Ver resultados**, Esc ou a máscara fecham a gaveta. O seletor **Ano do resumo** fica junto ao título **Resumo anual**. **Todos** significa ausência de restrição naquele campo. Os códigos aparecem junto dos nomes e são enviados como texto, preservando zeros iniciais.
 
 Os filtros combinam por E e atualizam automaticamente o resumo e a [evolução temporal](ANALISES.md). As [comparações](COMPARACOES.md) recebem os mesmos filtros, exceto o da dimensão agrupada, que serve para destacar o grupo. **Ano do resumo** e **Ano da comparação** controlam o mesmo ano; a evolução mantém seu próprio intervalo.
 
@@ -34,8 +34,10 @@ frontend/src/
       filtros.ts                           Serialização, limpeza e atualização da seleção
       api.ts                               Contrato e consulta do resumo
   lib/http.ts                              Requisições HTTP e tratamento de falha
-  main.tsx                                 Carrega Bootstrap antes do tema da aplicação
-  styles.css                               Tema e estilos específicos do painel
+  lib/primereact.ts, lib/ui.tsx            Tema dos componentes PrimeReact e peças visuais compartilhadas
+  lib/CampoLista.tsx                       Lista de seleção com ajustes de acessibilidade
+  main.tsx                                 Configura o PrimeReact e carrega fontes e estilos
+  styles.css                               Tailwind, tokens do tema e regras de base
 ```
 
 O painel de indicadores compõe o catálogo, a evolução temporal e as comparações pelas entradas públicas de `catalogos` e `analises`. O módulo de análises reutiliza apenas os tipos públicos de indicadores e catálogos. Os contratos são tipos do cliente HTTP; não há importação de código interno do backend.
@@ -49,7 +51,7 @@ O painel de indicadores compõe o catálogo, a evolução temporal e as compara�
 
 Cada resposta é associada à seleção e à tentativa que a originaram. `AbortController` cancela requisições substituídas, e os callbacks conferem o cancelamento antes de atualizar o resultado. Enquanto a nova consulta carrega, o painel pode manter o último resultado esmaecido. Uma falha remove esse resultado. A [interatividade](INTERATIVIDADE.md#recarga-sem-piscar) explica esse comportamento e a limitação conhecida da faixa do recorte.
 
-Seleções usam controles nativos com rótulos e a classe `form-select` do Bootstrap. Os avisos de carregamento, erro e ausência de dados são anunciados por regiões acessíveis. A grade usa uma coluna abaixo de 576 px; entre 576 e 767 px, o curso ocupa uma linha e os demais filtros usam duas colunas. A partir de 768 px, o curso ocupa meia linha e os demais campos um quarto. O ano permanece no resumo, fora dessa grade.
+Seleções usam `CampoLista`, a lista do PrimeReact com rótulo associado e ajustes de acessibilidade descritos em [estilização](ESTILIZACAO.md#acessibilidade-das-listas). Listas com mais de dez opções, como cursos e municípios, têm busca por nome ou código, sem distinguir acentos. Os avisos de carregamento, erro e ausência de dados são anunciados por regiões acessíveis. Na gaveta, os campos ficam em uma coluna, em qualquer largura de tela. O ano permanece no resumo, fora da gaveta.
 
 As duas taxas aparecem antes dos totais, com igual destaque e números de largura uniforme. A explicação metodológica completa está em **Como interpretar os dados**, ao final do painel. A ajuda curta sobre oferta e sede permanece perto dos filtros. O atalho **Ir para o conteúdo** permite pular o cabeçalho pelo teclado. Os detalhes do tema estão em [Estilização do frontend](ESTILIZACAO.md).
 

@@ -13,13 +13,13 @@ O módulo `frontend/src/modules/analises` consulta a [API de evolução temporal
 | `GraficoEvolucao.tsx` | Gráfico Recharts e tabela acessível                      |
 | `apresentacao.ts`     | Formatação de taxas e avisos dos recortes                |
 | `exportacao.ts`       | Geração do CSV com recorte, medidas e qualidade          |
-| `Celulas.tsx`         | Células de valor, ausência de dados e ação de exportação |
+| `Celulas.tsx`         | Tabela, células de valor, ausência de dados e exportação |
 
-Os tipos de seleção e resultado são compartilhados pela entrada pública de `indicadores`, sem importar implementações internas. O cliente HTTP é o mesmo dos outros módulos. Recharts é a biblioteca de gráficos prevista no documento do TCC. Os controles de período, mensagens de erro e tabela utilizam [Bootstrap com o tema da aplicação](ESTILIZACAO.md). React controla eventos, validação e carregamento.
+Os tipos de seleção e resultado são compartilhados pela entrada pública de `indicadores`, sem importar implementações internas. O cliente HTTP é o mesmo dos outros módulos. Recharts é a biblioteca de gráficos prevista no documento do TCC. Os campos de período, o botão e as mensagens de erro usam componentes do PrimeReact; layout e tabela usam Tailwind com o [tema da aplicação](ESTILIZACAO.md). React controla eventos, validação e carregamento.
 
 ## Período e filtros
 
-Execute `pnpm dev:demo` e abra `http://127.0.0.1:5173/`. O gráfico aparece abaixo do resumo anual, no mesmo painel. **Atualizar dados** recarrega catálogo, resumo, evolução e comparação; **Limpar filtros** mantém o ano do resumo e o intervalo do gráfico, removendo os sete filtros opcionais.
+Execute `pnpm dev:demo` e abra `http://127.0.0.1:5173/`. O gráfico fica na aba **Evolução**, a segunda do cabeçalho; o resumo anual tem aba própria. **Atualizar dados** recarrega catálogo, resumo, evolução e comparação; **Limpar filtros** mantém o ano do resumo e o intervalo do gráfico, removendo os sete filtros opcionais.
 
 O intervalo inicial vem da URL, quando válido; caso contrário, vai do menor ao maior ano do catálogo, limitado aos últimos 30 anos. Os campos aceitam anos entre 1900 e 9999, inclusive anos sem registros. **Aplicar período** valida ordem e tamanho antes de consultar; editar os campos mantém a série aplicada. O período é preservado ao atualizar os dados e pode ser compartilhado pela URL.
 
@@ -62,4 +62,4 @@ Teste também um único ano, lacunas entre anos, mudança rápida de filtros, fa
 
 O aceite inicial do gráfico e do refinamento registrou 31 testes (21 backend e 10 frontend). A conferência no navegador incluiu curso `001`, ano único, ruído negativo, base zero, somente docentes, intervalo superior a 30 anos, largura de 390 px e recuperação após reconstruir a Gold sintética e reaplicar grants. O [registro de validação](../operacao/VALIDACAO.md) apresenta a evidência mais recente. Os critérios visuais estão em [estilização](ESTILIZACAO.md).
 
-O build revisado em 23/11/2026 não emitiu aviso de chunk acima de 500 kB. O carregamento dos gráficos está descrito em [estado e exportação](ESTADO_E_EXPORTACAO.md); seu desempenho em conexão real ainda precisa ser medido.
+O build revisado em 24/11/2026, após a migração para PrimeReact e Tailwind, não emitiu aviso de chunk acima de 500 kB. O carregamento dos gráficos está descrito em [estado e exportação](ESTADO_E_EXPORTACAO.md); seu desempenho em conexão real ainda precisa ser medido.

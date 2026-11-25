@@ -6,9 +6,9 @@ O painel permite compartilhar o estado da tela pela URL e exportar os dados carr
 
 Sem ano escolhido e sem filtros, o painel abre no ano mais recente com dados de alunos. Se o último ano do catálogo só tem docentes, a tela recua e informa o ano pulado. Escolher um ano desliga esse ajuste. Recortes sem alunos mostram uma explicação e ações para voltar ao ano anterior, desfazer a última mudança ou limpar filtros, quando aplicáveis.
 
-Abaixo de 576 px, os sete filtros ficam recolhidos em **Mostrar filtros**. A contagem aparece no cabeçalho do bloco e as seleções ficam na faixa do recorte, descrita em [interatividade](INTERATIVIDADE.md).
+Em qualquer largura de tela, os sete filtros ficam numa gaveta aberta pelo botão **Filtros**, que mostra a contagem. As seleções ficam na faixa do recorte, descrita em [interatividade](INTERATIVIDADE.md).
 
-Ano, filtros, período e comparação aplicada ficam na URL. Recarregar restaura a seleção; **Copiar link** copia o endereço. Cada tabela oferece **Baixar CSV**, gerado no navegador com os dados já carregados.
+Ano, filtros, período, comparação aplicada e aba ativa ficam na URL. Recarregar restaura a seleção; **Copiar link**, no fim da gaveta de filtros, copia o endereço. Cada tabela oferece **Baixar CSV**, gerado no navegador com os dados já carregados.
 
 Os gráficos incluem zero no eixo e preservam valores negativos. A evolução mostra valores junto aos pontos isolados. A comparação mostra o valor de cada barra e, no celular, o nome do grupo acima delas. Dados ausentes aparecem como `...` nas tabelas, acompanhados do texto acessível "Não disponível" e de uma nota explicativa. As colunas numéricas não quebram linha.
 
@@ -16,11 +16,12 @@ Os rótulos seguem o formato `Nome (código)`, e os textos distinguem singular e
 
 ## Parâmetros na URL
 
-| Parâmetro                          | Painel     | Observação                                             |
-| ---------------------------------- | ---------- | ------------------------------------------------------ |
-| `ano` e os sete filtros de recorte | Resumo     | Saneados pelo catálogo, como em **Atualizar dados**    |
-| `ano_inicial`, `ano_final`         | Evolução   | Só quando um período foi aplicado; inválido é ignorado |
-| `agrupar_por`, `grupos` (repetido) | Comparação | Só quando difere do padrão; até 20 grupos, sem repetir |
+| Parâmetro                          | Painel     | Observação                                                      |
+| ---------------------------------- | ---------- | --------------------------------------------------------------- |
+| `ano` e os sete filtros de recorte | Resumo     | Saneados pelo catálogo, como em **Atualizar dados**             |
+| `ano_inicial`, `ano_final`         | Evolução   | Só quando um período foi aplicado; inválido é ignorado          |
+| `agrupar_por`, `grupos` (repetido) | Comparação | Só quando difere do padrão; até 20 grupos, sem repetir          |
+| `aba`                              | Cabeçalho  | `evolucao` ou `comparacao`; o resumo é o padrão e não é gravado |
 
 Cada painel grava apenas as próprias chaves com `history.replaceState`, sem criar entradas no histórico. Um ano fora do catálogo é ajustado ao mais recente disponível, com aviso. Sem filtros, a seleção automática pode recuar até um ano com dados de alunos.
 
@@ -37,7 +38,7 @@ Na comparação, o CSV contém apenas os grupos carregados. Se houver truncament
 
 ## Desempenho
 
-Os componentes dos gráficos usam `React.lazy`, e o download começa em paralelo com a primeira consulta. Enquanto carregam, a interface reserva espaço para o gráfico. A distribuição dos arquivos depende do build; na revisão de 23/11/2026, os dois maiores arquivos JavaScript tinham cerca de 493 e 447 kB, sem o aviso de chunk acima de 500 kB. Isso não comprova carregamento rápido numa conexão real.
+Os componentes dos gráficos usam `React.lazy`, e o download começa em paralelo com a primeira consulta. Enquanto carregam, a interface reserva espaço para o gráfico. A distribuição dos arquivos depende do build. O PrimeReact fica num arquivo próprio (`manualChunks` em `vite.config.ts`). Na revisão de 24/11/2026, após a migração, os maiores arquivos JavaScript tinham cerca de 449 kB (Recharts e código compartilhado), 256 kB (aplicação e React) e 219 kB (PrimeReact), sem o aviso de chunk acima de 500 kB; o CSS caiu de cerca de 244 para 31 kB. Isso não comprova carregamento rápido numa conexão real.
 
 `LimiteErro` impede que uma falha do componente derrube o restante do painel. Porém, gráfico, tabela e CSV pertencem ao mesmo componente lazy: uma falha nesse arquivo também oculta a tabela e a exportação da seção. Filtros e resumo permanecem disponíveis. Separar esses elementos é um ajuste adiado, registrado no [guia de validação](../operacao/VALIDACAO.md#ajustes-adiados).
 
@@ -48,8 +49,9 @@ Os componentes dos gráficos usam `React.lazy`, e o download começa em paralelo
 | `lib/url.ts`                                 | Leitura e gravação das chaves de cada painel na URL          |
 | `lib/useMedia.ts`                            | Media query como estado React (layout do celular)            |
 | `lib/Estados.tsx`                            | Indicador de carregamento e espaço reservado do gráfico      |
+| `lib/ui.tsx`                                 | Blocos, textos auxiliares, avisos e esmaecimento na recarga  |
 | `lib/LimiteErro.tsx`                         | Limite de erro dos gráficos carregados sob demanda           |
-| `analises/Celulas.tsx`                       | Células numéricas, ausência `...`, nota e botão de CSV       |
+| `analises/Celulas.tsx`                       | Tabela, células numéricas, ausência `...` e botão de CSV     |
 | `analises/exportacao.ts`                     | Geração do CSV e descrição do recorte                        |
 | `analises/apresentacao.ts`                   | Também `escalaTaxas` (eixo dos gráficos) e `plural`          |
 | `filtros.ts`, `periodo.ts`, `comparacoes.ts` | `lerSelecao`, `lerPeriodo` e `lerComparacao` a partir da URL |

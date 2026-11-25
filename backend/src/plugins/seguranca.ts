@@ -16,7 +16,8 @@ export async function registrarSeguranca(
 			directives: {
 				defaultSrc: ["'self'"],
 				scriptSrc: ["'self'"],
-				// Recharts usa estilos inline para posicionar gráfico e tooltip.
+				// Recharts usa estilos inline no gráfico e no tooltip; o PrimeReact injeta
+				// uma folha de estilo pequena para esconder campos auxiliares.
 				styleSrc: ["'self'", "'unsafe-inline'"],
 				fontSrc: ["'self'"],
 				imgSrc: ["'self'", 'data:'],

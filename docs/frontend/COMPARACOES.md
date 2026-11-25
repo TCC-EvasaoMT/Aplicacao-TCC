@@ -1,6 +1,6 @@
 # Comparações na interface
 
-A seção **Comparação entre grupos**, abaixo da evolução temporal, consome `GET /api/v1/analises/comparacoes`. Permite comparar cursos, áreas gerais CINE, municípios de oferta ou sede, modalidades, categorias administrativas e organizações acadêmicas. A consulta permanece pública, sem login. O [contrato da API](../api/COMPARACOES.md) não mudou.
+A seção **Comparação entre grupos**, na aba **Comparação** do cabeçalho, consome `GET /api/v1/analises/comparacoes`. Permite comparar cursos, áreas gerais CINE, municípios de oferta ou sede, modalidades, categorias administrativas e organizações acadêmicas. A consulta permanece pública, sem login. O [contrato da API](../api/COMPARACOES.md) não mudou.
 
 ## Como utilizar
 
@@ -36,7 +36,7 @@ Os arquivos ficam em `frontend/src/modules/analises`:
 | `api.ts`                 | Tipos das respostas e consultas HTTP canceláveis                   |
 | `comparacoes.ts`         | Dimensões, opções, rótulos, limite, serialização e grupos ausentes |
 | `PainelComparacoes.tsx`  | Formulário, configuração aplicada, requisição e estados            |
-| `SeletorGrupos.tsx`      | Busca e seleção com checkboxes nativos                             |
+| `SeletorGrupos.tsx`      | Painel recolhível com busca e caixas de marcação do PrimeReact     |
 | `GraficoComparacoes.tsx` | Barras horizontais e tabela acessível                              |
 | `apresentacao.ts`        | Percentuais e avisos compartilhados com a evolução temporal        |
 
@@ -52,7 +52,7 @@ A URL é montada com `URLSearchParams`, preservando zeros iniciais e repetindo `
 - A tabela contém os quatro totais do resumo: vínculos, ingressantes, matrículas e concluintes, além de base, taxas e qualidade. Os demais totais continuam disponíveis na API.
 - Avisos distinguem ausência de alunos, registros sem contagens, dados incompletos, valores negativos, base inferior a 30 e base não positiva.
 - Códigos permanecem visíveis mesmo sem nome. Rótulos longos são abreviados apenas no eixo; o tooltip e a tabela preservam o texto completo.
-- Controles nativos possuem rótulos; estados são anunciados, e a tabela tem cabeçalhos de linha e coluna. A tabela permite foco e rolagem horizontal em telas estreitas. Abaixo de 576 px, o nome do grupo fica acima das barras e o gráfico cabe na tela. Cada barra mostra o valor no fim. As barras não têm animação.
+- Listas, campos e caixas de marcação possuem rótulos associados; estados são anunciados, e a tabela tem cabeçalhos de linha e coluna. A tabela permite foco e rolagem horizontal em telas estreitas. Abaixo de 576 px, o nome do grupo fica acima das barras e o gráfico cabe na tela. Cada barra mostra o valor no fim. As barras não têm animação.
 
 Características institucionais podem agrupar várias IES; não há comparação nominal entre instituições. Município da sede não substitui oferta ausente em EaD. Essas análises não demonstram causa da evasão.
 

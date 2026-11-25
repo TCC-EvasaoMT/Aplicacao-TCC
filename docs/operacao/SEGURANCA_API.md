@@ -41,7 +41,7 @@ O pool mantém cinco conexões, espera de conexão de dois segundos e timeout SQ
 
 Helmet aplica cabeçalhos às respostas, inclusive erros: `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer` e Content Security Policy (CSP), entre outros padrões do plugin.
 
-Na aplicação compilada, scripts, fontes e conexões usam a própria origem. Imagens também podem usar `data:` para os controles do Bootstrap. Embutir a página em frames e carregar objetos são bloqueados. Estilos inline são permitidos porque Recharts os usa no gráfico e no tooltip; scripts inline e `eval` não são liberados.
+Na aplicação compilada, scripts, fontes e conexões usam a própria origem. Imagens também podem usar `data:`, permissão criada para os controles do Bootstrap; a interface atual, com PrimeReact e Tailwind, não depende dela, e a diretiva pode ser revista. Embutir a página em frames e carregar objetos são bloqueados. Estilos inline são permitidos porque Recharts os usa no gráfico e no tooltip e o PrimeReact injeta uma folha de estilo pequena para esconder campos auxiliares; scripts inline e `eval` não são liberados.
 
 Somente as rotas do Swagger recebem a CSP estática fornecida por seu plugin, compatível com os arquivos e hashes da versão instalada. A validação externa de especificações fica desativada. Swagger continua registrado apenas em `NODE_ENV=development`, inclusive quando a interface compilada é servida pelo Fastify.
 

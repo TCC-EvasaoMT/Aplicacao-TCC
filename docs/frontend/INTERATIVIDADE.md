@@ -4,6 +4,8 @@ Resumo, evolução e comparação compartilham o recorte. Clicar num grupo aplic
 
 ## O que cada clique faz
 
+Resumo, evolução e comparação ficam em abas no cabeçalho. Um clique num gráfico altera o recorte também das outras abas, que são atualizadas mesmo ocultas; a faixa do recorte mostra o efeito sem trocar de aba.
+
 | Onde                                   | Efeito                                                               |
 | -------------------------------------- | -------------------------------------------------------------------- |
 | Barra ou nome de grupo na comparação   | Aplica o grupo como filtro (ex.: `codigo_curso=001`); repetir remove |
@@ -13,7 +15,7 @@ Resumo, evolução e comparação compartilham o recorte. Clicar num grupo aplic
 | × num filtro da faixa do recorte       | Remove aquele filtro; **Limpar tudo** remove todos e mantém o ano    |
 | **Desfazer última mudança**            | No estado vazio, volta ao recorte anterior                           |
 
-O filtro aplicado pelo clique é um filtro comum: aparece no cartão de filtros, na faixa do recorte e na URL, e vale para resumo e evolução. Grupo sem identificador (**Não informado (sem identificador)**) não é filtrável, pois a API não aceita filtro por valor ausente.
+O filtro aplicado pelo clique é um filtro comum: aparece na gaveta de filtros, na faixa do recorte e na URL, e vale para resumo e evolução. Grupo sem identificador (**Não informado (sem identificador)**) não é filtrável, pois a API não aceita filtro por valor ausente.
 
 ## A comparação não filtra a si mesma
 
@@ -35,11 +37,11 @@ Os cartões do resumo mostram a variação contra o ano anterior com os mesmos f
 
 ## Faixa do recorte
 
-Abaixo do cartão de filtros, uma faixa fica fixa no topo ao rolar a página. Mostra o ano, os filtros ativos (removíveis) e as duas taxas do recorte. Assim, quem clica num gráfico mais abaixo vê o efeito sem voltar ao início. No celular as taxas saem da faixa e, com mais de um filtro, a faixa fica numa linha: o valor do primeiro filtro (o campo fica no `title` e no ×) e **+N**. A lista aberta mostra todos os filtros e **Limpar tudo**, e recolhe ao rolar a página ou ao mudar um filtro. Mudanças feitas pela pessoa (filtro aplicado, removido ou ano escolhido) são anunciadas numa região `role="status"`; ajustes automáticos, como um link antigo saneado, não.
+Logo abaixo do cabeçalho, uma faixa fica fixa no topo ao rolar a página. Mostra o botão **Filtros**, que abre a gaveta com os sete campos, o ano, os filtros ativos (removíveis) e as duas taxas do recorte. Assim, quem clica num gráfico mais abaixo vê o efeito sem voltar ao início. No celular as taxas saem da faixa e, com mais de um filtro, a faixa fica numa linha: o valor do primeiro filtro (o campo fica no `title` e no ×) e **+N**. A lista aberta mostra todos os filtros e **Limpar tudo**, e recolhe ao rolar a página ou ao mudar um filtro. Mudanças feitas pela pessoa (filtro aplicado, removido ou ano escolhido) são anunciadas numa região `role="status"`; ajustes automáticos, como um link antigo saneado, não.
 
 ## Recarga sem piscar
 
-Ao mudar o recorte, cada painel mantém os dados anteriores esmaecidos (`.is-refreshing`, com `aria-busy`) até a resposta chegar, em vez de trocar o conteúdo por "Carregando". O texto de carregamento aparece na primeira consulta e quando o último resumo exibido estava sem dados (`exibicao`, em `lib/exibicao.ts`).
+Ao mudar o recorte, cada painel mantém os dados anteriores esmaecidos (`classes.atualizando`, em `lib/ui.tsx`, com `aria-busy`) até a resposta chegar, em vez de trocar o conteúdo por "Carregando". O texto de carregamento aparece na primeira consulta e quando o último resumo exibido estava sem dados (`exibicao`, em `lib/exibicao.ts`).
 
 A faixa do recorte tem uma limitação: durante uma consulta lenta, ela já mostra os novos filtros, mas pode manter as taxas anteriores sem sinalizar a espera. O resultado correto aparece após a resposta. Esse ajuste está adiado; a revisão o reproduziu com atraso controlado na base sintética.
 

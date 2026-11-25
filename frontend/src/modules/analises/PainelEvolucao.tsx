@@ -6,10 +6,14 @@ import {
 	useState,
 	type FormEvent
 } from 'react'
+import { Button } from 'primereact/button'
+import { InputText } from 'primereact/inputtext'
+import { Message } from 'primereact/message'
 import { Carregando, GraficoCarregando } from '../../lib/Estados'
 import { exibicao } from '../../lib/exibicao'
 import { mensagemErro } from '../../lib/http'
 import { LimiteErro } from '../../lib/LimiteErro'
+import { Ajuda, classes, cx } from '../../lib/ui'
 import type { SelecaoFiltros } from '../indicadores'
 import { consultarEvolucao, type EvolucaoTemporal } from './api'
 import { gravarUrl, lerUrl } from '../../lib/url'
@@ -133,100 +137,114 @@ export function PainelEvolucao({
 
 	return (
 		<section
-			className="temporal"
+			className={classes.secao}
 			aria-labelledby="evolucao-titulo"
 			aria-busy={carregando}
 		>
-			<h2 id="evolucao-titulo">Evolução temporal</h2>
-			<p className="filter-help">
-				Compare as taxas no período abaixo. Os filtros são compartilhados; o ano
-				do resumo não limita este gráfico.
-			</p>
-			<form
-				className="row g-3 align-items-end"
-				onSubmit={aplicar}
-				noValidate
-				aria-describedby="periodo-ajuda"
-			>
-				{(['ano_inicial', 'ano_final'] as const).map((campo) => (
-					<div className="col-6 col-sm-4 col-lg-2" key={campo}>
-						<label className="form-label" htmlFor={campo}>
-							{campo === 'ano_inicial' ? 'Ano inicial' : 'Ano final'}
-						</label>
-						<input
-							className={`form-control${campoComErro === campo ? ' is-invalid' : ''}`}
-							id={campo}
-							name={campo}
-							autoComplete="off"
-							ref={(elemento) => {
-								camposPeriodo.current[campo] = elemento
-							}}
-							type="number"
-							min={1900}
-							max={9999}
-							step={1}
-							required
-							value={campos[campo]}
-							disabled={indisponivel || !anos.length}
-							aria-invalid={campoComErro === campo}
-							aria-describedby={erroPeriodo ? 'periodo-erro' : 'periodo-ajuda'}
-							onChange={(event) => {
-								setRascunho({ ...campos, [campo]: event.target.value })
-								setErroPeriodo('')
-							}}
-						/>
-					</div>
-				))}
-				<div className="col-12 col-sm-auto">
-					<button
-						className="btn btn-success"
-						disabled={indisponivel || !anos.length}
+			<div className={classes.cabecalhoSecao}>
+				<h2 id="evolucao-titulo" className={classes.titulo}>
+					Evolução temporal
+				</h2>
+				<form
+					className="flex flex-wrap items-end gap-3"
+					onSubmit={aplicar}
+					noValidate
+					aria-describedby="periodo-ajuda"
+				>
+					{(['ano_inicial', 'ano_final'] as const).map((campo) => (
+						<div className="w-28" key={campo}>
+							<label className={classes.rotulo} htmlFor={campo}>
+								{campo === 'ano_inicial' ? 'Ano inicial' : 'Ano final'}
+							</label>
+							<InputText
+								id={campo}
+								name={campo}
+								autoComplete="off"
+								ref={(elemento) => {
+									camposPeriodo.current[campo] = elemento
+								}}
+								inputMode="numeric"
+								keyfilter="pint"
+								maxLength={4}
+								required
+								value={campos[campo]}
+								disabled={indisponivel || !anos.length}
+								invalid={campoComErro === campo}
+								aria-invalid={campoComErro === campo}
+								aria-describedby={
+									erroPeriodo ? 'periodo-erro' : 'periodo-ajuda'
+								}
+								onChange={(event) => {
+									setRascunho({ ...campos, [campo]: event.target.value })
+									setErroPeriodo('')
+								}}
+							/>
+						</div>
+					))}
+					<Button
 						type="submit"
-					>
-						Aplicar período
-					</button>
-				</div>
-			</form>
-			<p id="periodo-ajuda" className="filter-help">
+						label="Aplicar período"
+						disabled={indisponivel || !anos.length}
+					/>
+				</form>
+			</div>
+			<Ajuda>
+				As taxas de cada ano no período escolhido. Os filtros são
+				compartilhados; o ano do resumo não limita este gráfico.
+			</Ajuda>
+			<Ajuda id="periodo-ajuda">
 				De 1 a 30 anos, incluindo os extremos. Anos sem dados permanecem como
 				lacunas.
-			</p>
+			</Ajuda>
 			{erroPeriodo && (
-				<p id="periodo-erro" className="alert alert-danger" role="alert">
-					{erroPeriodo}
-				</p>
+				<Message
+					id="periodo-erro"
+					className="my-4"
+					severity="error"
+					text={erroPeriodo}
+				/>
 			)}
 			<div aria-live="polite">
 				{indisponivel && (
-					<p className="state">
+					<p className={cx(classes.estado, 'mt-4')}>
 						Aguardando o catálogo de filtros. Em caso de falha, use “Atualizar
 						dados”.
 					</p>
 				)}
 				{!indisponivel && !anos.length && (
-					<p className="state">Nenhum ano está disponível na base conectada.</p>
+					<p className={cx(classes.estado, 'mt-4')}>
+						Nenhum ano está disponível na base conectada.
+					</p>
 				)}
 				{carregando && !ultima && (
-					<Carregando texto="Carregando evolução temporal…" />
+					<div className="mt-4">
+						<Carregando texto="Carregando evolução temporal…" />
+					</div>
 				)}
 				{podeConsultar && atual?.erro && (
-					<div className="alert alert-danger" role="alert">
-						<p>{atual.erro}</p>
-						<button
-							className="btn btn-outline-success btn-sm"
-							onClick={() => setTentativa((valor) => valor + 1)}
-						>
-							Tentar novamente
-						</button>
-					</div>
+					<Message
+						className="my-4"
+						severity="error"
+						content={
+							<>
+								<p className="mb-3">{atual.erro}</p>
+								<Button
+									label="Tentar novamente"
+									outlined
+									size="small"
+									onClick={() => setTentativa((valor) => valor + 1)}
+								/>
+							</>
+						}
+					/>
 				)}
 			</div>
 			{exibida && (
 				<div
-					className={atualizando ? 'is-refreshing' : undefined}
+					className={cx(atualizando && classes.atualizando)}
 					aria-busy={atualizando || undefined}
 				>
-					<p className="filter-count">
+					<p className={cx(classes.contagem, 'mt-3')}>
 						Período aplicado: {exibida.periodo.ano_inicial} a{' '}
 						{exibida.periodo.ano_final}
 					</p>

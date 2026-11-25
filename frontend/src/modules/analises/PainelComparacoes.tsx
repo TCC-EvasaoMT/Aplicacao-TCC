@@ -1,8 +1,12 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
+import { Button } from 'primereact/button'
+import { Message } from 'primereact/message'
 import { Carregando, GraficoCarregando } from '../../lib/Estados'
 import { exibicao } from '../../lib/exibicao'
 import { mensagemErro } from '../../lib/http'
 import { LimiteErro } from '../../lib/LimiteErro'
+import { CampoLista } from '../../lib/CampoLista'
+import { Ajuda, Aviso, classes, cx } from '../../lib/ui'
 import { plural } from './apresentacao'
 import type { Catalogo } from '../catalogos'
 import type { SelecaoFiltros } from '../indicadores'
@@ -158,151 +162,166 @@ export function PainelComparacoes({
 		return () => controller.abort()
 	}, [query, chave, podeConsultar])
 
+	const opcoesAno = catalogo?.anos.length
+		? catalogo.anos.map((ano) => ({ value: String(ano), label: String(ano) }))
+		: [{ value: '', label: 'Sem anos disponíveis' }]
+	const opcoesDimensao = Object.entries(dimensoesComparacao).map(
+		([valor, { rotulo }]) => ({ value: valor, label: rotulo })
+	)
+
 	return (
 		<section
-			className="comparison"
+			className={classes.secao}
 			aria-labelledby="comparacao-titulo"
 			aria-busy={carregando}
 		>
-			<div className="section-heading">
-				<h2 id="comparacao-titulo">Comparação entre grupos</h2>
-				<div className="summary-year">
-					<label className="form-label" htmlFor="comparacao-ano">
+			<div className={classes.cabecalhoSecao}>
+				<h2 id="comparacao-titulo" className={classes.titulo}>
+					Comparação entre grupos
+				</h2>
+				<div className={classes.campoAno}>
+					<label className={classes.rotulo} htmlFor="comparacao-ano">
 						Ano da comparação
 					</label>
-					<select
-						className="form-select"
-						id="comparacao-ano"
+					<CampoLista
+						inputId="comparacao-ano"
+						className="max-w-[260px]"
 						value={selecao.ano}
+						options={opcoesAno}
 						disabled={!podeConsultar}
 						aria-describedby="comparacao-contexto"
-						onChange={(event) => onAnoChange(event.target.value)}
-					>
-						{!catalogo?.anos.length && (
-							<option value="">Sem anos disponíveis</option>
-						)}
-						{catalogo?.anos.map((ano) => (
-							<option key={ano} value={ano}>
-								{ano}
-							</option>
-						))}
-					</select>
+						onChange={onAnoChange}
+					/>
 				</div>
 			</div>
-			<p className="filter-help" id="comparacao-contexto">
+			<Ajuda id="comparacao-contexto">
 				Compare grupos no mesmo ano e recorte. O ano é compartilhado com o
 				resumo; os filtros do painel também se aplicam aqui.
-			</p>
+			</Ajuda>
 			<form
+				className="mt-4"
 				onSubmit={(event) => {
 					event.preventDefault()
 					setAplicado({ ...rascunho, grupos: [...rascunho.grupos] })
 				}}
 			>
 				<fieldset disabled={!podeConsultar}>
-					<legend className="visually-hidden">Configurar comparação</legend>
-					<div className="comparison-dimension">
-						<label className="form-label" htmlFor="comparacao-dimensao">
-							Agrupar por
-						</label>
-						<select
-							className="form-select"
-							id="comparacao-dimensao"
-							value={rascunho.agrupar_por}
-							onChange={(event) =>
-								setRascunho({
-									agrupar_por: event.target.value as DimensaoComparacao,
-									grupos: []
-								})
-							}
-						>
-							{Object.entries(dimensoesComparacao).map(
-								([valor, { rotulo }]) => (
-									<option key={valor} value={valor}>
-										{rotulo}
-									</option>
-								)
-							)}
-						</select>
+					<legend className="sr-only">Configurar comparação</legend>
+					<div className="flex flex-wrap items-end gap-3">
+						<div className="w-full max-w-[360px]">
+							<label className={classes.rotulo} htmlFor="comparacao-dimensao">
+								Agrupar por
+							</label>
+							<CampoLista
+								inputId="comparacao-dimensao"
+								value={rascunho.agrupar_por}
+								options={opcoesDimensao}
+								disabled={!podeConsultar}
+								onChange={(valor) =>
+									setRascunho({
+										agrupar_por: valor as DimensaoComparacao,
+										grupos: []
+									})
+								}
+							/>
+						</div>
+						<Button
+							type="submit"
+							label="Comparar grupos"
+							disabled={!podeConsultar}
+						/>
 					</div>
 					<SeletorGrupos
 						key={rascunho.agrupar_por}
 						opcoes={opcoes}
 						grupos={rascunho.grupos}
+						desabilitado={!podeConsultar}
 						onChange={(grupos) => setRascunho({ ...rascunho, grupos })}
 					/>
-					<button className="btn btn-success" type="submit">
-						Comparar grupos
-					</button>
 				</fieldset>
 			</form>
 			{pendente && (
-				<p className="filter-help" role="status">
+				<Ajuda role="status">
 					Há alterações de agrupamento ou seleção. Use “Comparar grupos” para
 					aplicá-las.
-				</p>
+				</Ajuda>
 			)}
 			<div aria-live="polite">
 				{!podeConsultar && (
-					<p className="state">
+					<p className={cx(classes.estado, 'mt-4')}>
 						Aguardando anos e filtros disponíveis. Em caso de falha, use
 						“Atualizar dados” no resumo.
 					</p>
 				)}
-				{carregando && !ultima && <Carregando texto="Carregando comparação…" />}
-				{podeConsultar && atual?.erro && (
-					<div className="alert alert-danger" role="alert">
-						<p>{atual.erro}</p>
-						<button
-							className="btn btn-outline-success btn-sm"
-							onClick={() => setTentativa((valor) => valor + 1)}
-						>
-							Tentar comparação novamente
-						</button>
+				{carregando && !ultima && (
+					<div className="mt-4">
+						<Carregando texto="Carregando comparação…" />
 					</div>
+				)}
+				{podeConsultar && atual?.erro && (
+					<Message
+						className="my-4"
+						severity="error"
+						content={
+							<>
+								<p className="mb-3">{atual.erro}</p>
+								<Button
+									label="Tentar comparação novamente"
+									outlined
+									size="small"
+									onClick={() => setTentativa((valor) => valor + 1)}
+								/>
+							</>
+						}
+					/>
 				)}
 				{exibida && dados && (
 					<div
-						className={atualizando ? 'is-refreshing' : undefined}
+						className={cx(atualizando && classes.atualizando)}
 						aria-busy={atualizando || undefined}
 					>
-						<h3 className="comparison-result">
+						<h3 className="mt-6 mb-2">
 							{dimensao.rotulo} em {exibida.ano}:{' '}
 							{dados.grupos.length === dados.total_grupos
 								? plural(dados.total_grupos, 'grupo', 'grupos')
 								: `${dados.grupos.length} de ${plural(dados.total_grupos, 'grupo', 'grupos')}`}
 						</h3>
-						<p className="filter-help">
-							Ordem por código ou atributo, sem ranking de evasão.
-						</p>
+						<Ajuda>Ordem por código ou atributo, sem ranking de evasão.</Ajuda>
 						{destaque && (
-							<p className="filter-help">
+							<Ajuda>
 								{dimensao.rotulo} {rotuloDestaque} em destaque. Os demais grupos
 								seguem visíveis para comparar; resumo e evolução mostram só esse
 								grupo.
-							</p>
+							</Ajuda>
 						)}
 						{destaqueAusente && (
-							<p className="quality">
-								{rotuloDestaque} não aparece nesta comparação: não tem registros
-								neste ano e recorte ou ficou fora dos grupos exibidos.
-							</p>
+							<Aviso>
+								<p>
+									{rotuloDestaque} não aparece nesta comparação: não tem
+									registros neste ano e recorte ou ficou fora dos grupos
+									exibidos.
+								</p>
+							</Aviso>
 						)}
 						{dados.truncado && (
-							<p className="quality">
-								Exibindo somente {dados.grupos.length} de {dados.total_grupos}{' '}
-								grupos. Selecione até 20 grupos ou refine os filtros para
-								comparar os demais.
-							</p>
+							<Aviso>
+								<p>
+									Exibindo somente {dados.grupos.length} de {dados.total_grupos}{' '}
+									grupos. Selecione até 20 grupos ou refine os filtros para
+									comparar os demais.
+								</p>
+							</Aviso>
 						)}
 						{ausentes.length > 0 && (
-							<p className="quality">
-								Sem correspondência neste ano e recorte: {ausentes.join(', ')}.
-								Esses grupos não recebem valores zero.
-							</p>
+							<Aviso>
+								<p>
+									Sem correspondência neste ano e recorte: {ausentes.join(', ')}
+									. Esses grupos não recebem valores zero.
+								</p>
+							</Aviso>
 						)}
 						{dados.grupos.length === 0 && (
-							<p className="state">
+							<p className={cx(classes.estado, 'mt-4')}>
 								Nenhum grupo corresponde à seleção neste ano e recorte. Altere
 								os filtros, o ano ou a seleção de grupos.
 							</p>
@@ -312,7 +331,7 @@ export function PainelComparacoes({
 			</div>
 			{exibida && dados && dados.grupos.length > 0 && (
 				<div
-					className={atualizando ? 'is-refreshing' : undefined}
+					className={cx(atualizando && classes.atualizando)}
 					aria-busy={atualizando || undefined}
 				>
 					<LimiteErro mensagem="Não foi possível exibir o gráfico da comparação.">
@@ -331,10 +350,10 @@ export function PainelComparacoes({
 					</LimiteErro>
 				</div>
 			)}
-			<p className="filter-help">
+			<Ajuda className="mt-6">
 				Características institucionais podem reunir várias IES. Municípios de
 				oferta e sede são dimensões distintas, inclusive nos cursos a distância.
-			</p>
+			</Ajuda>
 		</section>
 	)
 }

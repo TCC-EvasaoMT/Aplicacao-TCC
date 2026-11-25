@@ -1,242 +1,94 @@
-:root {
-	--panel-green: #153f35;
-	--panel-ink: #172e29;
-	--panel-muted: #52675f;
-	--panel-surface: #fff;
-	--panel-background: #f5f7f7;
-	--panel-secondary: #805128;
-	--panel-chip-bg: #e8f0eb;
-	--panel-chip-border: #b9cbc3;
-	--panel-select-ring: var(--panel-ink);
-	--bs-body-font-family: 'Source Sans 3', 'Segoe UI', system-ui, sans-serif;
-	--bs-body-color: var(--panel-ink);
-	--bs-body-bg: var(--panel-background);
-	--bs-body-line-height: 1.5;
-	--bs-border-color: #b9cbc3;
-	--bs-border-radius: 0.25rem;
-	font-synthesis: none;
+@import 'tailwindcss';
+
+/* Tokens do tema. `static` mantém todas as variáveis no CSS, pois os gráficos
+   do Recharts usam var(--color-panel-*) fora das classes. */
+@theme static {
+	--font-sans: 'Source Sans 3', 'Segoe UI', system-ui, sans-serif;
+
+	/* Quebras iguais às da versão anterior: 576 px (celular) e 992 px. */
+	--breakpoint-sm: 36rem;
+	--breakpoint-lg: 62rem;
+
+	--color-panel-green: #153f35;
+	--color-panel-green-dark: #0f2f28;
+	--color-panel-green-darker: #0b241e;
+	--color-panel-ink: #172e29;
+	--color-panel-muted: #52675f;
+	--color-panel-background: #e9efec;
+	--color-panel-surface: #fff;
+	--color-panel-secondary: #805128;
+	--color-panel-secondary-soft: #f6ece2;
+	--color-panel-line: #dce5e1;
+	--color-panel-border: #b9cbc3;
+	--color-panel-chip: #e8f0eb;
+	--color-panel-hover: #f0f4f2;
+	--color-panel-warning: #af7220;
+	--color-panel-warning-bg: #fff8e8;
+	--color-panel-warning-ink: #65502b;
+	--color-panel-danger: #8b2921;
+	--color-panel-danger-bg: #fbeceb;
+	--color-panel-danger-border: #dfb6b2;
+	--color-panel-invalid: #b42318;
 }
-a {
-	color: inherit;
+
+@layer base {
+	html {
+		/* A faixa do recorte é fixa: âncoras e foco não ficam por baixo dela. */
+		scroll-padding-top: 80px;
+		font-synthesis: none;
+	}
+	body {
+		background-color: var(--color-panel-background);
+		color: var(--color-panel-ink);
+		line-height: 1.5;
+	}
+	h1,
+	h2,
+	h3 {
+		font-weight: 600;
+		text-wrap: balance;
+	}
+	h1 {
+		font-size: clamp(1.75rem, 2.5vw, 2rem);
+		line-height: 1.2;
+	}
+	h2 {
+		font-size: 1.25rem;
+		line-height: 1.3;
+	}
+	h3 {
+		font-size: 1rem;
+	}
+	button,
+	select,
+	input,
+	a,
+	summary {
+		touch-action: manipulation;
+	}
+	/* O Tailwind 4 usa o cursor padrão nos botões; o painel indica a ação. */
+	button:not(:disabled),
+	[role='button']:not([aria-disabled='true']) {
+		cursor: pointer;
+	}
+	:focus-visible {
+		outline: 3px solid var(--color-panel-green);
+		outline-offset: 4px;
+	}
+	@media (max-width: 575px) {
+		html {
+			scroll-padding-top: 104px;
+		}
+	}
 }
-button,
-select,
-input,
-a,
-summary {
-	touch-action: manipulation;
-}
-:focus-visible {
-	outline: 3px solid var(--panel-green);
-	outline-offset: 4px;
-}
-.skip-link {
-	position: fixed;
-	top: 8px;
-	left: 16px;
-	z-index: 10;
-	padding: 12px 16px;
-	background: var(--panel-green);
-	color: white;
-	transform: translateY(-150%);
-}
-.skip-link:focus {
-	transform: translateY(0);
-}
-.app {
-	max-width: 1440px;
-	margin: auto;
-}
-.topbar {
-	min-height: 64px;
-	padding: 12px 4%;
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 16px;
-	border-bottom: 1px solid #dce5e1;
-}
-.brand {
-	display: inline-flex;
-	align-items: center;
-	gap: 12px;
-	text-decoration: none;
-	font-weight: 700;
-	font-size: 1.25rem;
-}
-.brand-mark {
-	background: var(--panel-green);
-	color: white;
-	border-radius: 4px;
-	padding: 8px;
-	font-size: 1rem;
-}
-.project-label,
-.intro,
-.filter-help {
-	color: var(--panel-muted);
-}
-.project-label,
-.filter-help,
-.filter-count {
-	font-size: 0.875rem;
-}
-main {
-	padding: 32px 4%;
-}
-.heading {
-	margin-bottom: 24px;
-}
-h1,
-h2,
-h3 {
-	text-wrap: balance;
-	font-weight: 600;
-}
-h1 {
-	font-size: clamp(1.75rem, 2.5vw, 2rem);
-	line-height: 1.2;
-	margin: 0 0 8px;
-}
-h2 {
-	font-size: 1.25rem;
-	margin: 0;
-}
-h3 {
-	font-size: 1rem;
-	margin: 0;
-}
-.intro {
-	max-width: 75ch;
-	margin: 0;
-}
-.filters {
-	background: var(--panel-surface);
-	border: 1px solid #dce5e1;
-	border-radius: 8px;
-	padding: 16px 24px;
-	margin-bottom: 24px;
-}
-.section-heading {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	flex-wrap: wrap;
-	gap: 16px;
-	margin-bottom: 16px;
-}
-.filters .section-heading {
-	margin-bottom: 8px;
-}
-.filters .filter-count {
-	margin: 4px 0 0;
-	font-weight: 400;
-	color: var(--panel-muted);
-}
-.filters-actions {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 8px;
-}
-/* Faixa do recorte: fica fixa no topo ao rolar, para o clique num gráfico
-   mostrar o filtro e as taxas sem voltar ao início da página. */
-html {
-	scroll-padding-top: 80px;
-}
-.recorte {
-	position: sticky;
-	top: 8px;
-	z-index: 5;
-	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
-	gap: 8px 12px;
-	margin: 0 0 24px;
-	padding: 8px 12px;
-	background: var(--panel-surface);
-	border: 1px solid var(--panel-chip-border);
-	border-left: 4px solid var(--panel-green);
-	border-radius: 8px;
-	box-shadow:
-		0 1px 2px rgb(23 46 41 / 10%),
-		0 6px 16px rgb(23 46 41 / 8%);
-	font-size: 0.875rem;
-}
-.recorte-ano {
-	flex: none;
-	padding-right: 12px;
-	border-right: 1px solid #dce5e1;
-	font-weight: 700;
-	font-variant-numeric: tabular-nums;
-}
-.recorte-vazio {
-	color: var(--panel-muted);
-}
-.chips {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 8px;
-	margin: 0;
-	padding: 0;
-	list-style: none;
-}
-.chip {
-	display: inline-flex;
-	align-items: center;
-	gap: 4px;
-	min-height: 32px;
-	padding: 0 3px 0 10px;
-	border: 1px solid var(--panel-chip-border);
-	border-radius: 4px;
-	background: var(--panel-chip-bg);
-	color: var(--panel-green);
-	font-weight: 600;
-	overflow-wrap: anywhere;
-}
-.chip-remover {
-	position: relative;
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	width: 28px;
-	height: 28px;
-	border: 0;
-	border-radius: 4px;
-	background: none;
-	color: inherit;
-	font-size: 1.125rem;
-	line-height: 1;
-}
-/* Área de toque de 44 px sem aumentar o chip. */
-.chip-remover::before {
-	content: '';
-	position: absolute;
-	inset: -8px -4px;
-}
-.chip-remover:hover {
-	background: var(--panel-green);
-	color: #fff;
-}
-/* O anel padrão (offset 4 px) invadiria o chip vizinho. */
-.chip-remover:focus-visible,
-.chip-mais:focus-visible,
-.chip-limpar:focus-visible {
-	outline: 2px solid var(--panel-select-ring);
-	outline-offset: 1px;
-}
-.chip-remover:focus-visible {
-	background: var(--panel-surface);
+
+/* Clique do mouse foca a área do gráfico; só o teclado mostra o anel. */
+.recharts-wrapper :focus:not(:focus-visible) {
+	outline: none;
 }
 @media (prefers-reduced-motion: no-preference) {
-	.chip {
-		animation: chip-entrada 0.12s ease-out;
-	}
-	.chip-remover,
-	.chip-mais,
-	.link-filtro {
-		transition:
-			background-color 0.15s ease,
-			color 0.15s ease;
+	.comparison-bar {
+		transition: fill-opacity 0.15s ease;
 	}
 }
 @keyframes chip-entrada {
@@ -244,539 +96,4 @@ html {
 		opacity: 0;
 		transform: translateY(-2px);
 	}
-}
-.chip-mais {
-	min-height: 32px;
-	padding: 0 10px;
-	border: 1px solid var(--panel-chip-border);
-	border-radius: 4px;
-	background: var(--panel-surface);
-	color: var(--panel-green);
-	font-weight: 600;
-}
-.chip-mais:hover {
-	background: var(--panel-chip-bg);
-	border-color: var(--panel-green);
-}
-.chip-limpar {
-	min-height: 32px;
-	padding: 4px 8px;
-	border: 0;
-	border-radius: 4px;
-	background: none;
-	color: var(--panel-green);
-	font-weight: 600;
-	text-decoration: underline;
-	text-decoration-thickness: 1px;
-	text-underline-offset: 3px;
-}
-.chip-limpar:hover {
-	background: var(--panel-chip-bg);
-	text-decoration-thickness: 2px;
-}
-.recorte-taxas {
-	display: flex;
-	gap: 16px;
-	margin: 0 0 0 auto;
-	color: var(--panel-ink);
-	font-variant-numeric: tabular-nums;
-}
-.recorte-taxas span {
-	white-space: nowrap;
-}
-/* Quadrado na cor da série, igual ao gráfico e aos cartões. */
-.recorte-taxas span::before {
-	content: '';
-	display: inline-block;
-	width: 8px;
-	height: 8px;
-	margin-right: 6px;
-	border-radius: 2px;
-	background: var(--panel-green);
-}
-.recorte-taxas span + span::before {
-	background: var(--panel-secondary);
-}
-/* Variação contra o ano anterior, em cor neutra. */
-.variation {
-	margin: 0 0 8px;
-	color: var(--panel-muted);
-	font-size: 0.875rem;
-	font-variant-numeric: tabular-nums;
-}
-.metric .variation {
-	margin: 4px 0 0;
-	font-size: 0.8125rem;
-}
-.variation abbr {
-	text-decoration: none;
-	cursor: help;
-}
-/* Dados anteriores visíveis enquanto o novo recorte carrega. */
-.is-refreshing {
-	opacity: 0.6;
-	cursor: progress;
-}
-@media (prefers-reduced-motion: no-preference) {
-	.is-refreshing {
-		transition: opacity 0.15s ease;
-	}
-}
-.summary-controls {
-	display: flex;
-	align-items: end;
-	flex-wrap: wrap;
-	gap: 16px;
-}
-.summary-year {
-	min-width: 140px;
-}
-.summary-year .form-select {
-	max-width: 260px;
-}
-.annual-notes {
-	margin: 0;
-	padding-left: 16px;
-	min-width: 170px;
-}
-.annual-notes li + li {
-	margin-top: 4px;
-}
-.filter-help {
-	margin: 8px 0;
-	max-width: 78ch;
-}
-.filter-count {
-	font-weight: 600;
-	margin: 12px 0 0;
-}
-.form-label {
-	display: block;
-	font-size: 0.875rem;
-	font-weight: 600;
-	margin-bottom: 4px;
-}
-.form-select,
-.form-control {
-	background-color: var(--panel-surface);
-	min-height: 40px;
-}
-.form-select:focus,
-.form-control:focus {
-	border-color: var(--panel-green);
-	box-shadow: 0 0 0 0.2rem rgb(21 63 53 / 15%);
-}
-.form-control.is-invalid:focus {
-	border-color: var(--bs-danger);
-	box-shadow: 0 0 0 0.2rem rgb(var(--bs-danger-rgb) / 20%);
-}
-.btn {
-	min-height: 40px;
-	font-weight: 600;
-	padding: 8px 16px;
-}
-.btn-outline-success {
-	--bs-btn-color: var(--panel-green);
-	--bs-btn-border-color: #b9cbc3;
-	--bs-btn-hover-color: var(--panel-green);
-	--bs-btn-hover-bg: #e8f0eb;
-	--bs-btn-hover-border-color: var(--panel-green);
-	--bs-btn-active-bg: var(--panel-green);
-	--bs-btn-active-border-color: var(--panel-green);
-	--bs-btn-disabled-color: var(--panel-muted);
-	--bs-btn-disabled-border-color: #b9cbc3;
-}
-/* Ação principal de cada bloco (aplicar período, comparar). */
-.btn-success {
-	--bs-btn-bg: var(--panel-green);
-	--bs-btn-border-color: var(--panel-green);
-	--bs-btn-hover-bg: #0f2f28;
-	--bs-btn-hover-border-color: #0f2f28;
-	--bs-btn-active-bg: #0b241e;
-	--bs-btn-active-border-color: #0b241e;
-	--bs-btn-disabled-bg: var(--panel-muted);
-	--bs-btn-disabled-border-color: var(--panel-muted);
-}
-.metrics {
-	display: grid;
-	grid-template-columns: repeat(4, minmax(0, 1fr));
-	border: 1px solid #dce5e1;
-	border-radius: 8px;
-	background: var(--panel-surface);
-	margin-top: 16px;
-	overflow: hidden;
-}
-.metric {
-	padding: 16px 24px;
-}
-.metric + .metric {
-	border-left: 1px solid #dce5e1;
-}
-.metric h3 {
-	color: var(--panel-muted);
-}
-.metric-value,
-.rate-value {
-	font-variant-numeric: tabular-nums;
-	font-weight: 600;
-	line-height: 1.2;
-	overflow-wrap: anywhere;
-}
-.metric-value {
-	font-size: 1.5rem;
-	margin: 8px 0 0;
-}
-.rates {
-	display: grid;
-	grid-template-columns: repeat(2, minmax(0, 1fr));
-	gap: 16px;
-}
-.rate {
-	background: var(--panel-surface);
-	border: 1px solid #dce5e1;
-	border-top: 3px solid var(--panel-green);
-	border-radius: 0 0 8px 8px;
-	padding: 16px 24px 20px;
-	box-shadow: 0 1px 2px rgb(23 46 41 / 6%);
-}
-.rate + .rate {
-	border-top-color: var(--panel-secondary);
-}
-.rate-value {
-	margin: 8px 0 4px;
-	font-size: clamp(2.25rem, 4vw, 2.75rem);
-	letter-spacing: -0.01em;
-}
-.rate p:last-child {
-	margin: 0;
-	font-size: 0.875rem;
-	color: var(--panel-muted);
-}
-.state {
-	padding: 24px;
-	background: var(--panel-surface);
-	border: 1px solid #dce5e1;
-	border-radius: 8px;
-}
-.error {
-	border-color: #dfb6b2;
-	color: #8b2921;
-}
-.state-loading {
-	color: var(--panel-muted);
-}
-.state-loading .spinner-border {
-	margin-right: 8px;
-	vertical-align: -2px;
-}
-.state-empty {
-	border-style: dashed;
-	border-color: #b9cbc3;
-}
-.state-empty h3 {
-	margin-bottom: 4px;
-}
-.state-empty p {
-	margin: 0 0 12px;
-	color: var(--panel-muted);
-}
-.state-actions {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 8px;
-}
-/* Reserva a altura do gráfico enquanto o chunk do Recharts carrega. */
-.chart-loading {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	min-height: 360px;
-	margin: 24px 0;
-	border: 1px dashed #dce5e1;
-	border-radius: 8px;
-	color: var(--panel-muted);
-}
-.quality {
-	margin-top: 16px;
-	padding: 12px 16px;
-	border-left: 3px solid #af7220;
-	background: #fff8e8;
-}
-.quality p {
-	color: #65502b;
-	font-size: 0.875rem;
-	margin: 8px 0 0;
-}
-.temporal,
-.comparison {
-	margin-top: 40px;
-	padding: 24px 24px 32px;
-	background: var(--panel-surface);
-	border: 1px solid #dce5e1;
-	border-radius: 8px;
-	min-width: 0;
-}
-.temporal-chart {
-	margin: 24px 0;
-	min-width: 0;
-	font-size: 0.875rem;
-}
-.temporal-table {
-	margin-top: 24px;
-	/* Contém os textos visually-hidden (absolutos) dentro da rolagem da tabela. */
-	position: relative;
-}
-.temporal-table table {
-	--bs-table-color: var(--panel-ink);
-	--bs-table-bg: var(--panel-surface);
-	font-size: 0.875rem;
-	font-variant-numeric: tabular-nums;
-}
-.temporal-table caption {
-	color: var(--panel-ink);
-	font-weight: 600;
-	margin-bottom: 8px;
-}
-.temporal-table th,
-.temporal-table td {
-	padding: 12px;
-	min-width: 105px;
-}
-.temporal-table th:first-child {
-	min-width: 65px;
-}
-/* Filtragem cruzada: linha da tabela ligada ao gráfico. */
-.temporal-table tbody tr.is-active > * {
-	--bs-table-bg-state: #f0f4f2;
-}
-.temporal-table tbody tr.is-selected > * {
-	--bs-table-bg-state: var(--panel-chip-bg);
-}
-.temporal-table tbody tr.is-selected > th {
-	/* Mantém o fundo do Bootstrap (também um box-shadow) e soma a barra. */
-	box-shadow:
-		inset 3px 0 0 var(--panel-green),
-		inset 0 0 0 9999px var(--panel-chip-bg);
-}
-/* Clique do mouse foca a área do gráfico; só o teclado mostra o anel. */
-.recharts-wrapper :focus:not(:focus-visible) {
-	outline: none;
-}
-.link-filtro {
-	padding: 2px 4px;
-	margin: -2px -4px;
-	border: 0;
-	border-radius: 4px;
-	background: none;
-	color: var(--panel-green);
-	font: inherit;
-	font-weight: 600;
-	text-align: left;
-	text-decoration: underline;
-	text-decoration-thickness: 1px;
-	text-underline-offset: 3px;
-}
-.link-filtro:hover {
-	background: var(--panel-chip-bg);
-	text-decoration-thickness: 2px;
-}
-.link-filtro[aria-pressed='true'] {
-	text-decoration: none;
-}
-.link-filtro[aria-pressed='true']::after {
-	content: ' ✓';
-}
-.link-filtro:focus-visible {
-	outline: 2px solid var(--panel-select-ring);
-	outline-offset: 2px;
-}
-@media (prefers-reduced-motion: no-preference) {
-	.comparison-bar {
-		transition: fill-opacity 0.15s ease;
-	}
-	.temporal-table tbody tr > * {
-		transition: background-color 0.15s ease;
-	}
-}
-.temporal-table td.text-end {
-	white-space: nowrap;
-}
-.table-footer {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
-	justify-content: space-between;
-	gap: 8px 16px;
-	margin-top: 8px;
-}
-.table-note {
-	margin: 0;
-}
-.table-scroll-help {
-	display: none;
-}
-.temporal-table thead {
-	--bs-table-bg: var(--panel-background);
-}
-.comparison-dimension {
-	max-width: 360px;
-}
-.comparison-selection {
-	margin: 16px 0;
-	padding: 12px 0;
-	border-block: 1px solid #dce5e1;
-}
-.comparison-selection summary {
-	font-weight: 600;
-	cursor: pointer;
-}
-.comparison-selection .form-control {
-	max-width: 480px;
-}
-.comparison-options {
-	max-height: 240px;
-	overflow-y: auto;
-	margin: 12px 0;
-	padding: 4px;
-}
-.comparison-option {
-	display: flex;
-	align-items: baseline;
-	gap: 12px;
-	padding: 8px;
-	overflow-wrap: anywhere;
-}
-.comparison-option .form-check-input {
-	flex-shrink: 0;
-}
-.comparison-option .form-check-input:checked {
-	background-color: var(--panel-green);
-	border-color: var(--panel-green);
-}
-.comparison-result {
-	margin: 24px 0 8px;
-	font-weight: 600;
-}
-.comparison-table th:first-child {
-	min-width: 180px;
-	max-width: 280px;
-	overflow-wrap: anywhere;
-}
-.reading-note {
-	margin-top: 24px;
-	padding-top: 16px;
-	border-top: 1px solid #dce5e1;
-}
-.reading-note summary {
-	font-weight: 600;
-	cursor: pointer;
-}
-.reading-note p {
-	max-width: 78ch;
-	color: var(--panel-muted);
-	font-size: 0.875rem;
-	margin: 12px 0 0;
-}
-footer {
-	padding: 16px 4%;
-	border-top: 1px solid #dce5e1;
-	display: flex;
-	justify-content: space-between;
-	flex-wrap: wrap;
-	gap: 16px;
-	color: var(--panel-muted);
-	font-size: 0.875rem;
-}
-@media (max-width: 767px) {
-	.metrics {
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-	}
-	.metric:nth-child(3) {
-		border-left: 0;
-	}
-	.metric:nth-child(n + 3) {
-		border-top: 1px solid #dce5e1;
-	}
-}
-@media (max-width: 575px) {
-	html {
-		scroll-padding-top: 104px;
-	}
-	/* Faixa fixa compacta: ocupa o mínimo da tela pequena. */
-	.recorte {
-		top: 4px;
-		margin: 0 -8px 16px;
-		padding: 6px 8px;
-		gap: 4px 8px;
-		border-left-width: 3px;
-	}
-	.recorte-ano {
-		padding-right: 8px;
-	}
-	.chip {
-		min-height: 28px;
-		font-size: 0.8125rem;
-	}
-	.chip-limpar {
-		margin-left: auto;
-	}
-	/* Compacta: o primeiro filtro divide a linha com o ano e o "+N", só com o
-	   valor; o nome do campo fica no title e no ×. "Limpar tudo" aparece ao
-	   expandir (o cartão de filtros também tem "Limpar filtros"). */
-	.recorte.is-compact .chips {
-		flex: 1 1 0;
-		flex-wrap: nowrap;
-		min-width: 0;
-	}
-	.recorte.is-compact .chip {
-		min-width: 0;
-	}
-	.recorte.is-compact .chip > span {
-		min-width: 0;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-	}
-	.recorte.is-compact .chip-campo {
-		display: none;
-	}
-	.temporal,
-	.comparison {
-		margin-top: 24px;
-	}
-	.recorte-taxas {
-		display: none;
-	}
-	.table-scroll-help {
-		display: inline;
-	}
-	.temporal-table th,
-	.temporal-table td {
-		min-width: 80px;
-		padding: 8px;
-	}
-	main {
-		padding-top: 24px;
-	}
-	.filters,
-	.temporal,
-	.comparison,
-	.rate {
-		padding: 16px;
-	}
-	.temporal {
-		padding: 16px;
-	}
-	.project-label {
-		display: none;
-	}
-	.rates {
-		grid-template-columns: 1fr;
-	}
-	.metric {
-		padding: 12px;
-	}
-}
-.link-status:empty {
-	display: none;
 }
