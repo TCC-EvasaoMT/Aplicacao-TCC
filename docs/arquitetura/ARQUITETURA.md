@@ -52,7 +52,7 @@ Em desenvolvimento, `pnpm dev` inicia Fastify na porta 3000 e Vite na 5173. O na
 | `indicadores` | Agregar um recorte anual e calcular seus totais, taxas e qualidade | `GET /api/v1/indicadores/resumo`                                              |
 | `analises`    | Consultar evolução anual e comparar grupos no mesmo ano            | `GET /api/v1/analises/evolucao-temporal` e `GET /api/v1/analises/comparacoes` |
 
-Saúde da aplicação, tratamento de erros e documentação da API são recursos transversais. `GET /health` pertence a `plugins/health.ts`; não é uma responsabilidade do módulo de indicadores. As regras futuras de autorização também serão transversais, conforme o [modelo de acesso](AUTORIZACAO.md).
+Saúde da aplicação, tratamento de erros e documentação da API são recursos transversais. `GET /health` pertence a `plugins/health.ts`; não é uma responsabilidade do módulo de indicadores. O controle de acesso é instalado na raiz do Fastify pelo módulo de autenticação, antes das rotas, conforme o [modelo de acesso](AUTORIZACAO.md).
 
 ## Organização do backend
 
@@ -193,7 +193,7 @@ A Gold consumida não fornece nomes ou siglas de IES nem identificadores institu
 
 ## Documentação relacionada
 
-O [modelo de autorização](AUTORIZACAO.md) mantém o painel público e prevê administração autenticada. A implementação de sessão e permissões existe em branches separadas e ainda não foi integrada à `main`.
+O [modelo de autorização](AUTORIZACAO.md) mantém o painel público e a administração autenticada: JWT/Bearer, renovação por cookie e consulta de sessão e permissões a cada chamada protegida. A [preparação do schema app](BANCO_APLICACAO.md) usa migrações e roles distintas das camadas analíticas.
 
 - [Módulos e contratos do backend](MODULOS_BACKEND.md)
 - [Filtros e fluxo da interface](../frontend/FILTROS.md)

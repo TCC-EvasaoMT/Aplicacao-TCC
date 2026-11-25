@@ -12,6 +12,7 @@ export function registrarRotas(
 	app.get(
 		'/api/v1/filtros',
 		{
+			config: { acesso: 'publico' },
 			schema: {
 				tags: ['Catálogos'],
 				summary: 'Lista os filtros existentes na fato de cursos.',

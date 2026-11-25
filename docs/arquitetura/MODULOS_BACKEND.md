@@ -30,11 +30,17 @@ O módulo também fornece `GET /api/v1/analises/comparacoes`, com `ano` e `agrup
 
 `index.ts` exporta o plugin `analises`, a fábrica `criarConsultasAnalises` e o tipo de consultas, com as operações `evolucao` e `comparacao`. `consultas.ts` agrega por ano ou grupo; `evolucao.ts` completa lacunas; `comparacoes.ts` define as dimensões permitidas e monta os resultados. Ambos reutilizam o cálculo público de indicadores. `rotas.ts` e `schemas.ts` definem os contratos HTTP. Consulte a [API de evolução temporal](../api/ANALISES_TEMPORAIS.md) e as [comparações na interface](../frontend/COMPARACOES.md). Dispersão e rankings estão pendentes. As rotas disponíveis são públicas.
 
+## Autenticação
+
+`backend/src/modules/autenticacao` implementa login, renovação, logout e consulta de identidade em `/api/v1/autenticacao`. `rotas.ts` coordena HTTP e cookies; `schemas.ts` define contratos; `senhas.ts` trata Argon2id; `repositorio.ts` concentra o SQL e as transações de sessão; `acesso.ts` valida Bearer e aplica permissões consultadas no banco. Sua entrada pública exporta o registro de rotas, o controle transversal e a fábrica do repositório.
+
+O módulo usa exclusivamente o schema `app`, com outra role de conexão. `database/` contém as migrações e o provisionamento de administrador, executados fora do servidor HTTP. Veja [contrato de autenticação](AUTORIZACAO.md) e [preparação do banco](BANCO_APLICACAO.md). Nenhuma rota de ETL está implementada; os testes registram rotas próprias para verificar `etl:consultar` e `etl:reprocessar`.
+
 ## Operação e composição
 
 `GET /health` pertence a `plugins/health.ts` e verifica a leitura da fato e das seis dimensões. `plugins/gold.ts` converte falhas de consulta em `GOLD_INDISPONIVEL`; o tratamento global responde `503` sem expor credenciais ou SQL. Validações inválidas retornam `400`.
 
-`server.ts` cria um único pool PostgreSQL e injeta dependências separadas em `buildApp`: `catalogos`, `indicadores`, `analises` e `health`. Os testes HTTP podem substituir cada dependência sem conectar um banco. `app.ts` registra os plugins encapsulados e a documentação. Nenhum módulo importa arquivos internos de outro; análises usa o contrato público de indicadores.
+`server.ts` cria um pool de leitura da Gold e, quando a autenticação está habilitada, outro pool restrito ao schema `app`. Injeta dependências separadas em `buildApp`: `catalogos`, `indicadores`, `analises`, `health` e `autenticacao` opcional. Os testes HTTP podem substituir cada dependência sem conectar um banco. `app.ts` registra o controle de acesso antes dos módulos e a documentação antes das rotas. Análises usa o contrato público de indicadores.
 
 `plugins/seguranca.ts` registra cabeçalhos de segurança e uma cota compartilhada pelas rotas `/api`, antes de executar os módulos. O limite retorna `429` com `Retry-After`, também documentado no Swagger. `app.ts` preserva erros HTTP conhecidos e aplica limites de corpo e recebimento. Veja [configuração e limites da proteção HTTP](../operacao/SEGURANCA_API.md).
 
@@ -45,7 +51,7 @@ O módulo também fornece `GET /api/v1/analises/comparacoes`, com `ano` e `agrup
 1. Crie a pasta em `modules/` quando houver uma funcionalidade concreta.
 2. Mantenha rotas, schemas, consultas e regras específicas dentro dela.
 3. Exporte o plugin e as dependências necessárias pelo `index.ts`.
-4. Registre-o em `app.ts` e componha suas consultas em `server.ts`.
+4. Registre-o em `app.ts`, componha suas consultas em `server.ts` e declare `config.acesso` em cada rota `/api/`: pública, autenticada ou com a permissão exigida.
 5. Teste o contrato HTTP e, se houver SQL, a integração com PostgreSQL sintético.
 6. Atualize esta documentação junto da implementação, no mesmo commit.
 

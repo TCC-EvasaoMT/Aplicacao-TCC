@@ -18,6 +18,7 @@ export function registrarRotas(
 	app.get<{ Querystring: FiltrosComparacao }>(
 		'/api/v1/analises/comparacoes',
 		{
+			config: { acesso: 'publico' },
 			preValidation: async (request) => {
 				// O parser entrega uma string quando grupos aparece uma única vez.
 				const grupos: unknown = request.query.grupos
@@ -47,6 +48,7 @@ export function registrarRotas(
 	app.get<{ Querystring: FiltrosEvolucao }>(
 		'/api/v1/analises/evolucao-temporal',
 		{
+			config: { acesso: 'publico' },
 			schema: {
 				tags: ['Análises'],
 				summary: 'Consulta a evolução anual de um recorte.',
