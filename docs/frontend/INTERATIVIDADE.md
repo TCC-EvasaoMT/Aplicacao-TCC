@@ -4,7 +4,7 @@ Resumo, evolução e comparação compartilham o recorte. Clicar num grupo aplic
 
 ## O que cada clique faz
 
-Evolução e comparação ficam em abas no cabeçalho. Um clique numa delas altera o recorte também da outra aba, que é atualizada mesmo oculta.
+Resumo, evolução e comparação ficam em abas no cabeçalho. Um clique num gráfico altera o recorte também das outras abas, que são atualizadas mesmo ocultas; a faixa do recorte mostra o efeito sem trocar de aba.
 
 | Onde                                   | Efeito                                                               |
 | -------------------------------------- | -------------------------------------------------------------------- |

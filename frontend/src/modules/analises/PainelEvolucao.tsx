@@ -137,7 +137,7 @@ export function PainelEvolucao({
 
 	return (
 		<section
-			className={cx(classes.secao, 'mt-6 sm:mt-10')}
+			className={classes.secao}
 			aria-labelledby="evolucao-titulo"
 			aria-busy={carregando}
 		>

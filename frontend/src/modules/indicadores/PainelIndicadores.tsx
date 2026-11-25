@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Button } from 'primereact/button'
 import { Message } from 'primereact/message'
-import { PainelComparacoes, PainelEvolucao, type AbaAnalise } from '../analises'
+import { PainelComparacoes, PainelEvolucao } from '../analises'
 import { Carregando } from '../../lib/Estados'
 import { empilhar, exibicao } from '../../lib/exibicao'
 import { mensagemErro } from '../../lib/http'
@@ -9,6 +9,7 @@ import { CampoLista } from '../../lib/CampoLista'
 import { Ajuda, classes, cx } from '../../lib/ui'
 import { gravarUrl, lerUrl } from '../../lib/url'
 import { consultarCatalogo, type Catalogo } from '../catalogos'
+import type { AbaPainel } from './abas'
 import { consultarResumo, type Resumo } from './api'
 import { ChipsFiltros } from './ChipsFiltros'
 import {
@@ -24,7 +25,7 @@ import {
 import { FiltrosIndicadores } from './FiltrosIndicadores'
 import { ResumoIndicadores } from './ResumoIndicadores'
 
-export function PainelIndicadores({ aba }: { aba: AbaAnalise }) {
+export function PainelIndicadores({ aba }: { aba: AbaPainel }) {
 	const [catalogo, setCatalogo] = useState<Catalogo | null>(null)
 	const [selecao, setSelecao] = useState(() => lerSelecao(lerUrl()))
 	const [carregandoCatalogo, setCarregandoCatalogo] = useState(true)
@@ -233,118 +234,127 @@ export function PainelIndicadores({ aba }: { aba: AbaAnalise }) {
 						{selecao.ano}, o ano mais recente com dados.
 					</Ajuda>
 				)}
-			<section aria-labelledby="resumo-titulo" aria-busy={carregando}>
-				<div className={classes.cabecalhoSecao}>
-					<h2 id="resumo-titulo" className={classes.titulo}>
-						Resumo anual
-					</h2>
-					<div className="flex flex-wrap items-end gap-4">
-						<div className={classes.campoAno}>
-							<label className={classes.rotulo} htmlFor="ano">
-								Ano do resumo
-							</label>
-							<CampoLista
-								inputId="ano"
-								className="max-w-[260px]"
-								value={selecao.ano}
-								options={
-									catalogo?.anos.length
-										? catalogo.anos.map((ano) => ({
-												value: String(ano),
-												label: String(ano)
-											}))
-										: [
-												{
-													value: '',
-													label: carregandoCatalogo
-														? 'Carregando…'
-														: 'Sem anos disponíveis'
-												}
-											]
-								}
-								disabled={
-									carregandoCatalogo || !!erroCatalogo || !catalogo?.anos.length
-								}
-								onChange={(valor) => alterar('ano', valor)}
+			<div
+				role="tabpanel"
+				id="painel-resumo"
+				aria-labelledby="aba-resumo"
+				hidden={aba !== 'resumo'}
+			>
+				<section aria-labelledby="resumo-titulo" aria-busy={carregando}>
+					<div className={classes.cabecalhoSecao}>
+						<h2 id="resumo-titulo" className={classes.titulo}>
+							Resumo anual
+						</h2>
+						<div className="flex flex-wrap items-end gap-4">
+							<div className={classes.campoAno}>
+								<label className={classes.rotulo} htmlFor="ano">
+									Ano do resumo
+								</label>
+								<CampoLista
+									inputId="ano"
+									className="max-w-[260px]"
+									value={selecao.ano}
+									options={
+										catalogo?.anos.length
+											? catalogo.anos.map((ano) => ({
+													value: String(ano),
+													label: String(ano)
+												}))
+											: [
+													{
+														value: '',
+														label: carregandoCatalogo
+															? 'Carregando…'
+															: 'Sem anos disponíveis'
+													}
+												]
+									}
+									disabled={
+										carregandoCatalogo ||
+										!!erroCatalogo ||
+										!catalogo?.anos.length
+									}
+									onChange={(valor) => alterar('ano', valor)}
+								/>
+							</div>
+							<Button
+								label="Atualizar dados"
+								outlined
+								size="small"
+								disabled={carregando}
+								onClick={() => setTentativa((value) => value + 1)}
 							/>
 						</div>
-						<Button
-							label="Atualizar dados"
-							outlined
-							size="small"
-							disabled={carregando}
-							onClick={() => setTentativa((value) => value + 1)}
-						/>
 					</div>
-				</div>
-				<div aria-live="polite">
-					{carregando && !vista.atualizando && (
-						<Carregando texto="Carregando indicadores…" />
-					)}
-					{!carregando && erro && (
-						<Message
-							severity="error"
-							text={`${erro} Use “Atualizar dados” para tentar novamente.`}
-						/>
-					)}
-					{!carregando && !erro && !catalogo?.anos.length && (
-						<p className={classes.estado}>
-							Nenhum ano está disponível na base conectada.
-						</p>
-					)}
-					{!carregando && !erro && resumo?.qualidade.sem_dados && (
-						<div className={classes.estadoVazio}>
-							<h3 className="mb-1">Sem dados de alunos em {selecao.ano}</h3>
-							<p className="mb-3 text-panel-muted">
-								{filtrosAtivos
-									? `Nenhum registro de alunos com ${ativos
-											.map((filtro) => `${filtro.campo}: ${filtro.texto}`)
-											.join(' e ')}.`
-									: 'A base não tem registros de alunos neste ano.'}
+					<div aria-live="polite">
+						{carregando && !vista.atualizando && (
+							<Carregando texto="Carregando indicadores…" />
+						)}
+						{!carregando && erro && (
+							<Message
+								severity="error"
+								text={`${erro} Use “Atualizar dados” para tentar novamente.`}
+							/>
+						)}
+						{!carregando && !erro && !catalogo?.anos.length && (
+							<p className={classes.estado}>
+								Nenhum ano está disponível na base conectada.
 							</p>
-							<div className="flex flex-wrap gap-2">
-								{historico.length > 0 && (
-									<Button
-										label="Desfazer última mudança"
-										outlined
-										size="small"
-										onClick={desfazer}
-									/>
-								)}
-								{anoAnterior !== undefined && (
-									<Button
-										label={`Ver ${anoAnterior}`}
-										outlined
-										size="small"
-										onClick={() => alterar('ano', String(anoAnterior))}
-									/>
-								)}
-								{filtrosAtivos && (
-									<Button
-										label="Limpar filtros"
-										outlined
-										size="small"
-										onClick={limpar}
-									/>
-								)}
+						)}
+						{!carregando && !erro && resumo?.qualidade.sem_dados && (
+							<div className={classes.estadoVazio}>
+								<h3 className="mb-1">Sem dados de alunos em {selecao.ano}</h3>
+								<p className="mb-3 text-panel-muted">
+									{filtrosAtivos
+										? `Nenhum registro de alunos com ${ativos
+												.map((filtro) => `${filtro.campo}: ${filtro.texto}`)
+												.join(' e ')}.`
+										: 'A base não tem registros de alunos neste ano.'}
+								</p>
+								<div className="flex flex-wrap gap-2">
+									{historico.length > 0 && (
+										<Button
+											label="Desfazer última mudança"
+											outlined
+											size="small"
+											onClick={desfazer}
+										/>
+									)}
+									{anoAnterior !== undefined && (
+										<Button
+											label={`Ver ${anoAnterior}`}
+											outlined
+											size="small"
+											onClick={() => alterar('ano', String(anoAnterior))}
+										/>
+									)}
+									{filtrosAtivos && (
+										<Button
+											label="Limpar filtros"
+											outlined
+											size="small"
+											onClick={limpar}
+										/>
+									)}
+								</div>
 							</div>
+						)}
+					</div>
+					{!erro && vista.dado && !vista.dado.dados.qualidade.sem_dados && (
+						<div
+							className={cx(vista.atualizando && classes.atualizando)}
+							aria-busy={vista.atualizando || undefined}
+						>
+							<ResumoIndicadores
+								resumo={vista.dado.dados}
+								anterior={vista.dado.anterior}
+								ano={Number(vista.dado.ano)}
+							/>
 						</div>
 					)}
-				</div>
-				{!erro && vista.dado && !vista.dado.dados.qualidade.sem_dados && (
-					<div
-						className={cx(vista.atualizando && classes.atualizando)}
-						aria-busy={vista.atualizando || undefined}
-					>
-						<ResumoIndicadores
-							resumo={vista.dado.dados}
-							anterior={vista.dado.anterior}
-							ano={Number(vista.dado.ano)}
-						/>
-					</div>
-				)}
-			</section>
-			{/* Os dois painéis ficam montados: trocar de aba não refaz consultas
+				</section>
+			</div>
+			{/* Os painéis ficam montados: trocar de aba não refaz consultas
 			    nem perde o rascunho da comparação. */}
 			<div
 				role="tabpanel"

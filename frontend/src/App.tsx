@@ -2,16 +2,15 @@ import { useEffect, useState } from 'react'
 import { Accordion, AccordionTab } from 'primereact/accordion'
 import { TabMenu } from 'primereact/tabmenu'
 import { gravarUrl, lerUrl } from './lib/url'
-import { abasAnalise, lerAba } from './modules/analises'
-import { PainelIndicadores } from './modules/indicadores'
+import { abasPainel, lerAba, PainelIndicadores } from './modules/indicadores'
 
 const notaLeitura = 'mt-3 max-w-[78ch] text-sm text-panel-muted'
 
 export function App() {
 	const [aba, setAba] = useState(() => lerAba(lerUrl()))
-	const indice = abasAnalise.findIndex((item) => item.id === aba)
+	const indice = abasPainel.findIndex((item) => item.id === aba)
 	useEffect(() => {
-		gravarUrl(['aba'], aba === abasAnalise[0].id ? [] : [['aba', aba]])
+		gravarUrl(['aba'], aba === abasPainel[0].id ? [] : [['aba', aba]])
 	}, [aba])
 	return (
 		<>
@@ -48,11 +47,11 @@ export function App() {
 					    painéis da página, então segue o padrão de abas. */}
 					<TabMenu
 						className="mt-6 sm:mt-8"
-						model={[...abasAnalise]}
+						model={[...abasPainel]}
 						activeIndex={indice}
-						onTabChange={(evento) => setAba(abasAnalise[evento.index]!.id)}
+						onTabChange={(evento) => setAba(abasPainel[evento.index]!.id)}
 						pt={{
-							menu: { role: 'tablist', 'aria-label': 'Gráficos' },
+							menu: { role: 'tablist', 'aria-label': 'Seções do painel' },
 							action: (opcoes) => ({
 								role: 'tab',
 								id: `aba-${opcoes?.context.item.id}`,

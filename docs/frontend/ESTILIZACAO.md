@@ -40,15 +40,15 @@ O PrimeReact ainda injeta uma folha de estilo pequena com `.p-hidden-accessible`
 | `ProgressSpinner`          | Indicador de carregamento                                                              |
 | `Accordion`/`AccordionTab` | “Selecionar grupos” e “Como interpretar os dados”                                      |
 | `Sidebar`                  | Gaveta dos filtros, aberta pelo botão **Filtros** da faixa do recorte                  |
-| `TabMenu`                  | Abas dos gráficos no cabeçalho                                                         |
+| `TabMenu`                  | Abas do painel no cabeçalho                                                            |
 
 Alguns elementos continuam nativos, estilizados com Tailwind: as tabelas, que precisam de `caption`, cabeçalhos de linha (`th scope="row"`) e da ligação com os gráficos, recursos que o `DataTable` do PrimeReact não oferece da mesma forma; os chips da faixa do recorte, cujo botão de remoção precisa de nome acessível e de área de toque de 44 px; e os botões de ano e grupo dentro das tabelas. Os avisos de qualidade usam `Aviso` em vez de `Message` porque não são alertas: `Message` sempre anuncia o conteúdo como `role="alert"`.
 
 Listas com mais de dez opções, como cursos e municípios, ganham busca por nome ou código dentro da lista aberta. A busca ignora acentos e maiúsculas.
 
-### Abas dos gráficos
+### Abas do painel
 
-As abas usam o `TabMenu` do PrimeReact, que já move o foco com as setas, Home e End e ativa a aba com Enter ou espaço. Ele se declara menu de navegação (`menubar` e `menuitem`); como aqui troca painéis da mesma página, `App.tsx` aplica o padrão de abas: `role="tablist"`, `role="tab"` com `aria-selected` e `aria-controls`, e painéis `role="tabpanel"` rotulados pela aba. A aba ativa fica com a cor do fundo da página, ligada ao conteúdo, e vai para a URL (`?aba=comparacao`). Os dois painéis permanecem montados e o inativo fica com `hidden`: trocar de aba não refaz consultas nem perde o rascunho da comparação, e um clique num gráfico continua atualizando o recorte usado pela outra aba. No celular, as duas abas dividem a largura e o texto pode quebrar em duas linhas.
+O cabeçalho tem três abas, **Resumo**, **Evolução** e **Comparação**, cada uma com seu painel; a primeira é o padrão. Os rótulos são curtos para caber numa linha no celular; os títulos completos ficam nas seções. A faixa do recorte e seus avisos ficam fora das abas, visíveis em todas. As abas usam o `TabMenu` do PrimeReact, que já move o foco com as setas, Home e End e ativa a aba com Enter ou espaço. Ele se declara menu de navegação (`menubar` e `menuitem`); como aqui troca painéis da mesma página, `App.tsx` aplica o padrão de abas: `role="tablist"`, `role="tab"` com `aria-selected` e `aria-controls`, e painéis `role="tabpanel"` rotulados pela aba. A aba ativa fica com a cor do fundo da página, ligada ao conteúdo, e vai para a URL (`?aba=comparacao`). Os três painéis permanecem montados e os inativos ficam com `hidden`: trocar de aba não refaz consultas nem perde o rascunho da comparação, e um clique num gráfico continua atualizando o recorte usado pelas outras abas. No celular, as abas dividem a largura.
 
 ### Acessibilidade da gaveta de filtros
 
@@ -66,7 +66,7 @@ Os rótulos continuam associados por `<label for>` ao campo com foco. Ao usar no
 
 ## Identidade visual
 
-O cabeçalho é uma faixa verde com a marca, “Evasão no ensino superior”, o contexto institucional e as abas dos gráficos, **Evolução temporal** e **Comparação entre grupos**; o rodapé repete a faixa. Logo abaixo fica a faixa do recorte, fixa no topo ao rolar, com o botão **Filtros**. A sequência da página é recorte, resumo e o gráfico da aba ativa. O link “Ir para o conteúdo” aparece ao receber foco de teclado. As explicações metodológicas ficam em “Como interpretar os dados”, um painel recolhível.
+O cabeçalho é uma faixa verde com a marca, “Evasão no ensino superior”, o contexto institucional e as abas **Resumo**, **Evolução** e **Comparação**; o rodapé repete a faixa. Logo abaixo fica a faixa do recorte, fixa no topo ao rolar, com o botão **Filtros**. Abaixo dela aparece o painel da aba ativa. O link “Ir para o conteúdo” aparece ao receber foco de teclado. As explicações metodológicas ficam em “Como interpretar os dados”, um painel recolhível.
 
 O refinamento de 24/11/2026 reduziu o branco da tela e destacou os gráficos sem sair da paleta: fundo da página levemente esverdeado, cartões das taxas tingidos com a cor de cada série (valor na mesma cor), títulos de seção com marcador verde, gráficos em moldura com degradê suave e altura maior (400 px no desktop e 300 px no celular) e cabeçalho das tabelas em verde. Os controles de período ficam no cabeçalho da seção de evolução, e o agrupamento da comparação divide a linha com **Comparar grupos**, para que os gráficos apareçam mais cedo.
 

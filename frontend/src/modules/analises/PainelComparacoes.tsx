@@ -171,7 +171,7 @@ export function PainelComparacoes({
 
 	return (
 		<section
-			className={cx(classes.secao, 'mt-6 sm:mt-10')}
+			className={classes.secao}
 			aria-labelledby="comparacao-titulo"
 			aria-busy={carregando}
 		>
