@@ -34,6 +34,15 @@ export const loginSchema = {
 		senha: { type: 'string', minLength: 1, maxLength: 128 }
 	}
 } as const
+export const trocaSenhaSchema = {
+	type: 'object',
+	additionalProperties: false,
+	required: ['senha_atual', 'nova_senha'],
+	properties: {
+		senha_atual: { type: 'string', minLength: 1, maxLength: 128 },
+		nova_senha: { type: 'string', minLength: 15, maxLength: 128 }
+	}
+} as const
 export const csrfSchema = {
 	type: 'object',
 	required: ['origin', 'x-csrf-protection'],

@@ -1,10 +1,70 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import {
+	contarCaracteres,
+	LIMITES_SENHA,
 	MARGEM_RENOVACAO_MS,
+	MAX_UTF16_SENHA,
 	mensagemLogin,
-	precisaRenovar
+	mensagemTrocaSenha,
+	precisaRenovar,
+	validarNovaSenha
 } from '../src/modules/autenticacao/regras.ts'
+
+test('nova senha aceita os limites da API e rejeita tamanhos fora deles', () => {
+	for (const tamanho of [0, 14, 129]) {
+		const nova = 'a'.repeat(tamanho)
+		assert.equal(validarNovaSenha('senha atual', nova, nova)?.campo, 'nova')
+	}
+	for (const tamanho of [15, 16, 64, 65, 128]) {
+		const nova = 'a'.repeat(tamanho)
+		assert.equal(validarNovaSenha('senha atual', nova, nova), null)
+	}
+})
+
+test('nova senha conta caracteres como o servidor, não unidades UTF-16', () => {
+	// Cada emoji ocupa 2 unidades UTF-16, mas é 1 caractere para a API.
+	const emojis = (n: number) => '😀'.repeat(n)
+	for (const n of [8, 14, 129])
+		assert.equal(
+			validarNovaSenha('senha atual', emojis(n), emojis(n))?.campo,
+			'nova',
+			`${n} emojis`
+		)
+	for (const n of [15, 100, 128])
+		assert.equal(
+			validarNovaSenha('senha atual', emojis(n), emojis(n)),
+			null,
+			`${n} emojis`
+		)
+	assert.ok(emojis(LIMITES_SENHA.maximo).length <= MAX_UTF16_SENHA)
+	assert.equal(contarCaracteres('ação 😀'), 6)
+})
+
+test('nova senha precisa ser diferente da atual e ter confirmação idêntica', () => {
+	const nova = 'Uma nova senha longa'
+	assert.equal(validarNovaSenha(nova, nova, nova)?.campo, 'nova')
+	for (const confirmacao of [
+		'',
+		'Outra senha longa',
+		nova.toLowerCase(),
+		`${nova} `
+	]) {
+		assert.equal(
+			validarNovaSenha('senha atual', nova, confirmacao)?.campo,
+			'confirmacao'
+		)
+	}
+	assert.equal(validarNovaSenha('senha atual', nova, nova), null)
+})
+
+test('troca de senha distingue senha atual errada de sessão encerrada', () => {
+	assert.match(mensagemTrocaSenha(422), /senha atual/i)
+	assert.match(mensagemTrocaSenha(401), /entre novamente/i)
+	assert.match(mensagemTrocaSenha(400), /15 e 128/)
+	for (const status of [null, 403, 429])
+		assert.equal(mensagemTrocaSenha(status), mensagemLogin(status))
+})
 
 test('renova o JWT dentro da margem antes da expiração, não antes', () => {
 	const agora = 1_000_000

@@ -115,6 +115,39 @@ export function criarRepositorioAutenticacao(pool: Pool) {
 				client.release()
 			}
 		},
+		// Só troca se o hash ainda for o conferido: de duas trocas simultâneas, uma falha.
+		async trocarSenha(
+			usuario: string,
+			sessaoAtual: string,
+			hashAnterior: string,
+			hashNovo: string
+		) {
+			const client = await pool.connect()
+			try {
+				await client.query('BEGIN')
+				const result = await client.query(
+					`UPDATE app.usuarios SET senha_hash = $3
+					WHERE id = $1 AND ativo AND senha_hash = $2`,
+					[usuario, hashAnterior, hashNovo]
+				)
+				if (!result.rowCount) {
+					await client.query('ROLLBACK')
+					return false
+				}
+				await client.query(
+					`UPDATE app.sessoes SET revogada_em = now()
+					WHERE usuario_id = $1 AND id <> $2 AND revogada_em IS NULL`,
+					[usuario, sessaoAtual]
+				)
+				await client.query('COMMIT')
+				return true
+			} catch (error) {
+				await client.query('ROLLBACK')
+				throw error
+			} finally {
+				client.release()
+			}
+		},
 		async revogar(token: string) {
 			await pool.query(
 				`UPDATE app.sessoes SET revogada_em = COALESCE(revogada_em, now())

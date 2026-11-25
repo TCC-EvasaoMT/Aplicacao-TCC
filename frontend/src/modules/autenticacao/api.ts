@@ -14,13 +14,14 @@ export interface RespostaToken {
 
 const base = '/api/v1/autenticacao'
 
-async function postar(caminho: string, corpo?: unknown) {
+async function postar(caminho: string, corpo?: unknown, token?: string) {
 	const response = await fetch(`${base}/${caminho}`, {
 		method: 'POST',
 		credentials: 'same-origin',
 		headers: {
 			Accept: 'application/json',
 			'X-CSRF-Protection': '1',
+			...(token ? { Authorization: `Bearer ${token}` } : {}),
 			...(corpo === undefined ? {} : { 'Content-Type': 'application/json' })
 		},
 		body: corpo === undefined ? undefined : JSON.stringify(corpo)
@@ -41,4 +42,16 @@ export async function renovar() {
 
 export async function sair() {
 	await postar('logout')
+}
+
+export async function trocarSenha(
+	token: string,
+	senhaAtual: string,
+	novaSenha: string
+) {
+	await postar(
+		'senha',
+		{ senha_atual: senhaAtual, nova_senha: novaSenha },
+		token
+	)
 }

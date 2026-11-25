@@ -108,6 +108,7 @@ test(
 				for (const sql of [
 					'DELETE FROM app.usuarios',
 					'UPDATE app.usuarios SET ativo = false',
+					"UPDATE app.usuarios SET email = 'outro@example.com'",
 					'DELETE FROM app.usuario_permissoes',
 					'CREATE TABLE app.invasao (id int)',
 					'SELECT * FROM app.migracoes'
@@ -476,6 +477,121 @@ test(
 						.statusCode,
 					401
 				)
+			}
+		)
+		await t.test(
+			'troca de senha exige a atual, mantém esta sessão e revoga as demais',
+			async () => {
+				const app = await servidor()
+				const atual = await login(app)
+				const outra = await login(app, { email, senha }, '127.0.0.2')
+				const trocar = (
+					autorizacao: Record<string, string>,
+					payload: object,
+					headers: Record<string, string> = csrf
+				) =>
+					app.inject({
+						method: 'POST',
+						url: `${prefixo}/senha`,
+						headers: { ...headers, ...autorizacao },
+						payload
+					})
+				const nova = 'outra senha longa sintética'
+				const hashAntes = (
+					await db.query('SELECT senha_hash FROM app.usuarios')
+				).rows[0].senha_hash
+				const valida = { senha_atual: senha, nova_senha: nova }
+				assert.equal((await trocar({}, valida)).statusCode, 401)
+				assert.equal(
+					(await trocar(bearer(atual), valida, { origin: config.origin }))
+						.statusCode,
+					403
+				)
+				assert.equal(
+					(
+						await trocar(bearer(atual), {
+							senha_atual: senha,
+							nova_senha: 'curta'
+						})
+					).statusCode,
+					400
+				)
+				const errada = await trocar(bearer(atual), {
+					senha_atual: 'errada',
+					nova_senha: nova
+				})
+				assert.equal(errada.statusCode, 422)
+				assert.equal(errada.json().erro, 'SENHA_ATUAL_INCORRETA')
+				assert.equal(
+					(await db.query('SELECT senha_hash FROM app.usuarios')).rows[0]
+						.senha_hash,
+					hashAntes
+				)
+				const corrida = await Promise.all([
+					trocar(bearer(atual), valida),
+					trocar(bearer(atual), valida)
+				])
+				assert.deepEqual(corrida.map((r) => r.statusCode).sort(), [204, 422])
+				for (const [resposta, esperado] of [
+					[atual, 200],
+					[outra, 401]
+				] as const) {
+					assert.equal(
+						(
+							await app.inject({
+								url: `${prefixo}/me`,
+								headers: bearer(resposta)
+							})
+						).statusCode,
+						esperado
+					)
+					assert.equal(
+						(await post(app, 'renovar', cookie(resposta))).statusCode,
+						esperado
+					)
+				}
+				assert.equal(
+					(await login(app, { email, senha }, '127.0.0.3')).statusCode,
+					401
+				)
+				assert.equal(
+					(await login(app, { email, senha: nova }, '127.0.0.4')).statusCode,
+					200
+				)
+				const logado = await login(app, { email, senha: nova }, '127.0.0.5')
+				assert.equal(
+					(
+						await trocar(bearer(logado), {
+							senha_atual: nova,
+							nova_senha: senha
+						})
+					).statusCode,
+					204
+				)
+				const texto = logs.join('')
+				assert.ok(!texto.includes(nova))
+			}
+		)
+		await t.test(
+			'troca de senha limita tentativas por conta autenticada',
+			async () => {
+				const app = await servidor()
+				const sessao = await login(app)
+				const tentar = () =>
+					app.inject({
+						method: 'POST',
+						url: `${prefixo}/senha`,
+						headers: { ...csrf, ...bearer(sessao) },
+						payload: {
+							senha_atual: 'errada',
+							nova_senha: 'qualquer senha longa'
+						}
+					})
+				for (let i = 0; i < 5; i++)
+					assert.equal((await tentar()).statusCode, 422)
+				const limitado = await tentar()
+				assert.equal(limitado.statusCode, 429)
+				assert.ok(Number(limitado.headers['retry-after']) > 0)
 			}
 		)
 		await t.test(

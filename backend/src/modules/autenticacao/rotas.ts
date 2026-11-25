@@ -14,8 +14,10 @@ import {
 	errosAuth,
 	identidadeSchema,
 	loginSchema,
-	tokenSchema
+	tokenSchema,
+	trocaSenhaSchema
 } from './schemas.js'
+import { erroSchema } from '../../plugins/erros.js'
 
 export async function registrarRotas(
 	app: FastifyInstance,
@@ -161,5 +163,56 @@ export async function registrarRotas(
 			}
 		},
 		async (request) => request.identidade
+	)
+	// Por conta: um JWT roubado não serve para testar senhas sem limite.
+	const limiteTroca = app.createRateLimit({
+		max: 5,
+		timeWindow: 60_000,
+		keyGenerator: (request) => `troca:${request.identidade?.id}`
+	})
+	app.post<{ Body: { senha_atual: string; nova_senha: string } }>(
+		`${prefixo}/senha`,
+		{
+			config: { acesso: 'autenticado' },
+			schema: {
+				tags: ['Autenticação'],
+				summary:
+					'Troca a própria senha e revoga as demais sessões do usuário, mantendo a atual.',
+				security: [{ bearerAuth: [] }],
+				headers: csrfSchema,
+				body: trocaSenhaSchema,
+				response: { 204: { type: 'null' }, 422: erroSchema, ...errosAuth }
+			},
+			preHandler: async (request, reply) => {
+				const result = await limiteTroca(request)
+				if (!result.isAllowed && result.isExceeded) {
+					reply.header('Retry-After', result.ttlInSeconds)
+					throw erroAcesso(429)
+				}
+			}
+		},
+		async (request, reply) => {
+			const identidade = request.identidade!
+			const usuario = await repo.usuario(identidade.email)
+			// 422 e não 401: a sessão continua válida, só a senha informada falhou.
+			const senhaIncorreta = () =>
+				reply.code(422).send({
+					erro: 'SENHA_ATUAL_INCORRETA',
+					mensagem: 'A senha atual não confere.'
+				})
+			if (
+				!usuario ||
+				!(await verificarSenha(usuario.senha_hash, request.body.senha_atual))
+			)
+				return senhaIncorreta()
+			const trocou = await repo.trocarSenha(
+				identidade.id,
+				request.sessaoId!,
+				usuario.senha_hash,
+				await criarHash(request.body.nova_senha)
+			)
+			if (!trocou) return senhaIncorreta()
+			return reply.code(204).send()
+		}
 	)
 }

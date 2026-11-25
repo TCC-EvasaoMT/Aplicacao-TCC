@@ -4,10 +4,11 @@ import { InputText } from 'primereact/inputtext'
 import { Sidebar } from 'primereact/sidebar'
 import { ErroHttp } from '../../lib/http'
 import { Ajuda, classes } from '../../lib/ui'
-import { mensagemLogin } from './regras'
+import { MAX_UTF16_SENHA, mensagemLogin } from './regras'
 import { encerrarSessao, iniciarSessao } from './sessao'
 import { useSessao } from './useSessao'
 import { usePaginaInerte } from './usePaginaInerte'
+import { AlterarSenha } from './AlterarSenha'
 
 // Nativo, para não disputar cores com o tema do Button do PrimeReact.
 const botaoCabecalho =
@@ -16,6 +17,7 @@ const botaoCabecalho =
 export function AcessoAdministrativo() {
 	const { usuario, verificando } = useSessao()
 	const [aberto, setAberto] = useState(false)
+	const [trocandoSenha, setTrocandoSenha] = useState(false)
 	const [saindo, setSaindo] = useState(false)
 	const botao = useRef<HTMLButtonElement>(null)
 	const restaurado = useRef(false)
@@ -32,9 +34,23 @@ export function AcessoAdministrativo() {
 	if (usuario) {
 		return (
 			<div className="flex min-w-0 items-center gap-3 text-sm">
-				<span className="hidden truncate text-white/80 sm:inline">
+				<span className="hidden truncate text-white/80 lg:inline">
 					{usuario.email}
 				</span>
+				<button
+					type="button"
+					className={botaoCabecalho}
+					aria-haspopup="dialog"
+					aria-label="Alterar senha"
+					onClick={() => setTrocandoSenha(true)}
+				>
+					<span className="sm:hidden">Senha</span>
+					<span className="hidden sm:inline">Alterar senha</span>
+				</button>
+				<AlterarSenha
+					aberto={trocandoSenha}
+					onFechar={() => setTrocandoSenha(false)}
+				/>
 				<button
 					ref={botao}
 					type="button"
@@ -133,6 +149,7 @@ function FormularioLogin({
 						maxLength={254}
 						value={email}
 						invalid={!!erro}
+						aria-invalid={!!erro}
 						aria-describedby={erro ? 'login-erro' : undefined}
 						onChange={(evento) => setEmail(evento.target.value)}
 					/>
@@ -146,9 +163,10 @@ function FormularioLogin({
 						type="password"
 						autoComplete="current-password"
 						required
-						maxLength={128}
+						maxLength={MAX_UTF16_SENHA}
 						value={senha}
 						invalid={!!erro}
+						aria-invalid={!!erro}
 						aria-describedby={erro ? 'login-erro' : undefined}
 						onChange={(evento) => setSenha(evento.target.value)}
 					/>

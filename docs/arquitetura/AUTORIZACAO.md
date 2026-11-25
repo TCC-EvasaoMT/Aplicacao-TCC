@@ -27,12 +27,13 @@ Para acesso por Vite e seu proxy, use `AUTH_ORIGIN=http://127.0.0.1:5173`, inclu
 
 Prefixo: `/api/v1/autenticacao`.
 
-| Método e rota   | Entrada                        | Resultado                                               |
-| --------------- | ------------------------------ | ------------------------------------------------------- |
-| `POST /login`   | JSON com `email` e `senha`     | `200`, JWT de acesso, identidade e cookie de renovação  |
-| `POST /renovar` | Cookie de renovação; sem corpo | `200`, novo JWT e novo cookie; token anterior consumido |
-| `POST /logout`  | Cookie da sessão; sem corpo    | `204`, revoga a sessão e remove o cookie; é idempotente |
-| `GET /me`       | Cabeçalho Bearer               | `200`, identidade e permissões atuais                   |
+| Método e rota   | Entrada                                        | Resultado                                                |
+| --------------- | ---------------------------------------------- | -------------------------------------------------------- |
+| `POST /login`   | JSON com `email` e `senha`                     | `200`, JWT de acesso, identidade e cookie de renovação   |
+| `POST /renovar` | Cookie de renovação; sem corpo                 | `200`, novo JWT e novo cookie; token anterior consumido  |
+| `POST /logout`  | Cookie da sessão; sem corpo                    | `204`, revoga a sessão e remove o cookie; é idempotente  |
+| `GET /me`       | Cabeçalho Bearer                               | `200`, identidade e permissões atuais                    |
+| `POST /senha`   | Bearer e JSON com `senha_atual` e `nova_senha` | `204`, troca a senha e revoga as outras sessões da conta |
 
 Todos os POSTs acima exigem `Origin` igual a `AUTH_ORIGIN` e `X-CSRF-Protection: 1`. Origem ausente, divergente ou header ausente retorna `403`, antes de consultar credenciais. O header não é um segredo: impede envio por formulários de outros sites, em conjunto com a verificação de origem e a ausência de CORS. Clientes de terminal precisam enviar os dois headers explicitamente.
 
@@ -45,6 +46,14 @@ Exemplo do corpo de login (valores ilustrativos):
 A resposta contém `access_token`, `token_type: "Bearer"`, `expires_in: 600` e `usuario: { id, email, permissoes }`. Não contém senha, hash ou token de renovação no JSON. As respostas de autenticação e acesso protegido usam `Cache-Control: no-store`.
 
 Credenciais incorretas, usuário inexistente e conta desativada recebem o mesmo `401`. O login permite cinco tentativas por minuto por IP (IPv6 /64) e por e-mail normalizado, incluindo tentativas bem-sucedidas. O excesso retorna `429` com `Retry-After`. Os contadores são locais ao processo e reiniciam com ele; o limite geral da API também se aplica. Antes de distribuir em réplicas, use armazenamento compartilhado para os limites.
+
+## Troca de senha
+
+`POST /senha` exige sessão válida (Bearer), proteção CSRF e a senha atual. A nova senha segue os mesmos limites do cadastro (15 a 128 caracteres) e é gravada como novo hash Argon2id. Senha atual incorreta retorna `422` (`SENHA_ATUAL_INCORRETA`), e não `401`, porque a sessão continua válida. A rota permite cinco tentativas por minuto por conta autenticada, para que um JWT roubado não sirva para testar senhas.
+
+A troca atualiza o hash e revoga, na mesma transação, todas as outras sessões da conta; a sessão que fez a troca continua. A atualização só ocorre se o hash ainda for o conferido pela rota: de duas trocas simultâneas, uma vence e a outra recebe `422`. A role HTTP recebeu `UPDATE` apenas na coluna `senha_hash`; continua sem poder ativar contas, trocar e-mails ou conceder permissões. Em instalações existentes, reaplique `permissoes-app.sql`.
+
+Ainda não há recuperação de senha esquecida nem troca obrigatória no primeiro acesso.
 
 ## Sessão e tokens
 

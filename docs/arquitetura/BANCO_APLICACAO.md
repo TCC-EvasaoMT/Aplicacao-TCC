@@ -17,7 +17,7 @@ REVOKE ALL ON SCHEMA app FROM PUBLIC;
 
 Defina senhas diferentes com `\password tcc_app_owner` e `\password tcc_auth` no `psql`, sem colocar senhas no histórico SQL. Se o banco tiver revogado `CONNECT` de `PUBLIC`, conceda `CONNECT` às duas roles no banco escolhido. As roles não devem herdar privilégios de outras contas. Em bancos que ainda concedem `CREATE` no schema `public` a `PUBLIC`, revise essa permissão com o administrador.
 
-O dono `tcc_app_owner` cria tabelas e provisiona administradores. A API usa `tcc_auth`: pode ler usuários/permissões e criar/atualizar sessões e tokens, mas não criar usuários, conceder permissões ou alterar tabelas. A conexão de consulta à Gold continua usando a role de leitura já existente. Não use a conta administrativa do contêiner na API.
+O dono `tcc_app_owner` cria tabelas e provisiona administradores. A API usa `tcc_auth`: pode ler usuários/permissões, criar/atualizar sessões e tokens e atualizar somente a coluna `senha_hash` (troca da própria senha), mas não criar usuários, ativar contas, conceder permissões ou alterar tabelas. A conexão de consulta à Gold continua usando a role de leitura já existente. Não use a conta administrativa do contêiner na API.
 
 ## Migrações e permissões
 

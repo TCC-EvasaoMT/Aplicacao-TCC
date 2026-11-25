@@ -14,6 +14,7 @@ declare module 'fastify' {
 	}
 	interface FastifyRequest {
 		identidade: Identidade | null
+		sessaoId: string | null
 	}
 }
 
@@ -26,6 +27,7 @@ export async function registrarAcesso(
 	auth?: { config: ConfigAutenticacao; repositorio: RepositorioAutenticacao }
 ) {
 	app.decorateRequest('identidade', null)
+	app.decorateRequest('sessaoId', null)
 	if (auth)
 		await app.register(jwt, {
 			secret: auth.config.secret,
@@ -75,6 +77,7 @@ export async function registrarAcesso(
 		const identidade = await auth.repositorio.identidade(claims.sid)
 		if (!identidade || identidade.id !== claims.sub) throw erroAcesso(401)
 		request.identidade = identidade
+		request.sessaoId = claims.sid
 		if (acesso !== 'autenticado' && !identidade.permissoes.includes(acesso))
 			throw erroAcesso(403)
 	})

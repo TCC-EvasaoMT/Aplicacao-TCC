@@ -1,5 +1,12 @@
 import { ErroHttp } from '../../lib/http'
-import { entrar, renovar, sair, type RespostaToken, type Usuario } from './api'
+import {
+	entrar,
+	renovar,
+	sair,
+	trocarSenha,
+	type RespostaToken,
+	type Usuario
+} from './api'
 import { precisaRenovar } from './regras'
 
 interface Sessao {
@@ -115,6 +122,18 @@ export async function encerrarSessao() {
 		await sair()
 	} finally {
 		definir(null, 'saiu')
+	}
+}
+
+export async function alterarSenha(senhaAtual: string, novaSenha: string) {
+	const token = await tokenAcesso()
+	if (!token) throw new ErroHttp(401)
+	try {
+		await trocarSenha(token, senhaAtual, novaSenha)
+	} catch (erro) {
+		if (erro instanceof ErroHttp && erro.status === 401)
+			definir(null, sessao ? 'saiu' : undefined)
+		throw erro
 	}
 }
 
