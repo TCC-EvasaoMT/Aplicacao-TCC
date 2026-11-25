@@ -45,7 +45,7 @@ Com as credenciais de migração disponíveis apenas no terminal de manutenção
 pnpm --filter tcc-evasao-backend auth:criar-admin admin@example.com
 ```
 
-O comando pede senha e confirmação com entrada oculta, exige entre 15 e 128 caracteres e armazena um hash Argon2id com salt individual. Concede `etl:consultar` e `etl:reprocessar` em uma transação. E-mail é normalizado para minúsculas; uma conta existente nunca é substituída. Não existe autocadastro público nem senha padrão.
+O comando pede senha e confirmação com entrada oculta, exige entre 15 e 128 caracteres e armazena um hash Argon2id com salt individual. Concede `etl:consultar` e `etl:reprocessar` em uma transação. E-mail é normalizado para minúsculas; uma conta existente nunca é substituída. Não existe autocadastro público nem senha padrão. Quem executa o comando define a senha inicial; o administrador deve trocá-la no primeiro acesso, em **Alterar senha** no painel, para que só ele a conheça. A troca obrigatória ainda não é imposta pelo sistema.
 
 A opção `--se-ausente`, usada pela demonstração, verifica a existência antes de solicitar senha. Se a conta existir, encerra sem alterar senha, estado ou permissões, inclusive quando estiver desativada ou sem privilégios. Se não existir, exige o mesmo cadastro interativo; nunca inventa uma senha. Exemplo: `pnpm --filter tcc-evasao-backend auth:criar-admin admin@example.com --se-ausente`.
 
