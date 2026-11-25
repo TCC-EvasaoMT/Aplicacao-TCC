@@ -4,11 +4,16 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig(({ mode }) => {
 	// Só PORT é lida pelo processo Vite; credenciais do banco não entram no bundle.
+	// loadEnv também copia o NODE_ENV do .env do backend para o Vite, o que
+	// faria `vite build` gerar o React de desenvolvimento; o valor é descartado.
+	const nodeEnvAnterior = process.env.VITE_USER_NODE_ENV
 	const backendEnv = loadEnv(
 		mode,
 		fileURLToPath(new URL('../backend', import.meta.url)),
 		'PORT'
 	)
+	if (nodeEnvAnterior === undefined) delete process.env.VITE_USER_NODE_ENV
+	else process.env.VITE_USER_NODE_ENV = nodeEnvAnterior
 	const apiPort = process.env.PORT ?? backendEnv.PORT ?? '3000'
 	return {
 		plugins: [react()],
