@@ -87,20 +87,21 @@ Sem cliente local, abra o `psql` dentro do container e execute o conteúdo de `s
 
 ## Rotas e filtros
 
-| Método e rota                            | Resultado                                                                                                                                  |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `GET /health`                            | Testa a leitura da fato e das dimensões. `200` com `{"status":"ok"}` ou `503`. Uma Gold vazia, mas acessível, é saudável.                  |
-| `GET /api/v1/filtros`                    | Catálogo de todos os anos e opções presentes na fato de cursos. Não recebe parâmetros.                                                     |
-| `GET /api/v1/indicadores/resumo`         | Totais, base de risco, taxas e qualidade; exige `ano`.                                                                                     |
-| `GET /api/v1/analises/evolucao-temporal` | Série anual com os mesmos indicadores e filtros; exige `ano_inicial` e `ano_final`, até 30 anos inclusivos.                                |
-| `GET /api/v1/analises/comparacoes`       | Totais, taxas e qualidade por grupo no mesmo ano; exige `ano` e `agrupar_por`. Até 20 grupos, com seleção opcional e aviso de truncamento. |
-| `GET /api/v1/analises/dispersao`         | Todos os cursos do ano com matrículas, taxas e qualidade, a linha de alta evasão de cada taxa e a zona crítica; exige `ano`.               |
-| `POST /api/v1/autenticacao/login`        | Inicia a sessão; retorna JWT e cookie de renovação. Exige proteção CSRF.                                                                   |
-| `POST /api/v1/autenticacao/renovar`      | Rotaciona o cookie e emite novo JWT. Exige proteção CSRF.                                                                                  |
-| `POST /api/v1/autenticacao/logout`       | Revoga a sessão do cookie. Exige proteção CSRF.                                                                                            |
-| `GET /api/v1/autenticacao/me`            | Identidade e permissões atuais; exige Bearer.                                                                                              |
-| `POST /api/v1/autenticacao/senha`        | Troca a própria senha e revoga as outras sessões da conta; exige Bearer, proteção CSRF e a senha atual.                                    |
-| `GET /docs/`                             | Swagger UI em desenvolvimento. A especificação fica em `/docs/json`.                                                                       |
+| Método e rota                            | Resultado                                                                                                                                      |
+| ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET /health`                            | Testa a leitura da fato e das dimensões. `200` com `{"status":"ok"}` ou `503`. Uma Gold vazia, mas acessível, é saudável.                      |
+| `GET /api/v1/filtros`                    | Catálogo de todos os anos e opções presentes na fato de cursos. Não recebe parâmetros.                                                         |
+| `GET /api/v1/indicadores/resumo`         | Totais, base de risco, taxas e qualidade; exige `ano`.                                                                                         |
+| `GET /api/v1/analises/evolucao-temporal` | Série anual com os mesmos indicadores e filtros; exige `ano_inicial` e `ano_final`, até 30 anos inclusivos.                                    |
+| `GET /api/v1/analises/comparacoes`       | Totais, taxas e qualidade por grupo no mesmo ano; exige `ano` e `agrupar_por`. Até 20 grupos, com seleção opcional e aviso de truncamento.     |
+| `GET /api/v1/analises/dispersao`         | Todos os cursos do ano com matrículas, taxas e qualidade, a linha de alta evasão de cada taxa e a zona crítica; exige `ano`.                   |
+| `GET /api/v1/analises/ranking`           | Todas as áreas gerais ou modalidades do ano, ordenadas pela taxa escolhida, com empates, bases pequenas e ausências; exige `ano` e `dimensao`. |
+| `POST /api/v1/autenticacao/login`        | Inicia a sessão; retorna JWT e cookie de renovação. Exige proteção CSRF.                                                                       |
+| `POST /api/v1/autenticacao/renovar`      | Rotaciona o cookie e emite novo JWT. Exige proteção CSRF.                                                                                      |
+| `POST /api/v1/autenticacao/logout`       | Revoga a sessão do cookie. Exige proteção CSRF.                                                                                                |
+| `GET /api/v1/autenticacao/me`            | Identidade e permissões atuais; exige Bearer.                                                                                                  |
+| `POST /api/v1/autenticacao/senha`        | Troca a própria senha e revoga as outras sessões da conta; exige Bearer, proteção CSRF e a senha atual.                                        |
+| `GET /docs/`                             | Swagger UI em desenvolvimento. A especificação fica em `/docs/json`.                                                                           |
 
 Exemplo no PowerShell:
 
@@ -194,7 +195,7 @@ Registrar na próxima revisão do Word:
 | Evasão operacional = desvinculados / matrículas | Evasão do curso e da IES sobre vínculos menos falecidos, conforme a modelagem Gold.    |
 | Infraestrutura AWS                              | Esta entrega executa localmente; nuvem fica para etapa posterior.                      |
 
-A stack TypeScript/Fastify/pg e a finalidade de apoiar a análise da evasão são mantidas. Evolução temporal e comparações têm API e visualização. O gráfico de dispersão, os rankings simultâneos, a administração da pipeline e a implantação estão pendentes. Perfis e coortes dependem de definição de escopo. A autenticação administrativa (login, sessão, permissões e troca de senha) está implementada no backend e no painel; as rotas de administração do ETL ainda não. A API não acessa a Bronze para deduzir status de execução ou datas de atualização.
+A stack TypeScript/Fastify/pg e a finalidade de apoiar a análise da evasão são mantidas. Evolução temporal, comparações, dispersão por curso e o ranking simultâneo de áreas e modalidades têm API e visualização. A administração da pipeline e a implantação estão pendentes. Perfis e coortes dependem de definição de escopo. A autenticação administrativa (login, sessão, permissões e troca de senha) está implementada no backend e no painel; as rotas de administração do ETL ainda não. A API não acessa a Bronze para deduzir status de execução ou datas de atualização.
 
 A [matriz de requisitos do TCC](../docs/tcc/RASTREABILIDADE.md) detalha as diferenças, incluindo o cartão de desvinculados ausente na interface, a comparação nominal de IES e as metas operacionais ainda não verificadas. Atualizar a documentação da aplicação não altera nem aprova uma revisão dos requisitos acadêmicos.
 

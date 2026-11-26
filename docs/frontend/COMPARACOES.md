@@ -10,7 +10,7 @@ A seção **Comparação entre grupos**, na aba **Comparação** do cabeçalho, 
 4. Opcionalmente, abra **Selecionar grupos**, busque por nome ou código e marque até 20 opções.
 5. Clique em **Comparar grupos**. A tabela apresenta os totais, a base de risco, as duas taxas e a qualidade de cada grupo.
 
-Sem seleção explícita, a API retorna até 20 grupos na ordem de código ou atributo. Isso não é um ranking de evasão. Quando há mais resultados, a tela informa quantos foram exibidos e orienta selecionar os grupos desejados ou refinar os filtros. Os grupos sem identificador podem aparecer nessa consulta, com o rótulo **Não informado (sem identificador)**; não são opções selecionáveis do catálogo e não devem receber códigos inventados.
+Sem seleção explícita, a API retorna até 20 grupos na ordem de código ou atributo. Isso não é um ranking de evasão; o [ranking de áreas e modalidades](RANKING.md) fica no topo da mesma aba. Quando há mais resultados, a tela informa quantos foram exibidos e orienta selecionar os grupos desejados ou refinar os filtros. Os grupos sem identificador podem aparecer nessa consulta, com o rótulo **Não informado (sem identificador)**; não são opções selecionáveis do catálogo e não devem receber códigos inventados.
 
 Ao marcar 20 opções, as demais ficam desabilitadas até que alguma seja desmarcada. A busca aceita código ou parte do nome, sem distinguir acentos ou maiúsculas. Buscar não altera as seleções. **Limpar seleção de grupos** prepara a consulta sem seleção explícita; é necessário clicar em **Comparar grupos** para aplicar.
 

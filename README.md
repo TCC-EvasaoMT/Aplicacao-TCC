@@ -5,7 +5,7 @@ Monorepo com React, TypeScript e Fastify. O frontend consulta a API, e o backend
 ## Organização
 
 ```text
-frontend/              React e Vite; resumo, filtros, evolução, comparações, dispersão e login
+frontend/              React e Vite; resumo, filtros, evolução, comparações, ranking, dispersão e login
 backend/               API Fastify, regras de cálculo e acesso à Gold
 backend/src/modules/   Módulos de catálogos, indicadores, análises e autenticação
 backend/src/database/  Migrações do schema app e criação de administrador
@@ -22,7 +22,7 @@ O [índice da documentação](docs/README.md) reúne arquitetura, contratos, int
 
 O frontend não importa arquivos internos do backend e não acessa o banco. Ele usa HTTP/JSON em `/api/v1`. As fórmulas de evasão continuam no backend; a interface apenas formata os resultados.
 
-A interface apresenta resumo anual, evolução temporal, comparação entre grupos e [dispersão por curso](docs/frontend/DISPERSAO.md) em abas no cabeçalho, com filtros compartilhados numa gaveta. Resumo e comparação compartilham o ano; o gráfico temporal mantém seu próprio período. O tema usa Source Sans 3 servida localmente, duas taxas com igual destaque e totais em uma faixa compacta. A seção **Como interpretar os dados** reúne as explicações metodológicas.
+A interface apresenta resumo anual, evolução temporal, comparação entre grupos, [ranking de áreas e modalidades](docs/frontend/RANKING.md) e [dispersão por curso](docs/frontend/DISPERSAO.md) em abas no cabeçalho, com filtros compartilhados numa gaveta. Resumo e comparação compartilham o ano; o gráfico temporal mantém seu próprio período. O tema usa Source Sans 3 servida localmente, duas taxas com igual destaque e totais em uma faixa compacta. A seção **Como interpretar os dados** reúne as explicações metodológicas.
 
 A [API de evolução temporal](docs/api/ANALISES_TEMPORAIS.md) permite consultar séries anuais em `/api/v1/analises/evolucao-temporal`, com intervalo inclusivo de até 30 anos e os mesmos filtros de recorte. O [módulo de análises do frontend](docs/frontend/ANALISES.md) apresenta as duas taxas em um gráfico Recharts e uma tabela de valores e qualidade por ano. A interface usa componentes do PrimeReact 10 (licença MIT) em modo sem estilo e Tailwind CSS 4 para o layout e a identidade visual, conforme a [documentação de estilização](docs/frontend/ESTILIZACAO.md).
 
@@ -54,7 +54,7 @@ O comando inicia os dois pacotes. O Vite encaminha `/api`, `/health` e `/docs` p
 
 A tela inicial exibe vínculos, matrículas, ingressantes, concluintes e taxas de evasão. Permite combinar ano, curso, área CINE, modalidade, categoria administrativa, organização acadêmica e municípios de oferta e sede. Os filtros são aplicados automaticamente; limpar mantém o ano e atualizar preserva as seleções ainda disponíveis. O gráfico temporal usa os mesmos filtros opcionais e um intervalo próprio, independente do ano do resumo. Mostra estados de carregamento, erro, ausência de dados e qualidade. Ela utiliza a base conectada, sem injetar números fictícios no frontend.
 
-A [API de comparações entre cursos e grupos](docs/api/COMPARACOES.md) está disponível no Swagger, em `GET /api/v1/analises/comparacoes`, sem login. Exemplo: `?ano=2023&agrupar_por=curso&grupos=001&grupos=002`. O [frontend de comparações](docs/frontend/COMPARACOES.md) permite escolher a dimensão e até 20 grupos, com barras horizontais, tabela de totais e qualidade e avisos de truncamento ou ausência. Para testar, use 2023 na aba **Comparação**. Rankings permanecem pendentes.
+A [API de comparações entre cursos e grupos](docs/api/COMPARACOES.md) está disponível no Swagger, em `GET /api/v1/analises/comparacoes`, sem login. Exemplo: `?ano=2023&agrupar_por=curso&grupos=001&grupos=002`. O [frontend de comparações](docs/frontend/COMPARACOES.md) permite escolher a dimensão e até 20 grupos, com barras horizontais, tabela de totais e qualidade e avisos de truncamento ou ausência. Para testar, use 2023 na aba **Comparação**. No topo da mesma aba, o ranking mostra todas as áreas gerais e modalidades ao mesmo tempo, pela [API de ranking](docs/api/RANKING.md) (`GET /api/v1/analises/ranking?ano=2023&dimensao=area_geral`).
 
 O guia de [estado e exportação](docs/frontend/ESTADO_E_EXPORTACAO.md) descreve o link compartilhável, o CSV, o layout do celular e o carregamento dos gráficos. A [interatividade](docs/frontend/INTERATIVIDADE.md) explica a filtragem cruzada: clicar num grupo aplica o filtro ao resumo e à evolução; clicar num ano altera o resumo e a comparação. Os cartões mostram a variação contra o ano anterior.
 
