@@ -31,22 +31,23 @@ pnpm start
 
 O servidor escuta em `127.0.0.1` por padrão. A imagem Docker define `HTTP_HOST=0.0.0.0` para receber tráfego da porta publicada pelo Docker. `pnpm start` serve também `frontend/dist` em `/`. Swagger só é registrado com `NODE_ENV=development`. A autenticação administrativa é opcional (`AUTH_ENABLED`). Consulte o [guia da EC2](../docs/operacao/DOCKER_EC2.md).
 
-| Variável                                        | Uso                                                                                      |
-| ----------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| `NODE_ENV`                                      | `development` por padrão; também aceita `test` e `production`.                           |
-| `PORT`                                          | Porta HTTP, padrão `3000`.                                                               |
-| `HTTP_HOST`                                     | IP de escuta (não aceita nomes), padrão `127.0.0.1`; a imagem Docker usa `0.0.0.0`.      |
-| `HTTP_RATE_LIMIT_MAX`                           | Chamadas por minuto por IP e processo em `/api`, padrão `120`; aceita de 1 a 10000.      |
-| `POSTGRES_HOST`                                 | Host do banco, padrão `127.0.0.1`.                                                       |
-| `POSTGRES_PORT`                                 | Porta do banco, padrão `5432`.                                                           |
-| `POSTGRES_DB`                                   | Obrigatória: nome do banco da pipeline.                                                  |
-| `POSTGRES_USER`                                 | Obrigatória: login exclusivo de leitura.                                                 |
-| `POSTGRES_PASSWORD`                             | Obrigatória: senha desse login.                                                          |
-| `AUTH_ENABLED`                                  | `true` habilita a autenticação administrativa; padrão `false`.                           |
-| `AUTH_JWT_SECRET`                               | Com autenticação: segredo aleatório de pelo menos 64 caracteres hexadecimais.            |
-| `AUTH_ORIGIN`                                   | Com autenticação: origem exata do navegador, como `http://127.0.0.1:5173` no `pnpm dev`. |
-| `APP_POSTGRES_USER` / `APP_POSTGRES_PASSWORD`   | Com autenticação: role restrita ao schema `app` usada pelo servidor.                     |
-| `APP_MIGRATION_USER` / `APP_MIGRATION_PASSWORD` | Somente nos comandos de manutenção; nunca no processo HTTP.                              |
+| Variável                                        | Uso                                                                                                                     |
+| ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `NODE_ENV`                                      | `development` por padrão; também aceita `test` e `production`.                                                          |
+| `PORT`                                          | Porta HTTP, padrão `3000`.                                                                                              |
+| `HTTP_HOST`                                     | IP de escuta (não aceita nomes), padrão `127.0.0.1`; a imagem Docker usa `0.0.0.0`.                                     |
+| `HTTP_RATE_LIMIT_MAX`                           | Chamadas por minuto por IP e processo em `/api`, padrão `120`; aceita de 1 a 10000.                                     |
+| `HTTP_TRUST_PROXY`                              | IPs ou faixas CIDR dos proxies confiáveis, separados por vírgula; vazio (padrão) desativa. Recusa `0.0.0.0/0` e `::/0`. |
+| `POSTGRES_HOST`                                 | Host do banco, padrão `127.0.0.1`.                                                                                      |
+| `POSTGRES_PORT`                                 | Porta do banco, padrão `5432`.                                                                                          |
+| `POSTGRES_DB`                                   | Obrigatória: nome do banco da pipeline.                                                                                 |
+| `POSTGRES_USER`                                 | Obrigatória: login exclusivo de leitura.                                                                                |
+| `POSTGRES_PASSWORD`                             | Obrigatória: senha desse login.                                                                                         |
+| `AUTH_ENABLED`                                  | `true` habilita a autenticação administrativa; padrão `false`.                                                          |
+| `AUTH_JWT_SECRET`                               | Com autenticação: segredo aleatório de pelo menos 64 caracteres hexadecimais.                                           |
+| `AUTH_ORIGIN`                                   | Com autenticação: origem exata do navegador, como `http://127.0.0.1:5173` no `pnpm dev`.                                |
+| `APP_POSTGRES_USER` / `APP_POSTGRES_PASSWORD`   | Com autenticação: role restrita ao schema `app` usada pelo servidor.                                                    |
+| `APP_MIGRATION_USER` / `APP_MIGRATION_PASSWORD` | Somente nos comandos de manutenção; nunca no processo HTTP.                                                             |
 
 Credenciais ausentes ou portas inválidas impedem a inicialização. Uma conexão indisponível mantém o HTTP ativo, mas as consultas respondem `503`. O pool de leitura da Gold tem até cinco conexões, espera de conexão de dois segundos e limite SQL de 2,5 segundos; com autenticação, o pool de `app` tem até três conexões e os mesmos limites. Esses limites não substituem a medição de desempenho com a carga real.
 

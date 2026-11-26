@@ -1,6 +1,6 @@
 # Interatividade e filtragem cruzada
 
-Resumo, evolução e comparação compartilham o recorte. Clicar num grupo aplica seu filtro ao resumo e à evolução; clicar num ano altera o resumo e a comparação. As ações usam as rotas públicas de catálogo, resumo e análises, com as fórmulas de evasão do backend. A demonstração usa números sintéticos.
+Resumo, evolução e comparação compartilham o recorte. Clicar num grupo, curso ou categoria aplica seu filtro ao painel inteiro, em todas as abas; clicar num ano altera o resumo e a comparação. As ações usam as rotas públicas de catálogo, resumo e análises, com as fórmulas de evasão do backend. A demonstração usa números sintéticos.
 
 ## O que cada clique faz
 
@@ -17,7 +17,7 @@ Resumo, evolução, comparação e dispersão ficam em abas no cabeçalho. Um cl
 | × num filtro da faixa do recorte       | Remove aquele filtro; **Limpar tudo** remove todos e mantém o ano                                                  |
 | **Desfazer última mudança**            | No estado vazio, volta ao recorte anterior                                                                         |
 
-O filtro aplicado pelo clique é um filtro comum: aparece na gaveta de filtros, na faixa do recorte e na URL, e vale para resumo e evolução. Grupo sem identificador (**Não informado (sem identificador)**) não é filtrável, pois a API não aceita filtro por valor ausente.
+O filtro aplicado pelo clique é um filtro comum: aparece na gaveta de filtros, na faixa do recorte e na URL, e vale para todas as abas. As ajudas da comparação, da dispersão e do ranking dizem isso, e os botões das tabelas se chamam "Filtrar o painel inteiro por …". No ranking, uma linha acima da tabela informa "Painel filtrado por …" enquanto o filtro da dimensão estiver ativo. Grupo sem identificador (**Não informado (sem identificador)**) não é filtrável, pois a API não aceita filtro por valor ausente.
 
 ## A comparação não filtra a si mesma
 

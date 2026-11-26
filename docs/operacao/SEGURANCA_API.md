@@ -29,7 +29,11 @@ O contador fica na memória de cada processo, com cache limitado a 5000 chaves p
 
 ## Proxy e limites HTTP
 
-`trustProxy` permanece desativado. Cabeçalhos como `X-Forwarded-For` não mudam a identidade usada na limitação. Atrás do Vite ou de outro proxy, a API observa o IP desse proxy; os visitantes podem compartilhar a mesma cota. Antes da implantação, definir os proxies confiáveis e bloquear acesso direto indevido ao backend. Não habilitar confiança irrestrita para resolver esse agrupamento.
+Sem configuração, `trustProxy` fica desativado: cabeçalhos como `X-Forwarded-For` não mudam a identidade usada na limitação. Atrás do Vite ou de outro proxy, a API observa o IP desse proxy, e todos os visitantes compartilham a mesma cota de 120 consultas por minuto e de cinco tentativas de login.
+
+`HTTP_TRUST_PROXY` lista os proxies confiáveis, como o Nginx da implantação: IPs ou faixas CIDR separados por vírgula. Só numa conexão vinda de um desses endereços o servidor lê `X-Forwarded-For` e usa o endereço do visitante. Vindo de qualquer outro endereço, o cabeçalho continua ignorado, e trocá-lo não renova a cota. Valores inválidos, `0.0.0.0/0` e `::/0` impedem a inicialização: confiar em qualquer origem deixaria o cliente escolher o próprio IP.
+
+Use o endereço que o servidor enxerga. Com o Nginx no host e a porta publicada pelo Docker, é o gateway da rede do container (normalmente `172.17.0.1`, conferido com `docker network inspect bridge`). Com o Nginx em outro container da mesma rede, é o IP dele. No Nginx, envie `proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;`: o servidor percorre a lista da direita para a esquerda e para no primeiro endereço que não é proxy confiável, então um valor forjado pelo visitante à esquerda não é usado.
 
 O Fastify aceita corpos de até **16 KiB** nas rotas que processam corpo e configura **10 segundos para recebimento da requisição**. O timeout de recebimento não cancela handlers nem consultas em execução. O Node verifica timeouts periodicamente; não é um cronômetro preciso por chamada. As consultas são GET e não recebem corpo; apenas login e troca de senha recebem JSON.
 
