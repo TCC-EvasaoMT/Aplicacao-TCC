@@ -1,5 +1,6 @@
 import { isIP } from 'node:net'
 import { configurarAutenticacao } from './autenticacao.js'
+import { lerProxiesConfiaveis } from './proxy.js'
 
 export function readConfig(env: NodeJS.ProcessEnv = process.env) {
 	function required(name: string): string {
@@ -38,6 +39,7 @@ export function readConfig(env: NodeJS.ProcessEnv = process.env) {
 		autenticacao: configurarAutenticacao(env),
 		port: port('PORT', 3000),
 		maxRequisicoes: Number(maxRequisicoes),
+		proxiesConfiaveis: lerProxiesConfiaveis(env.HTTP_TRUST_PROXY),
 		docs: environment === 'development',
 		database: {
 			host: env.POSTGRES_HOST ?? '127.0.0.1',
