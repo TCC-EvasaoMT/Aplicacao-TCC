@@ -45,6 +45,7 @@ export async function buildApp(
 		logStream?: { write(message: string): void }
 		frontendDir?: string
 		maxRequisicoes?: number
+		proxiesConfiaveis?: string[]
 	} = {}
 ) {
 	const app = Fastify({
@@ -52,7 +53,11 @@ export async function buildApp(
 		logController: new LogController({ disableRequestLogging: true }),
 		requestIdHeader: false,
 		genReqId: () => randomUUID(),
-		trustProxy: false,
+		// Só os endereços listados: confiar em qualquer origem deixaria o
+		// cliente escolher o próprio IP pelo X-Forwarded-For.
+		trustProxy: options.proxiesConfiaveis?.length
+			? options.proxiesConfiaveis
+			: false,
 		bodyLimit: 16 * 1024,
 		requestTimeout: 10_000,
 		ajv: { customOptions: { removeAdditional: false, coerceTypes: true } }

@@ -206,4 +206,52 @@ test('Swagger restringe scripts, documenta 429 e fica ausente em produção', as
 	for (const value of ['0.0.0.0', '::', '::1', '10.0.1.25']) {
 		assert.equal(readConfig({ ...env, HTTP_HOST: value }).host, value)
 	}
+	assert.deepEqual(readConfig(env).proxiesConfiaveis, [])
+	assert.deepEqual(
+		readConfig({ ...env, HTTP_TRUST_PROXY: '' }).proxiesConfiaveis,
+		[]
+	)
+	assert.deepEqual(
+		readConfig({ ...env, HTTP_TRUST_PROXY: '172.18.0.2' }).proxiesConfiaveis,
+		['172.18.0.2']
+	)
+	assert.deepEqual(
+		readConfig({ ...env, HTTP_TRUST_PROXY: '10.0.0.2, 172.16.0.0/12, ::1' })
+			.proxiesConfiaveis,
+		['10.0.0.2', '172.16.0.0/12', '::1']
+	)
+	for (const value of [
+		'true',
+		'*',
+		'nginx',
+		'10.0.0.2,',
+		'10.0.0.0/33',
+		'0.0.0.0/0',
+		'::/0'
+	]) {
+		assert.throws(
+			() => readConfig({ ...env, HTTP_TRUST_PROXY: value }),
+			/HTTP_TRUST_PROXY/
+		)
+	}
+})
+
+test('atrás do proxy configurado, cada visitante tem a própria cota', async (t) => {
+	const app = await buildApp(consultas, {
+		maxRequisicoes: 1,
+		proxiesConfiaveis: ['10.0.0.2']
+	})
+	t.after(() => app.close())
+	const pelo = (remoteAddress: string, cliente: string) =>
+		app.inject({
+			url: '/api/v1/filtros',
+			remoteAddress,
+			headers: { 'x-forwarded-for': cliente }
+		})
+	assert.equal((await pelo('10.0.0.2', '203.0.113.10')).statusCode, 200)
+	assert.equal((await pelo('10.0.0.2', '203.0.113.11')).statusCode, 200)
+	assert.equal((await pelo('10.0.0.2', '203.0.113.10')).statusCode, 429)
+	// Fora do proxy, o cabeçalho é ignorado: trocá-lo não renova a cota.
+	assert.equal((await pelo('198.51.100.7', '203.0.113.20')).statusCode, 200)
+	assert.equal((await pelo('198.51.100.7', '203.0.113.21')).statusCode, 429)
 })

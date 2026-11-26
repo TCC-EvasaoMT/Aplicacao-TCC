@@ -311,7 +311,7 @@ export function GraficoDispersao({
 							Cada ponto é um curso: matrículas no eixo horizontal e{' '}
 							{rotuloTaxa.toLowerCase()} no vertical. A linha tracejada é a taxa
 							do recorte. Clique num curso, aqui ou na tabela, para filtrar o
-							resumo e a evolução; clique de novo para remover.
+							painel inteiro, em todas as abas; clique de novo para remover.
 						</Ajuda>
 					</figcaption>
 				</figure>
@@ -385,7 +385,7 @@ export function GraficoDispersao({
 											type="button"
 											className={classesLinkFiltro}
 											aria-pressed={selecionado}
-											aria-label={`Filtrar por ${rotulo}`}
+											aria-label={`Filtrar o painel inteiro por ${rotulo}`}
 											onFocus={() => setAtivo(codigo)}
 											onBlur={() => setAtivo(null)}
 											onClick={() => onSelecionar(codigo)}

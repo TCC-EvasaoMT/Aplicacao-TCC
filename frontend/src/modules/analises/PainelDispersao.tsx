@@ -165,9 +165,10 @@ export function PainelDispersao({
 				</div>
 			</div>
 			<Ajuda id="dispersao-contexto">
-				Relaciona matrículas e evasão de cada curso no ano. O ano é
-				compartilhado com o resumo; os filtros do painel também se aplicam aqui,
-				exceto o de curso, que destaca o curso escolhido.
+				Relaciona matrículas e evasão de cada curso em um único ano do Censo; a
+				aba Evolução mostra vários anos. O ano é compartilhado com o resumo; os
+				filtros do painel também se aplicam aqui, exceto o de curso, que destaca
+				o curso escolhido.
 			</Ajuda>
 			<div aria-live="polite">
 				{!podeConsultar && (

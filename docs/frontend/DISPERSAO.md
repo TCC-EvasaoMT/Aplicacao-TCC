@@ -20,7 +20,7 @@ Cada ponto é um curso, com matrículas (cursando mais concluintes) no eixo hori
 
 A forma muda junto com a cor, para a série não depender só dela. A linha tracejada é a linha de alta evasão, com o valor no rótulo. A legenda fica abaixo do gráfico, em HTML.
 
-A dica mostra o curso, as matrículas, a taxa, a base de risco e a situação. Clicar num ponto aplica o curso como filtro no resumo e na evolução; clicar de novo remove. Cada ponto tem uma área de toque de 24 px, maior que o marcador. Cursos sem matrículas ou sem a taxa escolhida não têm ponto, mas continuam na tabela.
+A dica mostra o curso, as matrículas, a taxa, a base de risco e a situação. Clicar num ponto aplica o curso como filtro no painel inteiro, em todas as abas; clicar de novo remove. Cada ponto tem uma área de toque de 24 px, maior que o marcador. Cursos sem matrículas ou sem a taxa escolhida não têm ponto, mas continuam na tabela.
 
 O hover no gráfico não muda estado, apenas exibe a dica. Qualquer nova renderização durante o hover faz o Recharts recriar o ponto sob o cursor entre `mousedown` e `mouseup`, e o navegador descarta o clique. Por isso a ligação vai num sentido só: foco ou hover numa linha da tabela destaca o ponto, mas o hover no ponto não destaca a linha.
 

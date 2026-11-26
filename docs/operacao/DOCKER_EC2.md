@@ -31,7 +31,10 @@ POSTGRES_USER=tcc_api
 POSTGRES_PASSWORD=substitua-pela-senha
 AUTH_ENABLED=false
 HTTP_RATE_LIMIT_MAX=120
+# HTTP_TRUST_PROXY=172.17.0.1
 ```
+
+Com um Nginx na frente do container, defina `HTTP_TRUST_PROXY` com o endereço dele visto pelo container; sem isso, todos os acessos pelo Nginx dividem a cota de 120 consultas por minuto. Detalhes na [proteção da API](SEGURANCA_API.md#proxy-e-limites-http). O gerador de carga que acessa a porta 3000 diretamente não precisa dessa variável, mas cada máquina geradora conta como um único IP.
 
 Se o PostgreSQL estiver em outra instância, permita a conexão na porta do banco a partir do grupo de segurança da EC2 da aplicação. Se estiver em outro container na mesma EC2, conecte a aplicação à rede Docker dele com `--network NOME_DA_REDE` e use o nome do serviço em `POSTGRES_HOST`. Dentro do container, `127.0.0.1` aponta para a própria aplicação. O serviço requer a Gold carregada e os grants descritos no [README do backend](../../backend/README.md). Para cargas reais, confirme com o responsável pelo SEDAP+ as condições de uso e armazenamento na nuvem.
 

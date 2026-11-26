@@ -90,7 +90,7 @@ export function ChipsFiltros({
 				{ano ? `Ano ${ano}` : 'Ano'}
 			</span>
 			{ativos.length === 0 ? (
-				<span className="text-panel-muted">Todos os recortes</span>
+				<span className="text-panel-muted">Todos os cursos</span>
 			) : (
 				<ul
 					className={cx(

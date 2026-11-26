@@ -45,7 +45,7 @@ Exemplo do corpo de login (valores ilustrativos):
 
 A resposta contém `access_token`, `token_type: "Bearer"`, `expires_in: 600` e `usuario: { id, email, permissoes }`. Não contém senha, hash ou token de renovação no JSON. As respostas de autenticação e acesso protegido usam `Cache-Control: no-store`.
 
-Credenciais incorretas, usuário inexistente e conta desativada recebem o mesmo `401`. O login permite cinco tentativas por minuto por IP (IPv6 /64) e por e-mail normalizado, incluindo tentativas bem-sucedidas. O excesso retorna `429` com `Retry-After`. Os contadores são locais ao processo e reiniciam com ele; o limite geral da API também se aplica. Antes de distribuir em réplicas, use armazenamento compartilhado para os limites. Atrás de um proxy, enquanto `trustProxy` estiver desativado, todos os acessos chegam com o IP do proxy e dividem o mesmo limite de login; configure os proxies confiáveis antes da implantação.
+Credenciais incorretas, usuário inexistente e conta desativada recebem o mesmo `401`. O login permite cinco tentativas por minuto por IP (IPv6 /64) e por e-mail normalizado, incluindo tentativas bem-sucedidas. O excesso retorna `429` com `Retry-After`. Os contadores são locais ao processo e reiniciam com ele; o limite geral da API também se aplica. Antes de distribuir em réplicas, use armazenamento compartilhado para os limites. Atrás de um proxy, todos os acessos chegam com o IP dele e dividem o mesmo limite de login, a menos que o proxy esteja em `HTTP_TRUST_PROXY`, como descrito na [proteção da API](../operacao/SEGURANCA_API.md#proxy-e-limites-http).
 
 ## Troca de senha
 

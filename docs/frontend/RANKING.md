@@ -23,7 +23,7 @@ Cada tabela tem posição, categoria, taxa escolhida, base de risco e qualidade.
 
 Os motivos sem posição são "base de risco abaixo do mínimo" (menos de 30), "taxa indisponível" e "categoria sem identificador". A coluna de qualidade traz em seguida os mesmos avisos do resumo para aquela categoria. As linhas "Sem registros" vêm das áreas e modalidades do catálogo de filtros que a resposta não trouxe, para a tabela cobrir todas as categorias. Acima de cada tabela, um texto informa quantas categorias há e quantas foram classificadas.
 
-O nome da categoria é um botão que aplica ou remove o filtro (`codigo_area_geral` ou `modalidade`), com `aria-pressed`, e a linha selecionada ganha o destaque das outras tabelas. O grupo sem identificador não tem botão, porque não há valor para filtrar.
+O nome da categoria é um botão que aplica ou remove o filtro (`codigo_area_geral` ou `modalidade`) no painel inteiro, em todas as abas, com `aria-pressed` e `title` "Filtrar o painel inteiro por …". A linha selecionada ganha o destaque das outras tabelas, e uma linha acima da tabela informa "Painel filtrado por Educação (01). Clique de novo no nome para remover." A ajuda do painel explica o mesmo. O grupo sem identificador não tem botão, porque não há valor para filtrar.
 
 ## Layout
 

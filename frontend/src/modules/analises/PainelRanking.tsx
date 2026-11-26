@@ -117,6 +117,7 @@ function TabelaRanking({
 	const filtro = rankings.find((r) => r.dimensao === dimensao)!.filtro
 	const destaque = selecao[filtro]
 	const dados = exibido?.dados
+	const grupoDestaque = dados?.grupos.find((g) => g.grupo.valor === destaque)
 	const semRegistro = dados
 		? categoriasSemRegistro(catalogo, dimensao, dados.grupos)
 		: []
@@ -150,6 +151,13 @@ function TabelaRanking({
 			)}
 			{dados && (
 				<div className={cx(atualizando && classes.atualizando)}>
+					{destaque && (
+						<p role="status" className="mb-2 text-sm font-semibold">
+							Painel filtrado por{' '}
+							{grupoDestaque ? rotuloCategoria(grupoDestaque.grupo) : destaque}.
+							Clique de novo no nome para remover.
+						</p>
+					)}
 					<Ajuda className="mt-0">
 						{plural(
 							dados.grupos.length + semRegistro.length,
@@ -233,7 +241,8 @@ function TabelaRanking({
 													type="button"
 													className={classesLinkFiltro}
 													aria-pressed={selecionado}
-													aria-label={`Filtrar por ${rotulo}`}
+													aria-label={`Filtrar o painel inteiro por ${rotulo}`}
+													title={`Filtrar o painel inteiro por ${rotulo}`}
 													onClick={() =>
 														onSelecaoChange(
 															alternarFiltroGrupo(selecao, dimensao, valor)
@@ -381,7 +390,9 @@ export function PainelRanking({
 				maior para a menor taxa. Taxas iguais dividem a posição (1º, 2º, 2º,
 				4º). Grupos com base de risco abaixo de 30, sem taxa ou sem
 				identificador aparecem no fim, sem posição. Os filtros do painel se
-				aplicam, exceto o da própria dimensão, que destaca a categoria.
+				aplicam, exceto o da própria dimensão, que destaca a categoria. Clicar
+				numa área ou modalidade filtra o painel inteiro, em todas as abas;
+				clique de novo para remover.
 			</Ajuda>
 			{!podeConsultar ? (
 				<p className={cx(classes.estado, 'mt-4')}>
