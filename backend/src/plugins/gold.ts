@@ -14,6 +14,11 @@ const dimensoesDoCurso = `
 export const origemPerfil = `
   FROM gold.fato_evasao_perfil f${dimensoesDoCurso}`
 
+// t é o ano do censo; ti, o ano de ingresso da turma.
+export const origemCoorte = `
+  FROM gold.fato_evasao_coorte f${dimensoesDoCurso}
+  JOIN gold.dim_tempo ti ON ti.id_tempo = f.id_tempo_ingresso`
+
 export const origem = `
   FROM gold.fato_evasao_curso f${dimensoesDoCurso}
   LEFT JOIN gold.fato_evasao_coorte ci

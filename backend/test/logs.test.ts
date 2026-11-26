@@ -20,7 +20,8 @@ test('logs mantêm correlação e resultado sem expor credenciais ou URLs recebi
 				comparacao: fail,
 				dispersao: fail,
 				ranking: fail,
-				perfil: fail
+				perfil: fail,
+				coorte: fail
 			}
 		},
 		{

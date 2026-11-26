@@ -440,3 +440,169 @@ export const perfilSchema = {
 		}
 	}
 }
+
+const numeroOuNulo = { type: 'number', nullable: true }
+const proporcao = (description: string) => ({ ...numeroOuNulo, description })
+
+export const coorteQuerySchema = {
+	type: 'object',
+	additionalProperties: false,
+	required: ['ano_ingresso'],
+	properties: {
+		ano_ingresso: {
+			...anoSchema,
+			description:
+				'Ano de ingresso da turma. Só turmas cujo ano de ingresso foi carregado como ano do censo têm tamanho inicial.'
+		},
+		...filtrosRecorteProperties
+	}
+}
+
+export const coorteSchema = {
+	type: 'object',
+	additionalProperties: false,
+	required: [
+		'filtros',
+		'tamanho_inicial',
+		'base_minima',
+		'cursos_iniciais',
+		'serie'
+	],
+	properties: {
+		filtros: {
+			type: 'object',
+			additionalProperties: false,
+			required: ['ano_ingresso'],
+			properties: coorteQuerySchema.properties
+		},
+		tamanho_inicial: {
+			...numeroOuNulo,
+			description:
+				'Vínculos da turma no censo do ano de ingresso; null sem essa linha. Não usa ingressantes_total, que tem ruído alto.'
+		},
+		base_minima: {
+			type: 'integer',
+			const: BASE_MINIMA,
+			description:
+				'Turma com tamanho inicial abaixo deste valor é grupo pequeno.'
+		},
+		cursos_iniciais: {
+			type: 'integer',
+			minimum: 0,
+			description: 'Cursos com linha no ano de ingresso: os que formam a turma.'
+		},
+		serie: {
+			type: 'array',
+			description:
+				'Um item por ano do censo carregado, do ingresso em diante; vazia sem tamanho inicial.',
+			items: {
+				type: 'object',
+				additionalProperties: false,
+				required: [
+					'ano',
+					'anos_desde_ingresso',
+					'totais',
+					'acumulados',
+					'continua',
+					'taxas',
+					'qualidade'
+				],
+				properties: {
+					ano: { type: 'integer' },
+					anos_desde_ingresso: { type: 'integer', minimum: 0 },
+					totais: {
+						type: 'object',
+						additionalProperties: false,
+						required: [
+							'vinculos_total',
+							'concluintes_total',
+							'alunos_cursando',
+							'alunos_desvinculados',
+							'alunos_transferidos',
+							'alunos_matricula_trancada',
+							'alunos_falecidos'
+						],
+						properties: {
+							vinculos_total: numeroOuNulo,
+							concluintes_total: numeroOuNulo,
+							alunos_cursando: numeroOuNulo,
+							alunos_desvinculados: numeroOuNulo,
+							alunos_transferidos: numeroOuNulo,
+							alunos_matricula_trancada: numeroOuNulo,
+							alunos_falecidos: numeroOuNulo
+						}
+					},
+					acumulados: {
+						type: 'object',
+						additionalProperties: false,
+						required: ['evadidos', 'desvinculados', 'concluintes'],
+						properties: {
+							evadidos: proporcao(
+								'Desvinculados + transferidos somados do ingresso até este ano; null a partir de um ano sem a medida.'
+							),
+							desvinculados: numeroOuNulo,
+							concluintes: numeroOuNulo
+						}
+					},
+					continua: proporcao('Cursando + trancados neste ano.'),
+					taxas: {
+						type: 'object',
+						additionalProperties: false,
+						required: [
+							'evadiu',
+							'evadiu_ies',
+							'concluiu',
+							'continua',
+							'residuo'
+						],
+						properties: {
+							evadiu: proporcao('Já evadiu do curso ÷ tamanho inicial.'),
+							evadiu_ies: proporcao(
+								'Desvinculados acumulados ÷ tamanho inicial.'
+							),
+							concluiu: proporcao('Concluintes acumulados ÷ tamanho inicial.'),
+							continua: proporcao('Cursando + trancados ÷ tamanho inicial.'),
+							residuo: proporcao(
+								'1 − (evadiu + concluiu + continua): falecidos, ruído, cursos omitidos no ano e vínculos que mudam de curso.'
+							)
+						}
+					},
+					qualidade: {
+						type: 'object',
+						additionalProperties: false,
+						required: [
+							'sem_dados',
+							'registros',
+							'cursos_iniciais_ausentes',
+							'registros_fora_da_turma',
+							'vinculos_fora_da_turma',
+							'dados_incompletos',
+							'flag_valor_negativo',
+							'flag_grupo_pequeno'
+						],
+						properties: {
+							sem_dados: { type: 'boolean' },
+							registros: { type: 'integer', minimum: 0 },
+							cursos_iniciais_ausentes: {
+								type: 'integer',
+								minimum: 0,
+								description:
+									'Cursos da turma sem linha neste ano, por exemplo omitidos pelo SEDAP+.'
+							},
+							registros_fora_da_turma: {
+								type: 'integer',
+								minimum: 0,
+								description:
+									'Linhas com o mesmo ano de ingresso em cursos sem linha inicial; não entram nas somas.'
+							},
+							vinculos_fora_da_turma: numeroOuNulo,
+							dados_incompletos: { type: 'boolean' },
+							flag_valor_negativo: { type: 'boolean' },
+							flag_grupo_pequeno: { type: 'boolean' }
+						}
+					}
+				}
+			}
+		}
+	}
+}

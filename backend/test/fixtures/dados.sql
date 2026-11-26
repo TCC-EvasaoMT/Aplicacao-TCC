@@ -35,19 +35,23 @@ VALUES
   (3, 3, 8, 2, 2, 1, '008', 20, 50, -60, 2, 12, 2, 1, 3, 0, 3, true, true);
 -- Ingressantes de cada curso: linha da coorte com ano de ingresso igual ao do censo.
 -- A coorte de 2022 observada em 2023 é um distrator e não pode ser somada.
+-- Turma de 2022: só o 001 tem a linha inicial; o 002 aparece em 2023 com o mesmo ano
+-- de ingresso e fica fora da turma; 2024 não tem linhas da turma (ano faltante).
 INSERT INTO gold.fato_evasao_coorte
   (id_tempo, id_tempo_ingresso, id_instituicao, id_curso, id_area_conhecimento, id_localidade,
-   id_oferta, codigo_curso, vinculos_total)
+   id_oferta, codigo_curso, vinculos_total, alunos_cursando, alunos_matricula_trancada,
+   alunos_desvinculados, alunos_transferidos, concluintes_total, alunos_falecidos)
 VALUES
-  (2, 2, 1, 1, 1, 1, 1, '001', 100),
-  (3, 3, 1, 1, 1, 1, 1, '001', 20),
-  (3, 2, 1, 1, 1, 1, 1, '001', 70),
-  (3, 3, 1, 2, 2, 0, 2, '002', 100),
-  (3, 3, 2, 4, 1, 2, 1, '004', 0),
-  (3, 3, 2, 5, 1, 2, 1, '005', 0.25),
-  (3, 3, 2, 6, 1, 2, 1, '006', 2),
-  (3, 3, 3, 7, 2, 2, 1, '007', 2),
-  (3, 3, 3, 8, 2, 2, 1, '008', 2);
+  (2, 2, 1, 1, 1, 1, 1, '001', 100, 90, 2, 6, 2, 0, 0),
+  (3, 3, 1, 1, 1, 1, 1, '001', 20, 18, 0, 2, 0, 0, 0),
+  (3, 2, 1, 1, 1, 1, 1, '001', 88, 70, 3, 8, -1, 8, 0),
+  (3, 2, 1, 2, 2, 0, 2, '002', 15, 10, 0, 5, 0, 0, 0),
+  (3, 3, 1, 2, 2, 0, 2, '002', 100, 92, 0, 6, 2, 0, 0),
+  (3, 3, 2, 4, 1, 2, 1, '004', 0, 0, 0, 0, 0, 0, 0),
+  (3, 3, 2, 5, 1, 2, 1, '005', 0.25, 0.25, 0, 0, 0, 0, 0),
+  (3, 3, 2, 6, 1, 2, 1, '006', 2, 2, 0, 0, 0, 0, 0),
+  (3, 3, 3, 7, 2, 2, 1, '007', 2, 2, 0, 0, 0, 0, 0),
+  (3, 3, 3, 8, 2, 2, 1, '008', 2, 2, 0, 0, 0, 0, 0);
 -- Perfil com dois fatores. O código 7 do apoio social não está no catálogo e só
 -- aparece em 2022: em 2023 é uma categoria sem registros. O 006 masculino tem
 -- desvinculados ausentes; o 007 tem grupo pequeno e ruído negativo.

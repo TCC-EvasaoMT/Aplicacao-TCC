@@ -45,7 +45,8 @@ async function servidor(
 				comparacao,
 				dispersao: unused,
 				ranking: unused,
-				perfil: unused
+				perfil: unused,
+				coorte: unused
 			}
 		},
 		{ docs }
