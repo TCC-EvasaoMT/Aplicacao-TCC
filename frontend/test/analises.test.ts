@@ -125,6 +125,8 @@ test('avisos distinguem ausência, somente docentes, base zero, ruído e grupos 
 			sem_dados: true,
 			registros_com_alunos: 0,
 			registros_sem_alunos: 0,
+			registros_sem_ingressantes: 0,
+			ingressantes_minimo: false,
 			dados_incompletos: false,
 			flag_valor_negativo: false,
 			flag_grupo_pequeno: null
@@ -163,6 +165,19 @@ test('avisos distinguem ausência, somente docentes, base zero, ruído e grupos 
 			}
 		}),
 		['Dados incompletos', 'Valores negativos na origem', 'Base inferior a 30']
+	)
+	assert.deepEqual(
+		avisosDoRecorte({
+			...ponto,
+			base_risco: 100,
+			qualidade: {
+				...ponto.qualidade,
+				sem_dados: false,
+				registros_sem_ingressantes: 2,
+				ingressantes_minimo: true
+			}
+		}),
+		['Ingressantes mínimos: 2 cursos sem ingressantes informados']
 	)
 })
 

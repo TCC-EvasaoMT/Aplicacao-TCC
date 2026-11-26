@@ -88,10 +88,17 @@ export function ResumoIndicadores({ resumo, anterior, ano }: Props) {
 		anterior === undefined
 			? undefined
 			: variacaoTaxa(resumo.taxas[chave], anterior?.taxas[chave] ?? null)
+	// Mínimos não são comparáveis: a diferença pode vir só dos cursos sem linha.
+	const minimo = (
+		r: Resumo | null | undefined,
+		chave: keyof Resumo['totais']
+	) => chave === 'ingressantes_total' && !!r?.qualidade.ingressantes_minimo
 	const totalVar = (chave: keyof Resumo['totais']) =>
 		anterior === undefined
 			? undefined
-			: variacaoTotal(resumo.totais[chave], anterior?.totais[chave] ?? null)
+			: minimo(resumo, chave) || minimo(anterior, chave)
+				? null
+				: variacaoTotal(resumo.totais[chave], anterior?.totais[chave] ?? null)
 	return (
 		<>
 			<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -135,6 +142,9 @@ export function ResumoIndicadores({ resumo, anterior, ano }: Props) {
 					>
 						<h3 className="text-panel-muted">{rotulo}</h3>
 						<p className={cx(valorDestacado, 'mt-2 text-2xl')}>
+							{minimo(resumo, chave) && resumo.totais[chave] !== null && (
+								<span className="mr-1 text-sm text-panel-muted">ao menos</span>
+							)}
 							{formatar(resumo.totais[chave])}
 						</p>
 						<LinhaVariacao
@@ -147,7 +157,8 @@ export function ResumoIndicadores({ resumo, anterior, ano }: Props) {
 			</div>
 			{(resumo.qualidade.flag_valor_negativo ||
 				resumo.qualidade.flag_grupo_pequeno ||
-				resumo.qualidade.dados_incompletos) && (
+				resumo.qualidade.dados_incompletos ||
+				resumo.qualidade.ingressantes_minimo) && (
 				<Aviso role="note">
 					<h3>Cuidados na leitura</h3>
 					{resumo.qualidade.flag_valor_negativo && (
@@ -160,6 +171,15 @@ export function ResumoIndicadores({ resumo, anterior, ano }: Props) {
 						<p className="mt-2 text-sm text-panel-warning-ink">
 							A base tem menos de 30 vínculos. As taxas devem ser interpretadas
 							com cautela.
+						</p>
+					)}
+					{resumo.qualidade.ingressantes_minimo && (
+						<p className="mt-2 text-sm text-panel-warning-ink">
+							{resumo.qualidade.registros_sem_ingressantes === 1
+								? '1 curso não tem ingressantes informados'
+								: `${resumo.qualidade.registros_sem_ingressantes} cursos não têm ingressantes informados`}
+							, por não ter ingressantes no ano ou por omissão da fonte. O total
+							de ingressantes é um mínimo.
 						</p>
 					)}
 					{resumo.qualidade.dados_incompletos && (

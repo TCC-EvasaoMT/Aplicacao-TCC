@@ -86,6 +86,10 @@ export function avisosDoRecorte(
 		avisos.push(
 			`${plural(qualidade.registros_sem_alunos, 'registro', 'registros')} sem contagens de alunos`
 		)
+	if (qualidade.ingressantes_minimo)
+		avisos.push(
+			`Ingressantes mínimos: ${plural(qualidade.registros_sem_ingressantes, 'curso', 'cursos')} sem ingressantes informados`
+		)
 	if (qualidade.dados_incompletos) avisos.push('Dados incompletos')
 	if (qualidade.flag_valor_negativo) avisos.push('Valores negativos na origem')
 	if (qualidade.flag_grupo_pequeno) avisos.push('Base inferior a 30')

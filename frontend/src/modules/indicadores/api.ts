@@ -12,6 +12,9 @@ export interface Resumo {
 	qualidade: {
 		registros_com_alunos: number
 		registros_sem_alunos: number
+		// Cursos sem a linha de ingresso; com algum, ingressantes é um mínimo.
+		registros_sem_ingressantes: number
+		ingressantes_minimo: boolean
 		sem_dados: boolean
 		dados_incompletos: boolean
 		flag_valor_negativo: boolean

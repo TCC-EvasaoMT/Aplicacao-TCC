@@ -331,7 +331,14 @@ export function GraficoComparacoes({
 									)}
 								</th>
 								{totais.map(([chave]) => (
-									<CelulaNumero key={chave} valor={grupo.totais[chave]} />
+									<CelulaNumero
+										key={chave}
+										valor={grupo.totais[chave]}
+										minimo={
+											chave === 'ingressantes_total' &&
+											grupo.qualidade.ingressantes_minimo
+										}
+									/>
 								))}
 								<CelulaNumero valor={grupo.base_risco} />
 								<CelulaTaxa valor={grupo.taxas.evasao_curso} />
