@@ -11,6 +11,7 @@ import {
 	type AgregadoGrupo,
 	type FiltrosComparacao
 } from './comparacoes.js'
+import type { AgregadoCurso, FiltrosDispersao } from './dispersao.js'
 
 export interface FiltrosEvolucao extends FiltrosRecorte {
 	ano_inicial: number
@@ -68,8 +69,26 @@ export function consultaComparacao({
 	}
 }
 
+// Um item por código de curso, sem limite: a dispersão mostra todos.
+export function consultaDispersao(filtros: FiltrosDispersao) {
+	const { values, conditions } = parametrizarFiltros(filtros)
+	return {
+		text: `SELECT c.codigo_curso AS curso_codigo,
+        CASE WHEN c.codigo_curso IS NOT NULL THEN min(c.nome_curso COLLATE "C") END AS curso_nome,
+        ${agregacaoSQL}
+      ${origem}
+      WHERE ${conditions.join(' AND ')}
+      GROUP BY c.codigo_curso
+      ORDER BY c.codigo_curso COLLATE "C" ASC NULLS LAST`,
+		values
+	}
+}
+
 export function criarConsultasAnalises(pool: Pool) {
 	return {
+		async dispersao(filtros: FiltrosDispersao): Promise<AgregadoCurso[]> {
+			return (await pool.query<AgregadoCurso>(consultaDispersao(filtros))).rows
+		},
 		async comparacao(filtros: FiltrosComparacao): Promise<AgregadoGrupo[]> {
 			return (await pool.query<AgregadoGrupo>(consultaComparacao(filtros))).rows
 		},

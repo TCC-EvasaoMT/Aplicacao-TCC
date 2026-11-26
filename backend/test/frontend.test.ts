@@ -8,6 +8,7 @@ import { buildApp, type Dependencias } from '../src/app.js'
 const consultas: Dependencias = {
 	analises: {
 		comparacao: async () => [],
+		dispersao: async () => [],
 		async evolucao() {
 			return []
 		}

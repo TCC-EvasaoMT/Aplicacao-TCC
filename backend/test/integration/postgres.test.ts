@@ -406,6 +406,67 @@ test(
 		await testarComparacoes(t, server, db)
 
 		await t.test(
+			'dispersão repete o resumo de cada curso e calcula a referência sem cursos sem taxa',
+			async () => {
+				const dispersao = async (query: string) => {
+					const response = await server.inject(
+						`/api/v1/analises/dispersao?${query}`
+					)
+					assert.equal(response.statusCode, 200, response.body)
+					return response.json()
+				}
+				const todos = await dispersao('ano=2023')
+				assert.deepEqual(
+					todos.cursos.map(
+						(c: { curso: { codigo: string } }) => c.curso.codigo
+					),
+					['001', '002', '003', '004', '005', '006', '007', '008']
+				)
+				for (const { curso, zona_critica: _, ...ponto } of todos.cursos) {
+					const { filtros: __, ...resumoCurso } = await resumo({
+						codigo_curso: curso.codigo
+					})
+					assert.deepEqual(ponto, resumoCurso, curso.codigo)
+				}
+				const ref = todos.referencias
+				assert.equal(ref.alta_evasao.evasao_curso, 248.75 / 1060.5)
+				assert.equal(ref.alta_evasao.evasao_ies, 193.5 / 1060.5)
+				assert.deepEqual(ref.cursos_fora_da_referencia, {
+					evasao_curso: 3,
+					evasao_ies: 3
+				})
+				const zona = (resultado: {
+					cursos: {
+						curso: { codigo: string }
+						zona_critica: { evasao_curso: boolean }
+					}[]
+				}) =>
+					resultado.cursos
+						.filter((c) => c.zona_critica.evasao_curso)
+						.map((c) => c.curso.codigo)
+				// O 007 tem a mesma taxa do 002, mas base 20.
+				assert.deepEqual(zona(todos), ['002'])
+				const federal = await dispersao(
+					'ano=2023&categoria_administrativa=P%C3%BAblica+Federal'
+				)
+				assert.equal(federal.referencias.alta_evasao.evasao_curso, 0.24)
+				assert.deepEqual(zona(federal), ['002'])
+				const presencialEducacao = await dispersao(
+					'ano=2023&codigo_area_geral=01&modalidade=Presencial'
+				)
+				assert.deepEqual(
+					presencialEducacao.cursos.map(
+						(c: { curso: { codigo: string } }) => c.curso.codigo
+					),
+					['001', '004', '005', '006']
+				)
+				const vazio = await dispersao('ano=1999')
+				assert.deepEqual(vazio.cursos, [])
+				assert.equal(vazio.referencias.alta_evasao.evasao_curso, null)
+			}
+		)
+
+		await t.test(
 			'reconstrução altera IDs; reaplicar grants recupera consultas por código',
 			async () => {
 				const antes = await resumo({ codigo_curso: '001' })
