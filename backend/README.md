@@ -29,7 +29,7 @@ pnpm build
 pnpm start
 ```
 
-O servidor escuta exclusivamente em `127.0.0.1`. `pnpm start` serve também `frontend/dist` em `/`. Swagger só é registrado com `NODE_ENV=development`, inclusive na versão compilada. `NODE_ENV=production` desativa `/docs`. A autenticação administrativa é opcional (`AUTH_ENABLED`); a implantação pública permanece pendente.
+O servidor escuta em `127.0.0.1` por padrão. A imagem Docker define `HTTP_HOST=0.0.0.0` para receber tráfego da porta publicada pelo Docker. `pnpm start` serve também `frontend/dist` em `/`. Swagger só é registrado com `NODE_ENV=development`. A autenticação administrativa é opcional (`AUTH_ENABLED`). Consulte o [guia da EC2](../docs/operacao/DOCKER_EC2.md).
 
 | Variável                                        | Uso                                                                                      |
 | ----------------------------------------------- | ---------------------------------------------------------------------------------------- |

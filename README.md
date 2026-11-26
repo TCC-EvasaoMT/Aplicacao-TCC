@@ -4,6 +4,8 @@ Monorepo com React, TypeScript e Fastify. O frontend consulta a API, e o backend
 
 ## Organização
 
+Para executar a aplicação em container e preparar a EC2 para testes de carga, consulte o [guia da imagem Docker](docs/operacao/DOCKER_EC2.md).
+
 ```text
 frontend/              React e Vite; resumo, filtros, evolução, comparações, ranking, dispersão e login
 backend/               API Fastify, regras de cálculo e acesso à Gold
