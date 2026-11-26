@@ -35,6 +35,19 @@ HTTP_RATE_LIMIT_MAX=120
 
 Se o PostgreSQL estiver em outra instância, permita a conexão na porta do banco a partir do grupo de segurança da EC2 da aplicação. Se estiver em outro container na mesma EC2, conecte a aplicação à rede Docker dele com `--network NOME_DA_REDE` e use o nome do serviço em `POSTGRES_HOST`. Dentro do container, `127.0.0.1` aponta para a própria aplicação. O serviço requer a Gold carregada e os grants descritos no [README do backend](../../backend/README.md). Para cargas reais, confirme com o responsável pelo SEDAP+ as condições de uso e armazenamento na nuvem.
 
+## Autenticação administrativa (opcional)
+
+O ensaio do painel público dispensa autenticação. A imagem define `NODE_ENV=production`; com `AUTH_ENABLED=true`, `AUTH_ORIGIN` precisa ser uma origem `https://` e o cookie de sessão recebe `Secure`. Com `http://IP:3000`, o servidor não inicia. Para medir rotas autenticadas, coloque um ingresso HTTPS na frente do container e use a origem dele.
+
+As credenciais de manutenção ficam em outro arquivo, por exemplo `~/evasao-mt-manutencao.env`, com `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_DB`, `APP_MIGRATION_USER` e `APP_MIGRATION_PASSWORD`. Não o use no container do servidor. A imagem traz as migrações e os comandos compilados:
+
+```sh
+docker run --rm --env-file "$HOME/evasao-mt-manutencao.env" evasao-mt:ensaio-01 node dist/database/cli.js migrar
+docker run --rm -it --env-file "$HOME/evasao-mt-manutencao.env" evasao-mt:ensaio-01 node dist/database/cli.js criar-admin admin@example.com
+```
+
+Entre os dois comandos, aplique `backend/sql/permissoes-app.sql` com `psql` a partir de um checkout, como descrito na [preparação do schema app](../arquitetura/BANCO_APLICACAO.md). No arquivo do servidor, acrescente `AUTH_ENABLED=true`, `AUTH_JWT_SECRET`, `AUTH_ORIGIN`, `APP_POSTGRES_USER` e `APP_POSTGRES_PASSWORD`.
+
 ## Iniciar e verificar
 
 Defina o endereço IPv4 **privado da interface da EC2** para publicar a porta. No grupo de segurança, permita TCP 3000 a partir do grupo de segurança da máquina geradora de carga na VPC. Para uma conferência apenas na própria instância, use `IP_APP=127.0.0.1`.
@@ -49,7 +62,7 @@ curl -fsS "http://${IP_APP}:3000/api/v1/filtros"
 docker logs --tail 30 evasao-mt
 ```
 
-O primeiro endereço retorna `{"status":"ok"}` quando a API consegue ler a Gold. Um `503` indica que é preciso conferir rede, conexão e permissões antes de medir. Abra `/` para verificar o painel. A imagem define `NODE_ENV=production` e executa o build do React.
+O primeiro endereço retorna `{"status":"ok"}` quando a API consegue ler a Gold. Um `503` indica que é preciso conferir rede, conexão e permissões antes de medir. O Docker consulta `/health` a cada 30 segundos, e `docker ps` mostra `healthy` ou `unhealthy`. Abra `/` para verificar o painel. A imagem define `NODE_ENV=production` e executa o build do React.
 
 ## Registrar o ensaio
 
