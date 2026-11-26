@@ -21,7 +21,10 @@ COPY --from=production-deps /app/node_modules /app/node_modules
 COPY --from=production-deps /app/backend/node_modules ./node_modules
 COPY --from=build /app/backend/package.json ./
 COPY --from=build /app/backend/dist ./dist
+COPY --from=build /app/backend/sql/migrations ./sql/migrations
 COPY --from=build /app/frontend/dist /app/frontend/dist
 USER node
 EXPOSE 3000
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+	CMD ["node", "-e", "fetch('http://127.0.0.1:' + process.env.PORT + '/health').then((r) => process.exit(r.ok ? 0 : 1), () => process.exit(1))"]
 CMD ["node", "dist/server.js", "--serve-frontend"]

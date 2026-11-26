@@ -2,12 +2,12 @@
 !package.json
 !pnpm-lock.yaml
 !pnpm-workspace.yaml
-!backend/
 !backend/package.json
 !backend/tsconfig*.json
+!backend/sql/migrations/
+!backend/sql/migrations/**
 !backend/src/
 !backend/src/**
-!frontend/
 !frontend/package.json
 !frontend/tsconfig.json
 !frontend/vite.config.ts
