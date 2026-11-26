@@ -197,6 +197,8 @@ O módulo `analises` oferece a API de evolução temporal e utiliza o contrato p
 
 No frontend, `modules/autenticacao` reúne o login, a restauração e a renovação da sessão e a alteração de senha, com controles no cabeçalho. Não importa outros módulos do painel. Veja [login e sessão no painel](../frontend/AUTENTICACAO.md).
 
+A dispersão por curso (RF10) tem API e aba própria no frontend: `PainelDispersao` usa o ano e os filtros do painel, omite o filtro de curso para manter todos os cursos visíveis e alterna a taxa no eixo vertical. Veja [dispersão na interface](../frontend/DISPERSAO.md).
+
 Comparações entre cursos e grupos institucionais estão implementadas na API e no frontend de análises. `PainelComparacoes` recebe catálogo, filtros e ano do resumo; mantém rascunho e seleção aplicada próprios, consulta cancelável, gráfico e tabela. O frontend omite o filtro da dimensão agrupada para manter os outros grupos visíveis; essa regra não modifica a API. Veja [comparações na interface](../frontend/COMPARACOES.md).
 
 A Gold consumida não fornece nomes ou siglas de IES nem identificadores institucionais permanentes para comparação individual. Administração do ETL depende de um contrato externo para execuções e reprocessamentos. A proteção HTTP, os logs e a autenticação já estão na aplicação; as rotas do ETL e a integração com monitoramento externo estão pendentes. Os módulos futuros serão criados junto de suas funcionalidades.
