@@ -76,9 +76,17 @@ export function anoNoClique(
 	)
 }
 
-export function avisosDoRecorte(
-	ponto: Pick<Resumo, 'base_risco' | 'qualidade'>
-): string[] {
+type QualidadeSemIngressantes = Omit<
+	Resumo['qualidade'],
+	'ingressantes_minimo' | 'registros_sem_ingressantes'
+> &
+	Partial<Resumo['qualidade']>
+
+// Aceita também a qualidade do perfil, que não tem ingressantes.
+export function avisosDoRecorte(ponto: {
+	base_risco: number | null
+	qualidade: QualidadeSemIngressantes
+}): string[] {
 	const avisos: string[] = []
 	const qualidade = ponto.qualidade
 	if (qualidade.sem_dados) avisos.push('Sem dados de alunos')
@@ -88,7 +96,7 @@ export function avisosDoRecorte(
 		)
 	if (qualidade.ingressantes_minimo)
 		avisos.push(
-			`Ingressantes mínimos: ${plural(qualidade.registros_sem_ingressantes, 'curso', 'cursos')} sem ingressantes informados`
+			`Ingressantes mínimos: ${plural(qualidade.registros_sem_ingressantes ?? 0, 'curso', 'cursos')} sem ingressantes informados`
 		)
 	if (qualidade.dados_incompletos) avisos.push('Dados incompletos')
 	if (qualidade.flag_valor_negativo) avisos.push('Valores negativos na origem')

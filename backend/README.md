@@ -83,7 +83,7 @@ Conceda `CONNECT` ao banco se ele não permitir conexões por padrão. Com o cli
 psql -h 127.0.0.1 -U SEU_USUARIO_ADMIN -d SEU_BANCO -v ON_ERROR_STOP=1 -v api_role=tcc_api -f sql/permissoes.sql
 ```
 
-Sem cliente local, abra o `psql` dentro do container e execute o conteúdo de `sql/permissoes.sql` depois de definir `\set api_role tcc_api`. O script concede `USAGE` no schema e `SELECT` apenas nas oito tabelas utilizadas pela API: as duas fatos de alunos por curso e por coorte e as seis dimensões. Não concede acesso à Bronze, Silver nem escrita na Gold. Ele pressupõe uma role nova: não remove permissões antigas de usuários já existentes.
+Sem cliente local, abra o `psql` dentro do container e execute o conteúdo de `sql/permissoes.sql` depois de definir `\set api_role tcc_api`. O script concede `USAGE` no schema e `SELECT` apenas nas dez tabelas utilizadas pela API: as três fatos de alunos (por curso, por coorte e por perfil), as seis dimensões do curso e a `dim_perfil`. Não concede acesso à Bronze, Silver nem escrita na Gold. Ele pressupõe uma role nova: não remove permissões antigas de usuários já existentes.
 
 **Reaplique `sql/permissoes.sql` após cada transformação.** A pipeline executa `DROP SCHEMA gold CASCADE` e recria as tabelas, removendo os grants anteriores. Durante carga, bloqueio prolongado ou ausência de permissões, as rotas podem responder `503`; depois da reaplicação, o mesmo processo da API volta a consultar. Não há migrações ou inicialização automática da Gold no backend.
 
@@ -98,6 +98,7 @@ Sem cliente local, abra o `psql` dentro do container e execute o conteúdo de `s
 | `GET /api/v1/analises/comparacoes`       | Totais, taxas e qualidade por grupo no mesmo ano; exige `ano` e `agrupar_por`. Até 20 grupos, com seleção opcional e aviso de truncamento.     |
 | `GET /api/v1/analises/dispersao`         | Todos os cursos do ano com matrículas, taxas e qualidade, a linha de alta evasão de cada taxa e a zona crítica; exige `ano`.                   |
 | `GET /api/v1/analises/ranking`           | Todas as áreas gerais ou modalidades do ano, ordenadas pela taxa escolhida, com empates, bases pequenas e ausências; exige `ano` e `dimensao`. |
+| `GET /api/v1/analises/perfil`            | Taxas de evasão por categoria de um dos 12 fatores de perfil, na ordem do catálogo, com o conjunto do fator; exige `ano` e `fator`.            |
 | `POST /api/v1/autenticacao/login`        | Inicia a sessão; retorna JWT e cookie de renovação. Exige proteção CSRF.                                                                       |
 | `POST /api/v1/autenticacao/renovar`      | Rotaciona o cookie e emite novo JWT. Exige proteção CSRF.                                                                                      |
 | `POST /api/v1/autenticacao/logout`       | Revoga a sessão do cookie. Exige proteção CSRF.                                                                                                |

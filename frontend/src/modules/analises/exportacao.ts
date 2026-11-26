@@ -1,4 +1,5 @@
 import type {
+	CategoriaPerfil,
 	CursoDispersao,
 	GrupoComparacao,
 	GrupoRanking,
@@ -129,6 +130,53 @@ export function csvRanking(grupos: GrupoRanking[], recorte: string) {
 			grupo.grupo.valor,
 			grupo.grupo.nome,
 			...medidas(grupo, recorte)
+		])
+	)
+}
+
+// Perfil: sem ingressantes, que a fato de perfil não tem. A última linha é o
+// conjunto do fator.
+export function csvPerfil(
+	fator: string,
+	categorias: CategoriaPerfil[],
+	recorte: string
+) {
+	return gerarCsv(
+		[
+			'Fator',
+			'Código da categoria',
+			'Categoria',
+			'Vínculos',
+			'Matrículas',
+			'Concluintes',
+			'Base de risco',
+			'Evasão do curso (proporção)',
+			'Evasão da instituição (proporção)',
+			'Sem dados de alunos',
+			'Registros com alunos',
+			'Registros sem alunos',
+			'Dados incompletos',
+			'Valores negativos na origem',
+			'Base inferior a 30',
+			'Recorte'
+		],
+		categorias.map((c) => [
+			fator,
+			c.categoria.codigo,
+			c.categoria.nome,
+			c.totais.vinculos_total,
+			c.totais.matriculas_total,
+			c.totais.concluintes_total,
+			c.base_risco,
+			c.taxas.evasao_curso,
+			c.taxas.evasao_ies,
+			c.qualidade.sem_dados,
+			c.qualidade.registros_com_alunos,
+			c.qualidade.registros_sem_alunos,
+			c.qualidade.dados_incompletos,
+			c.qualidade.flag_valor_negativo,
+			c.qualidade.flag_grupo_pequeno,
+			recorte
 		])
 	)
 }

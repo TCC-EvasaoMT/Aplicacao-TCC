@@ -7,6 +7,7 @@ import { MAX_ANOS } from './evolucao.js'
 import { agrupamentos, MAX_GRUPOS } from './comparacoes.js'
 import { BASE_MINIMA, taxasDispersao } from './dispersao.js'
 import { dimensoesRanking, situacoes, taxasRanking } from './ranking.js'
+import { codigosFatores, fatoresPerfil } from './perfil.js'
 
 export const comparacaoQuerySchema = {
 	type: 'object',
@@ -325,6 +326,115 @@ export const rankingSchema = {
 						type: 'boolean',
 						description: 'Divide a posição com outro grupo de mesma taxa.'
 					}
+				}
+			}
+		}
+	}
+}
+
+export const perfilQuerySchema = {
+	type: 'object',
+	additionalProperties: false,
+	required: ['ano', 'fator'],
+	properties: {
+		ano: anoSchema,
+		fator: {
+			type: 'string',
+			enum: codigosFatores,
+			description: `Um dos 12 fatores de prioridade 1: ${codigosFatores.map((c) => `${c} (${fatoresPerfil[c].nome})`).join('; ')}.`
+		},
+		...filtrosRecorteProperties
+	}
+}
+
+// Resumo de uma categoria de perfil: o do resumo, sem ingressantes, que a fato
+// de perfil não tem.
+const { totais: totaisResumo, qualidade: qualidadeResumo } =
+	resultadoResumoProperties
+const { ingressantes_total: _ingressantes, ...totaisPerfil } =
+	totaisResumo.properties
+const {
+	registros_sem_ingressantes: _registros,
+	ingressantes_minimo: _minimo,
+	...qualidadePerfil
+} = qualidadeResumo.properties
+const resumoPerfilProperties = {
+	...resultadoResumoProperties,
+	totais: {
+		...totaisResumo,
+		required: Object.keys(totaisPerfil),
+		properties: totaisPerfil
+	},
+	qualidade: {
+		...qualidadeResumo,
+		required: Object.keys(qualidadePerfil),
+		properties: qualidadePerfil
+	}
+}
+const resumoPerfil = {
+	type: 'object',
+	additionalProperties: false,
+	required: ['totais', 'base_risco', 'taxas', 'qualidade'],
+	properties: resumoPerfilProperties
+}
+
+export const perfilSchema = {
+	type: 'object',
+	additionalProperties: false,
+	required: ['filtros', 'fator', 'base_minima', 'conjunto', 'categorias'],
+	properties: {
+		filtros: {
+			type: 'object',
+			additionalProperties: false,
+			required: ['ano', 'fator'],
+			properties: perfilQuerySchema.properties
+		},
+		fator: {
+			type: 'object',
+			additionalProperties: false,
+			required: ['codigo', 'nome', 'grupo'],
+			properties: {
+				codigo: { type: 'string', enum: codigosFatores },
+				nome: { type: 'string' },
+				grupo: { type: 'string' }
+			}
+		},
+		base_minima: {
+			type: 'integer',
+			const: BASE_MINIMA,
+			description:
+				'Base de risco abaixo da qual a categoria é grupo pequeno; mesmo limite de flag_grupo_pequeno.'
+		},
+		conjunto: {
+			...resumoPerfil,
+			nullable: true,
+			description:
+				'Todas as categorias do fator somadas antes de dividir; null se o fator não está no catálogo. Pode diferir do resumo: cada fator é uma consulta própria ao SEDAP+, com ruído e grupos omitidos.'
+		},
+		categorias: {
+			type: 'array',
+			description:
+				'Todas as categorias do fator em gold.dim_perfil, na ordem do catálogo, inclusive as sem registros no recorte (sem_dados) e os códigos fora do catálogo.',
+			items: {
+				type: 'object',
+				additionalProperties: false,
+				required: ['categoria', ...resumoPerfil.required],
+				properties: {
+					categoria: {
+						type: 'object',
+						additionalProperties: false,
+						required: ['codigo', 'nome', 'ordem'],
+						properties: {
+							codigo: {
+								type: 'string',
+								nullable: true,
+								description: 'Código bruto no SEDAP+; null é o valor vazio.'
+							},
+							nome: { type: 'string' },
+							ordem: { type: 'integer', nullable: true }
+						}
+					},
+					...resumoPerfilProperties
 				}
 			}
 		}

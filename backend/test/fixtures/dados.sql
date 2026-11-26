@@ -48,3 +48,31 @@ VALUES
   (3, 3, 2, 6, 1, 2, 1, '006', 2),
   (3, 3, 3, 7, 2, 2, 1, '007', 2),
   (3, 3, 3, 8, 2, 2, 1, '008', 2);
+-- Perfil com dois fatores. O código 7 do apoio social não está no catálogo e só
+-- aparece em 2022: em 2023 é uma categoria sem registros. O 006 masculino tem
+-- desvinculados ausentes; o 007 tem grupo pequeno e ruído negativo.
+INSERT INTO gold.dim_perfil (id_perfil, grupo_fator, fator, categoria, codigo_categoria, ordem_categoria, variavel_origem)
+VALUES (1, 'Demográfico', 'Sexo', 'Feminino', '1', 1, 'SUP_ALUNO.TP_SEXO'),
+  (2, 'Demográfico', 'Sexo', 'Masculino', '2', 2, 'SUP_ALUNO.TP_SEXO'),
+  (3, 'Permanência', 'Recebe apoio social', 'Sim', '1', 1, 'SUP_ALUNO.IN_APOIO_SOCIAL'),
+  (4, 'Permanência', 'Recebe apoio social', 'Não', '0', 2, 'SUP_ALUNO.IN_APOIO_SOCIAL'),
+  (5, 'Permanência', 'Recebe apoio social', 'Código 7 não previsto no catálogo', '7', 99, 'SUP_ALUNO.IN_APOIO_SOCIAL');
+INSERT INTO gold.fato_evasao_perfil
+  (id_tempo, id_instituicao, id_curso, id_area_conhecimento, id_localidade, id_oferta, id_perfil, codigo_curso,
+   vinculos_total, alunos_cursando, alunos_matricula_trancada, alunos_desvinculados, alunos_transferidos,
+   concluintes_total, alunos_falecidos, flag_valor_negativo, flag_grupo_pequeno)
+VALUES
+  (3, 1, 1, 1, 1, 1, 1, '001', 60, 30, 9, 6, 3, 12, 0, false, false),
+  (3, 1, 1, 1, 1, 1, 2, '001', 40, 20, 6, 4, 2, 8, 0, false, false),
+  (3, 1, 2, 2, 0, 2, 1, '002', 500, 280, 40, 90, 20, 70, 0, false, false),
+  (3, 1, 2, 2, 0, 2, 2, '002', 400, 220, 35, 90, 25, 30, 0, false, false),
+  (3, 3, 7, 2, 2, 1, 1, '007', 12, 6, 2, 2, 1, 1, 0, false, true),
+  (3, 3, 7, 2, 2, 1, 2, '007', 8, 4, 1, 2, 0, 1, 0, false, true),
+  (3, 2, 6, 1, 2, 1, 2, '006', 30, 15, 4, NULL, 1, 5, 0, false, false),
+  (3, 1, 1, 1, 1, 1, 3, '001', 10, 7, 1, 0, 0, 2, 0, false, true),
+  (3, 1, 1, 1, 1, 1, 4, '001', 90, 43, 14, 10, 5, 18, 0, false, false),
+  (3, 1, 2, 2, 0, 2, 3, '002', 100, 80, 5, 1, 0, 14, 0, false, false),
+  (3, 1, 2, 2, 0, 2, 4, '002', 800, 420, 70, 179, 45, 86, 0, false, false),
+  (3, 3, 7, 2, 2, 1, 3, '007', 2.5, 3, 0, -0.5, 0, 0, 0, true, true),
+  (3, 3, 7, 2, 2, 1, 4, '007', 17.5, 7, 3, 4.5, 1, 2, 0, false, true),
+  (2, 1, 1, 1, 1, 1, 5, '001', 5, 5, 0, 0, 0, 0, 0, false, true);

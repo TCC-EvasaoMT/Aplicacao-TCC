@@ -10,6 +10,7 @@ const consultas: Dependencias = {
 		comparacao: async () => [],
 		dispersao: async () => [],
 		ranking: async () => [],
+		perfil: async () => [],
 		async evolucao() {
 			return []
 		}

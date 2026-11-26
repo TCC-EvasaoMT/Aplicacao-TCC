@@ -58,6 +58,32 @@ export function consultarRanking(query: string, signal: AbortSignal) {
 	return consultar<Ranking>(`/api/v1/analises/ranking?${query}`, signal)
 }
 
+// Resumo de uma categoria de perfil: a fato de perfil não tem ingressantes.
+export interface ResumoPerfil {
+	base_risco: number | null
+	totais: Omit<Resumo['totais'], 'ingressantes_total'>
+	taxas: Resumo['taxas']
+	qualidade: Omit<
+		Resumo['qualidade'],
+		'ingressantes_minimo' | 'registros_sem_ingressantes'
+	>
+}
+
+export interface CategoriaPerfil extends ResumoPerfil {
+	categoria: { codigo: string | null; nome: string; ordem: number | null }
+}
+
+export interface Perfil {
+	fator: { codigo: string; nome: string; grupo: string }
+	base_minima: number
+	conjunto: ResumoPerfil | null
+	categorias: CategoriaPerfil[]
+}
+
+export function consultarPerfil(query: string, signal: AbortSignal) {
+	return consultar<Perfil>(`/api/v1/analises/perfil?${query}`, signal)
+}
+
 export interface PontoTemporal extends Resumo {
 	ano: number
 }

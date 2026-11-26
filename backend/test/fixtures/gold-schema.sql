@@ -116,3 +116,37 @@ CREATE TABLE gold.fato_evasao_coorte (
     flag_grupo_pequeno         boolean,
     PRIMARY KEY (id_tempo, id_tempo_ingresso, id_curso)
 );
+
+-- Perfil: uma linha por curso, categoria de um fator e ano. Cada fator soma o
+-- total de vínculos; fatores diferentes nunca são somados entre si.
+CREATE TABLE gold.dim_perfil (
+    id_perfil         integer PRIMARY KEY,
+    grupo_fator       text,
+    fator             text,
+    categoria         text,
+    codigo_categoria  text,
+    ordem_categoria   integer,
+    variavel_origem   text,
+    UNIQUE NULLS NOT DISTINCT (fator, codigo_categoria)
+);
+
+CREATE TABLE gold.fato_evasao_perfil (
+    id_tempo                   integer NOT NULL REFERENCES gold.dim_tempo,
+    id_instituicao             integer NOT NULL REFERENCES gold.dim_instituicao,
+    id_curso                   integer NOT NULL REFERENCES gold.dim_curso,
+    id_area_conhecimento       integer NOT NULL REFERENCES gold.dim_area_conhecimento,
+    id_localidade              integer NOT NULL REFERENCES gold.dim_localidade,
+    id_oferta                  integer NOT NULL REFERENCES gold.dim_oferta,
+    id_perfil                  integer NOT NULL REFERENCES gold.dim_perfil,
+    codigo_curso               text NOT NULL,
+    vinculos_total             numeric,
+    alunos_cursando            numeric,
+    alunos_matricula_trancada  numeric,
+    alunos_desvinculados       numeric,
+    alunos_transferidos        numeric,
+    concluintes_total          numeric,
+    alunos_falecidos           numeric,
+    flag_valor_negativo        boolean,
+    flag_grupo_pequeno         boolean,
+    PRIMARY KEY (id_tempo, id_curso, id_perfil)
+);

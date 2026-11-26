@@ -1,11 +1,17 @@
 import type { Pool } from 'pg'
 import {
 	agregacaoSQL,
+	medidas,
 	parametrizarFiltros,
 	type Agregado,
 	type FiltrosRecorte
 } from '../indicadores/index.js'
-import { origem } from '../../plugins/gold.js'
+import { origem, origemPerfil } from '../../plugins/gold.js'
+import {
+	fatoresPerfil,
+	type AgregadoPerfil,
+	type FiltrosPerfil
+} from './perfil.js'
 import {
 	agrupamentos,
 	type AgregadoGrupo,
@@ -111,8 +117,51 @@ export function consultaRanking({
 	}
 }
 
+// Mesma regra de agregacaoSQL sobre a fato de perfil: ausência parcial não
+// vira soma completa, e só as medidas exibidas contam como ruído negativo.
+const somasPerfil = medidas.map(
+	(medida) => `
+  CASE WHEN count(r.${medida}) FILTER (WHERE r.vinculos_total IS NOT NULL) = count(r.vinculos_total)
+    THEN (sum(r.${medida}) FILTER (WHERE r.vinculos_total IS NOT NULL))::text
+  END AS ${medida}`
+)
+const listaPerfil = medidas.map((m) => `r.${m}`).join(', ')
+
+// Todas as categorias do fator no catálogo, inclusive as sem registros no
+// recorte (LEFT JOIN), e o conjunto do fator na mesma consulta (GROUPING SETS).
+// Um fator por consulta: o mesmo vínculo aparece uma vez em cada fator.
+export function consultaPerfil({ fator, ...filtros }: FiltrosPerfil) {
+	const nome = fatoresPerfil[fator]?.nome
+	if (!nome) throw new Error('Fator inválido')
+	const { values, conditions } = parametrizarFiltros(filtros)
+	return {
+		text: `WITH recorte AS (
+        SELECT f.* ${origemPerfil}
+        WHERE ${conditions.join(' AND ')}
+      )
+      SELECT grouping(p.id_perfil) = 1 AS conjunto,
+        p.codigo_categoria, p.categoria, p.ordem_categoria,
+        ${somasPerfil.join(',')},
+        NULL::text AS ingressantes_total,
+        0 AS registros_sem_ingressantes,
+        count(r.vinculos_total)::integer AS registros_com_alunos,
+        count(r.id_perfil) FILTER (WHERE r.vinculos_total IS NULL)::integer AS registros_sem_alunos,
+        coalesce(bool_or(r.vinculos_total IS NOT NULL AND least(${listaPerfil}) < 0), false) AS flag_valor_negativo,
+        coalesce(bool_or(r.vinculos_total IS NOT NULL AND num_nonnulls(${listaPerfil}) < ${medidas.length}), false) AS dados_incompletos
+      FROM gold.dim_perfil p
+      LEFT JOIN recorte r USING (id_perfil)
+      WHERE p.fator = $${values.length + 1}
+      GROUP BY GROUPING SETS ((p.id_perfil, p.codigo_categoria, p.categoria, p.ordem_categoria), ())
+      ORDER BY conjunto, p.ordem_categoria, p.codigo_categoria COLLATE "C"`,
+		values: [...values, nome]
+	}
+}
+
 export function criarConsultasAnalises(pool: Pool) {
 	return {
+		async perfil(filtros: FiltrosPerfil): Promise<AgregadoPerfil[]> {
+			return (await pool.query<AgregadoPerfil>(consultaPerfil(filtros))).rows
+		},
 		async ranking(filtros: FiltrosRanking): Promise<AgregadoCategoria[]> {
 			return (await pool.query<AgregadoCategoria>(consultaRanking(filtros)))
 				.rows

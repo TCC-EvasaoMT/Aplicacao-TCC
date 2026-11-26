@@ -5,6 +5,7 @@ import {
 	PainelComparacoes,
 	PainelDispersao,
 	PainelEvolucao,
+	PainelPerfil,
 	PainelRanking
 } from '../analises'
 import { Carregando } from '../../lib/Estados'
@@ -376,6 +377,15 @@ export function PainelIndicadores({ aba }: { aba: AbaPainel }) {
 						</div>
 					)}
 				</section>
+				<PainelPerfil
+					selecao={selecao}
+					atualizacao={tentativa}
+					podeConsultar={
+						!carregandoCatalogo &&
+						!erroCatalogo &&
+						!!catalogo?.anos.includes(Number(selecao.ano))
+					}
+				/>
 			</div>
 			{/* Os painéis ficam montados: trocar de aba não refaz consultas
 			    nem perde o rascunho da comparação. */}
