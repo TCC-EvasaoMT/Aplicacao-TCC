@@ -12,6 +12,11 @@ import {
 	type FiltrosComparacao
 } from './comparacoes.js'
 import type { AgregadoCurso, FiltrosDispersao } from './dispersao.js'
+import {
+	dimensoesRanking,
+	type AgregadoCategoria,
+	type FiltrosRanking
+} from './ranking.js'
 
 export interface FiltrosEvolucao extends FiltrosRecorte {
 	ano_inicial: number
@@ -84,8 +89,34 @@ export function consultaDispersao(filtros: FiltrosDispersao) {
 	}
 }
 
+// Todas as categorias da dimensão, sem limite; a ordem final é do ranking.
+export function consultaRanking({
+	dimensao,
+	taxa: _taxa,
+	...filtros
+}: FiltrosRanking) {
+	// Só área e modalidade: agrupamentos também tem as outras dimensões da
+	// comparação.
+	if (!dimensoesRanking.includes(dimensao)) throw new Error('Dimensão inválida')
+	const { valor, nome } = agrupamentos[dimensao]
+	const { values, conditions } = parametrizarFiltros(filtros)
+	return {
+		text: `SELECT ${valor} AS grupo_valor,
+        CASE WHEN ${valor} IS NOT NULL THEN min(${nome} COLLATE "C") END AS grupo_nome,
+        ${agregacaoSQL}
+      ${origem}
+      WHERE ${conditions.join(' AND ')}
+      GROUP BY ${valor}`,
+		values
+	}
+}
+
 export function criarConsultasAnalises(pool: Pool) {
 	return {
+		async ranking(filtros: FiltrosRanking): Promise<AgregadoCategoria[]> {
+			return (await pool.query<AgregadoCategoria>(consultaRanking(filtros)))
+				.rows
+		},
 		async dispersao(filtros: FiltrosDispersao): Promise<AgregadoCurso[]> {
 			return (await pool.query<AgregadoCurso>(consultaDispersao(filtros))).rows
 		},

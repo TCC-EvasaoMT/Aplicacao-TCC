@@ -40,7 +40,12 @@ async function servidor(
 			health: unused,
 			indicadores: { resumo: unused },
 			catalogos: { filtros: unused },
-			analises: { evolucao: unused, comparacao, dispersao: unused }
+			analises: {
+				evolucao: unused,
+				comparacao,
+				dispersao: unused,
+				ranking: unused
+			}
 		},
 		{ docs }
 	)
