@@ -89,6 +89,7 @@ Sem cliente local, abra o `psql` dentro do container e execute o conteúdo de `s
 | `GET /api/v1/indicadores/resumo`         | Totais, base de risco, taxas e qualidade; exige `ano`.                                                                                     |
 | `GET /api/v1/analises/evolucao-temporal` | Série anual com os mesmos indicadores e filtros; exige `ano_inicial` e `ano_final`, até 30 anos inclusivos.                                |
 | `GET /api/v1/analises/comparacoes`       | Totais, taxas e qualidade por grupo no mesmo ano; exige `ano` e `agrupar_por`. Até 20 grupos, com seleção opcional e aviso de truncamento. |
+| `GET /api/v1/analises/dispersao`         | Todos os cursos do ano com matrículas, taxas e qualidade, a linha de alta evasão de cada taxa e a zona crítica; exige `ano`.               |
 | `POST /api/v1/autenticacao/login`        | Inicia a sessão; retorna JWT e cookie de renovação. Exige proteção CSRF.                                                                   |
 | `POST /api/v1/autenticacao/renovar`      | Rotaciona o cookie e emite novo JWT. Exige proteção CSRF.                                                                                  |
 | `POST /api/v1/autenticacao/logout`       | Revoga a sessão do cookie. Exige proteção CSRF.                                                                                            |
