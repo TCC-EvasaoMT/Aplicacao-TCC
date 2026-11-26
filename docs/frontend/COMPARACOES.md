@@ -49,8 +49,8 @@ A URL é montada com `URLSearchParams`, preservando zeros iniciais e repetindo `
 - As barras seguem a ordem da API. A primeira barra de cada grupo mostra evasão do curso; a segunda, da instituição, com as mesmas cores das outras análises.
 - O eixo inclui zero e preserva taxas negativas ou superiores a 100%. A interface formata proporções, sem calcular médias nem refazer fórmulas.
 - `null` aparece como `...` na tabela (convenção do IBGE; o leitor de tela ouve "Não disponível") e sem barra no gráfico. Um zero real permanece zero.
-- A tabela contém os quatro totais do resumo: vínculos, ingressantes, matrículas e concluintes, além de base, taxas e qualidade. Os demais totais continuam disponíveis na API.
-- Avisos distinguem ausência de alunos, registros sem contagens, dados incompletos, valores negativos, base inferior a 30 e base não positiva.
+- A tabela contém os quatro totais do resumo: vínculos, ingressantes, matrículas e concluintes, além de base, taxas e qualidade. Ingressantes mínimos aparecem como `≥ N`, lido como “ao menos N” por leitores de tela. Os demais totais continuam disponíveis na API.
+- Avisos distinguem ausência de alunos, registros sem contagens, cursos sem ingressantes informados, dados incompletos, valores negativos, base inferior a 30 e base não positiva.
 - Códigos permanecem visíveis mesmo sem nome. Rótulos longos são abreviados apenas no eixo; o tooltip e a tabela preservam o texto completo.
 - Listas, campos e caixas de marcação possuem rótulos associados; estados são anunciados, e a tabela tem cabeçalhos de linha e coluna. A tabela permite foco e rolagem horizontal em telas estreitas. Abaixo de 576 px, o nome do grupo fica acima das barras e o gráfico cabe na tela. Cada barra mostra o valor no fim. As barras não têm animação.
 

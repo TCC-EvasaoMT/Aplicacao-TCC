@@ -53,7 +53,7 @@ Cada resposta é associada à seleção e à tentativa que a originaram. `AbortC
 
 Seleções usam `CampoLista`, a lista do PrimeReact com rótulo associado e ajustes de acessibilidade descritos em [estilização](ESTILIZACAO.md#acessibilidade-das-listas). Listas com mais de dez opções, como cursos e municípios, têm busca por nome ou código, sem distinguir acentos. Os avisos de carregamento, erro e ausência de dados são anunciados por regiões acessíveis. Na gaveta, os campos ficam em uma coluna, em qualquer largura de tela. O ano permanece no resumo, fora da gaveta.
 
-As duas taxas aparecem antes dos totais, com igual destaque e números de largura uniforme. A explicação metodológica completa está em **Como interpretar os dados**, ao final do painel. A ajuda curta sobre oferta e sede permanece perto dos filtros. O atalho **Ir para o conteúdo** permite pular o cabeçalho pelo teclado. Os detalhes do tema estão em [Estilização do frontend](ESTILIZACAO.md).
+As duas taxas aparecem antes dos totais, com igual destaque e números de largura uniforme. Quando algum curso do recorte não tem ingressantes informados, o cartão mostra “ao menos N”, **Cuidados na leitura** explica a ausência e a variação de ingressantes contra o ano anterior não é exibida, porque mínimos não são comparáveis. A explicação metodológica completa está em **Como interpretar os dados**, ao final do painel. A ajuda curta sobre oferta e sede permanece perto dos filtros. O atalho **Ir para o conteúdo** permite pular o cabeçalho pelo teclado. Os detalhes do tema estão em [Estilização do frontend](ESTILIZACAO.md).
 
 ## Verificação com dados sintéticos
 

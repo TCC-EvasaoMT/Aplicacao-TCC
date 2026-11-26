@@ -76,7 +76,7 @@ Conceda `CONNECT` ao banco se ele não permitir conexões por padrão. Com o cli
 psql -h 127.0.0.1 -U SEU_USUARIO_ADMIN -d SEU_BANCO -v ON_ERROR_STOP=1 -v api_role=tcc_api -f sql/permissoes.sql
 ```
 
-Sem cliente local, abra o `psql` dentro do container e execute o conteúdo de `sql/permissoes.sql` depois de definir `\set api_role tcc_api`. O script concede `USAGE` no schema e `SELECT` apenas nas sete tabelas utilizadas pela API. Não concede acesso à Bronze, Silver nem escrita na Gold. Ele pressupõe uma role nova: não remove permissões antigas de usuários já existentes.
+Sem cliente local, abra o `psql` dentro do container e execute o conteúdo de `sql/permissoes.sql` depois de definir `\set api_role tcc_api`. O script concede `USAGE` no schema e `SELECT` apenas nas oito tabelas utilizadas pela API: as duas fatos de alunos por curso e por coorte e as seis dimensões. Não concede acesso à Bronze, Silver nem escrita na Gold. Ele pressupõe uma role nova: não remove permissões antigas de usuários já existentes.
 
 **Reaplique `sql/permissoes.sql` após cada transformação.** A pipeline executa `DROP SCHEMA gold CASCADE` e recria as tabelas, removendo os grants anteriores. Durante carga, bloqueio prolongado ou ausência de permissões, as rotas podem responder `503`; depois da reaplicação, o mesmo processo da API volta a consultar. Não há migrações ou inicialização automática da Gold no backend.
 
@@ -129,12 +129,14 @@ Na evolução temporal, as regras abaixo são aplicadas separadamente por ano. A
 
 As consultas usam exclusivamente `gold.fato_evasao_curso` e suas dimensões. Fatos de perfil, coorte e contexto docente não são somadas a ela. O guia de [fontes e indicadores](../docs/metodologia/FONTES_E_INDICADORES.md) explica o grão, a origem e os limites dessas medidas.
 
-| Campo                | Cálculo                                                                                                                 |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `totais`             | Somas de vínculos, ingressantes, matrículas, concluintes, cursando, desvinculados, transferidos, trancados e falecidos. |
-| `base_risco`         | `SUM(vinculos_total) - SUM(alunos_falecidos)`.                                                                          |
-| `taxas.evasao_curso` | `(SUM(alunos_desvinculados) + SUM(alunos_transferidos)) / base_risco`.                                                  |
-| `taxas.evasao_ies`   | `SUM(alunos_desvinculados) / base_risco`.                                                                               |
+| Campo                       | Cálculo                                                                                                              |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `totais`                    | Somas de vínculos, concluintes, cursando, desvinculados, transferidos, trancados e falecidos da `fato_evasao_curso`. |
+| `totais.matriculas_total`   | `SUM(alunos_cursando) + SUM(concluintes_total)`: vínculo cursando ou formado, definição do INEP.                     |
+| `totais.ingressantes_total` | Soma de `vinculos_total` da `fato_evasao_coorte` na linha com ano de ingresso igual ao ano do censo.                 |
+| `base_risco`                | `SUM(vinculos_total) - SUM(alunos_falecidos)`.                                                                       |
+| `taxas.evasao_curso`        | `(SUM(alunos_desvinculados) + SUM(alunos_transferidos)) / base_risco`.                                               |
+| `taxas.evasao_ies`          | `SUM(alunos_desvinculados) / base_risco`.                                                                            |
 
 As taxas são proporções: `0.2` significa 20%. Nunca se faz média de taxas individuais. As funções de cálculo ficam separadas do SQL e não dependem do PostgreSQL.
 
@@ -143,7 +145,9 @@ As taxas são proporções: `0.2` significa 20%. Nunca se faz média de taxas in
 - Sem linhas com vínculos, os totais são `null` e `qualidade.sem_dados=true`. Uma linha que informa zero vínculos é distinta de ausência de dados.
 - Linhas apenas com docentes não contribuem para medidas de alunos e aparecem em `registros_sem_alunos`.
 - Se uma medida falta em alguma linha com vínculos, seu total fica `null` e `dados_incompletos=true`. Isso evita dividir um numerador parcial por uma base completa. As outras medidas completas continuam disponíveis.
-- `flag_valor_negativo` indica se alguma linha do recorte tem essa marca na Gold. Ela pode refletir medidas de docentes também, conforme a pipeline.
+- `flag_valor_negativo` indica se alguma medida exibida é negativa em alguma linha do recorte. É calculada na consulta; a marca da Gold não é usada porque também reflete as colunas descartadas.
+- As colunas `ingressantes_total` e `matriculas_total` da `fato_evasao_curso` não são lidas: na extração do SEDAP+, o ruído delas chega a dezenas de milhares por curso. As demais medidas vêm de contagens com ruído pequeno.
+- A linha de ingresso da coorte falta em parte dos cursos, sem ingressantes no ano ou omitidos pelo SEDAP+. `qualidade.registros_sem_ingressantes` conta esses cursos e, havendo algum, `qualidade.ingressantes_minimo=true`: o total soma apenas os cursos com a linha e é um mínimo. Sem nenhuma linha no recorte, o total é `null`. Essa ausência não torna as outras medidas incompletas.
 - `flag_grupo_pequeno` é recalculada pela **base agregada**, inferior a 30. Base desconhecida produz marca `null`.
 
 Medidas são números JSON; o frontend deve formatar sua exibição. O SEDAP+ adiciona ruído e pode omitir grupos. A API descreve o conjunto disponível e não reconstrói valores omitidos nem identifica IES por fontes alternativas.

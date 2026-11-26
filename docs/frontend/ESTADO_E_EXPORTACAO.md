@@ -32,7 +32,7 @@ O arquivo atende planilhas em português: separador `;`, vírgula decimal, UTF-8
 - `evasao-mt-evolucao-<inicial>-<final>.csv`: uma linha por ano.
 - `evasao-mt-comparacao-<dimensao>-<ano>.csv`: uma linha por grupo, com código e nome.
 
-As colunas trazem os quatro totais, a base de risco, as duas taxas como proporção da API (0,1 = 10%), sem arredondamento, e as marcas de qualidade. Ausências ficam vazias, nunca zero. A última coluna descreve o recorte com os nomes dos parâmetros, por exemplo `ano_inicial=2022; ano_final=2024; codigo_curso=001`.
+As colunas trazem os quatro totais, com uma coluna indicando se ingressantes é um mínimo, a base de risco, as duas taxas como proporção da API (0,1 = 10%), sem arredondamento, e as marcas de qualidade. Ausências ficam vazias, nunca zero. A última coluna descreve o recorte com os nomes dos parâmetros, por exemplo `ano_inicial=2022; ano_final=2024; codigo_curso=001`.
 
 Na comparação, o CSV contém apenas os grupos carregados. Se houver truncamento, selecione os grupos desejados antes de exportar; o arquivo não busca os demais resultados. Códigos são escritos com seus zeros iniciais. Ao importar numa planilha, defina essas colunas como texto para evitar a conversão automática em números.
 
