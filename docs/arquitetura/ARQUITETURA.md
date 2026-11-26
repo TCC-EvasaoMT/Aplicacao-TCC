@@ -2,7 +2,7 @@
 
 A aplicação é um monorepo com dois pacotes: `frontend` (React/Vite) e `backend` (Fastify). O backend é um monólito modular: os módulos compartilham o mesmo processo e banco, mas cada um possui suas rotas, consultas e contratos. A pipeline Python tem repositório e execução independentes.
 
-No frontend, PrimeReact 10 fornece os controles interativos (botões, listas, campos, caixas de marcação, mensagens e painéis recolhíveis) em modo sem estilo, e Tailwind CSS 4 define layout e aparência a partir dos tokens de `styles.css`; Recharts apresenta as séries temporais e as comparações entre grupos. A configuração compartilhada dos componentes fica em `src/lib`, e React mantém o controle do estado e dos eventos. Veja [Estilização do frontend](../frontend/ESTILIZACAO.md) para a organização e os limites dessa integração.
+No frontend, PrimeReact 10 fornece os controles interativos (botões, listas, campos, caixas de marcação, mensagens, painéis recolhíveis, gavetas e abas) em modo sem estilo, e Tailwind CSS 4 define layout e aparência a partir dos tokens de `styles.css`; Recharts apresenta as séries temporais, as comparações entre grupos e a dispersão por curso. A configuração compartilhada dos componentes fica em `src/lib`, e React mantém o controle do estado e dos eventos. Veja [Estilização do frontend](../frontend/ESTILIZACAO.md) para a organização e os limites dessa integração.
 
 ## Arquitetura adotada no backend
 

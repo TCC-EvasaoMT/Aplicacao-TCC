@@ -4,9 +4,9 @@ API em TypeScript/Fastify para consultar a camada Gold da [Pipeline-TCC](https:/
 
 ## Preparar e iniciar
 
-O código está organizado em `src/modules/catalogos`, `src/modules/indicadores` e `src/modules/analises`, com plugins compartilhados em `src/plugins` e configuração em `src/config`. Veja a [arquitetura](../docs/arquitetura/ARQUITETURA.md) e os [contratos dos módulos](../docs/arquitetura/MODULOS_BACKEND.md). A extração do catálogo preserva `GET /api/v1/filtros` e sua resposta.
+O código está organizado em `src/modules/catalogos`, `src/modules/indicadores`, `src/modules/analises` e `src/modules/autenticacao`, com plugins compartilhados em `src/plugins`, configuração em `src/config` e comandos de manutenção do schema `app` em `src/database`. Veja a [arquitetura](../docs/arquitetura/ARQUITETURA.md) e os [contratos dos módulos](../docs/arquitetura/MODULOS_BACKEND.md). A extração do catálogo preserva `GET /api/v1/filtros` e sua resposta.
 
-Requisitos: Node.js 22.13 ou superior, pnpm 11.25.0 e PostgreSQL 17 com a Gold carregada pela pipeline. O banco não é criado ou migrado pela API. Se o pnpm ainda não estiver instalado, depois de instalar o Node.js execute `npm install --global pnpm@11.25.0`.
+Requisitos: Node.js 22.13 ou superior, pnpm 11.25.0 e PostgreSQL 17 com a Gold carregada pela pipeline. O servidor não cria o banco nem executa migrações; o comando de manutenção `db:migrate` migra somente o schema `app`, usado pela autenticação. Se o pnpm ainda não estiver instalado, depois de instalar o Node.js execute `npm install --global pnpm@11.25.0`.
 
 O backend faz parte do workspace pnpm. Para instalar as dependências, execute na raiz do repositório:
 
@@ -31,18 +31,23 @@ pnpm start
 
 O servidor escuta exclusivamente em `127.0.0.1`. `pnpm start` serve também `frontend/dist` em `/`. Swagger só é registrado com `NODE_ENV=development`, inclusive na versão compilada. `NODE_ENV=production` desativa `/docs`. A autenticação administrativa é opcional (`AUTH_ENABLED`); a implantação pública permanece pendente.
 
-| Variável              | Uso                                                                                 |
-| --------------------- | ----------------------------------------------------------------------------------- |
-| `NODE_ENV`            | `development` por padrão; também aceita `test` e `production`.                      |
-| `PORT`                | Porta HTTP, padrão `3000`.                                                          |
-| `HTTP_RATE_LIMIT_MAX` | Chamadas por minuto por IP e processo em `/api`, padrão `120`; aceita de 1 a 10000. |
-| `POSTGRES_HOST`       | Host do banco, padrão `127.0.0.1`.                                                  |
-| `POSTGRES_PORT`       | Porta do banco, padrão `5432`.                                                      |
-| `POSTGRES_DB`         | Obrigatória: nome do banco da pipeline.                                             |
-| `POSTGRES_USER`       | Obrigatória: login exclusivo de leitura.                                            |
-| `POSTGRES_PASSWORD`   | Obrigatória: senha desse login.                                                     |
+| Variável                                        | Uso                                                                                      |
+| ----------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `NODE_ENV`                                      | `development` por padrão; também aceita `test` e `production`.                           |
+| `PORT`                                          | Porta HTTP, padrão `3000`.                                                               |
+| `HTTP_RATE_LIMIT_MAX`                           | Chamadas por minuto por IP e processo em `/api`, padrão `120`; aceita de 1 a 10000.      |
+| `POSTGRES_HOST`                                 | Host do banco, padrão `127.0.0.1`.                                                       |
+| `POSTGRES_PORT`                                 | Porta do banco, padrão `5432`.                                                           |
+| `POSTGRES_DB`                                   | Obrigatória: nome do banco da pipeline.                                                  |
+| `POSTGRES_USER`                                 | Obrigatória: login exclusivo de leitura.                                                 |
+| `POSTGRES_PASSWORD`                             | Obrigatória: senha desse login.                                                          |
+| `AUTH_ENABLED`                                  | `true` habilita a autenticação administrativa; padrão `false`.                           |
+| `AUTH_JWT_SECRET`                               | Com autenticação: segredo aleatório de pelo menos 64 caracteres hexadecimais.            |
+| `AUTH_ORIGIN`                                   | Com autenticação: origem exata do navegador, como `http://127.0.0.1:5173` no `pnpm dev`. |
+| `APP_POSTGRES_USER` / `APP_POSTGRES_PASSWORD`   | Com autenticação: role restrita ao schema `app` usada pelo servidor.                     |
+| `APP_MIGRATION_USER` / `APP_MIGRATION_PASSWORD` | Somente nos comandos de manutenção; nunca no processo HTTP.                              |
 
-Credenciais ausentes ou portas inválidas impedem a inicialização. Uma conexão indisponível mantém o HTTP ativo, mas as consultas respondem `503`. O pool tem até cinco conexões, espera de conexão de dois segundos e limite SQL de 2,5 segundos. Esses limites não substituem a medição de desempenho com a carga real.
+Credenciais ausentes ou portas inválidas impedem a inicialização. Uma conexão indisponível mantém o HTTP ativo, mas as consultas respondem `503`. O pool de leitura da Gold tem até cinco conexões, espera de conexão de dois segundos e limite SQL de 2,5 segundos; com autenticação, o pool de `app` tem até três conexões e os mesmos limites. Esses limites não substituem a medição de desempenho com a carga real.
 
 Consulte a [proteção da API pública](../docs/operacao/SEGURANCA_API.md) para limites HTTP, respostas `429`, cabeçalhos e cuidados com proxy. O painel continua público. Para habilitar a autenticação administrativa, siga [autenticação e autorização](../docs/arquitetura/AUTORIZACAO.md) e [preparação do schema app](../docs/arquitetura/BANCO_APLICACAO.md). Depois de criar as roles e o schema e configurar as credenciais de manutenção, execute na raiz:
 
@@ -174,7 +179,7 @@ A senha acima é somente do banco sintético local. A porta é `55432` e os dado
 
 `test/fixtures/gold-schema.sql` é uma cópia apenas do DDL necessário aos testes, extraída do commit `ff66b7d44306a257fedde422a771848cc9a7899f` da pipeline. Não é uma migração de produção. `dados.sql` contém somente dados sintéticos.
 
-Os testes cobrem taxas sobre somas, todos os filtros, códigos com zeros iniciais, EaD, ruído, dados ausentes, permissões e reconstrução da Gold. A medição de resposta com a fixture não comprova a meta de três segundos no volume real; essa validação depende de carregar os dados reais no ambiente alvo.
+Os testes cobrem taxas sobre somas, todos os filtros, códigos com zeros iniciais, EaD, ruído, dados ausentes, permissões e reconstrução da Gold, além de migrações de `app`, sessões, renovação, revogação, troca de senha, CSRF e a dispersão por curso, cujos itens são conferidos contra o resumo de cada curso. A medição de resposta com a fixture não comprova a meta de três segundos no volume real; essa validação depende de carregar os dados reais no ambiente alvo.
 
 ## Conciliação com o TCC I
 

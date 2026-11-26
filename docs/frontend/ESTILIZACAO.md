@@ -1,6 +1,6 @@
 # Estilização do frontend
 
-A interface usa React, PrimeReact 10, Tailwind CSS 4 e Recharts. PrimeReact fornece os controles interativos (botões, listas de seleção, campos, caixas de marcação, mensagens de erro, indicador de carregamento e painéis recolhíveis); Tailwind fornece o layout e toda a aparência, inclusive a desses controles. As dependências pertencem ao pacote `frontend`, ficam registradas no lockfile da raiz e são servidas pela aplicação, sem CDN. A migração substituiu o Bootstrap 5.3 em 24/11/2026; a [comparação com o TCC](../tcc/RASTREABILIDADE.md) registra a relação dessa escolha com o texto acadêmico.
+A interface usa React, PrimeReact 10, Tailwind CSS 4 e Recharts. PrimeReact fornece os controles interativos (botões, listas de seleção, campos, caixas de marcação, mensagens de erro, indicador de carregamento, painéis recolhíveis, gavetas e abas); Tailwind fornece o layout e toda a aparência, inclusive a desses controles. As dependências pertencem ao pacote `frontend`, ficam registradas no lockfile da raiz e são servidas pela aplicação, sem CDN. A migração substituiu o Bootstrap 5.3 em 24/11/2026; a [comparação com o TCC](../tcc/RASTREABILIDADE.md) registra a relação dessa escolha com o texto acadêmico.
 
 ## Versões e licença
 
@@ -66,7 +66,7 @@ Os rótulos continuam associados por `<label for>` ao campo com foco. Ao usar no
 
 ## Identidade visual
 
-O cabeçalho é uma faixa verde com a marca, “Evasão no ensino superior”, o contexto institucional e as abas **Resumo**, **Evolução** e **Comparação**; o rodapé repete a faixa. Logo abaixo fica a faixa do recorte, fixa no topo ao rolar, com o botão **Filtros**. Abaixo dela aparece o painel da aba ativa. O link “Ir para o conteúdo” aparece ao receber foco de teclado. As explicações metodológicas ficam em “Como interpretar os dados”, um painel recolhível.
+O cabeçalho é uma faixa verde com a marca, “Evasão no ensino superior”, o contexto institucional, os botões de acesso (**Entrar**, ou **Alterar senha** e **Sair** com sessão ativa) e as abas **Resumo**, **Evolução**, **Comparação** e **Dispersão**; o rodapé repete a faixa. Os botões de acesso são nativos e estão descritos em [login e sessão](AUTENTICACAO.md). Logo abaixo fica a faixa do recorte, fixa no topo ao rolar, com o botão **Filtros**. Abaixo dela aparece o painel da aba ativa. O link “Ir para o conteúdo” aparece ao receber foco de teclado. As explicações metodológicas ficam em “Como interpretar os dados”, um painel recolhível.
 
 O refinamento de 24/11/2026 reduziu o branco da tela e destacou os gráficos sem sair da paleta: fundo da página levemente esverdeado, cartões das taxas tingidos com a cor de cada série (valor na mesma cor), títulos de seção com marcador verde, gráficos em moldura com degradê suave e altura maior (400 px no desktop e 300 px no celular) e cabeçalho das tabelas em verde. Os controles de período ficam no cabeçalho da seção de evolução, e o agrupamento da comparação divide a linha com **Comparar grupos**, para que os gráficos apareçam mais cedo.
 
