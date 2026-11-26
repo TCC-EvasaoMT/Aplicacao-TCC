@@ -84,7 +84,7 @@ export function FiltrosIndicadores({
 		>
 			<p className="text-sm font-semibold" aria-live="polite">
 				{quantidade === 0
-					? 'Todos os recortes disponíveis.'
+					? 'Nenhum filtro: todos os cursos.'
 					: quantidade === 1
 						? '1 filtro aplicado.'
 						: `${quantidade} filtros aplicados.`}

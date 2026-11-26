@@ -30,6 +30,14 @@ import {
 import { FiltrosIndicadores } from './FiltrosIndicadores'
 import { ResumoIndicadores } from './ResumoIndicadores'
 
+// Cada registro da fato de curso é um curso no ano.
+function cursosNoCalculo(quantidade: number, ano: string) {
+	const numero = quantidade.toLocaleString('pt-BR')
+	return quantidade === 1
+		? `1 curso com alunos entra no cálculo de ${ano}.`
+		: `${numero} cursos com alunos entram no cálculo de ${ano}.`
+}
+
 export function PainelIndicadores({ aba }: { aba: AbaPainel }) {
 	const [catalogo, setCatalogo] = useState<Catalogo | null>(null)
 	const [selecao, setSelecao] = useState(() => lerSelecao(lerUrl()))
@@ -291,6 +299,16 @@ export function PainelIndicadores({ aba }: { aba: AbaPainel }) {
 							/>
 						</div>
 					</div>
+					{!erro && vista.dado && !vista.dado.dados.qualidade.sem_dados && (
+						<Ajuda className={cx(vista.atualizando && classes.atualizando)}>
+							{cursosNoCalculo(
+								vista.dado.dados.qualidade.registros_com_alunos,
+								vista.dado.ano
+							)}{' '}
+							Os valores são de um único ano do Censo; a aba Evolução mostra
+							vários anos.
+						</Ajuda>
+					)}
 					<div aria-live="polite">
 						{carregando && !vista.atualizando && (
 							<Carregando texto="Carregando indicadores…" />

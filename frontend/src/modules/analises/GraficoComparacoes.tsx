@@ -244,8 +244,8 @@ export function GraficoComparacoes({
 						<Ajuda>
 							Em cada grupo, a primeira barra representa a evasão do curso; a
 							segunda, da instituição. Taxas indisponíveis ficam sem barra.
-							Clique num grupo, aqui ou na tabela, para filtrar o resumo e a
-							evolução; clique de novo para remover.
+							Clique num grupo, aqui ou na tabela, para filtrar o painel
+							inteiro, em todas as abas; clique de novo para remover.
 						</Ajuda>
 					</figcaption>
 				</figure>
@@ -321,7 +321,7 @@ export function GraficoComparacoes({
 											type="button"
 											className={classesLinkFiltro}
 											aria-pressed={indice === indiceDestaque}
-											aria-label={`Filtrar por ${rotulo}`}
+											aria-label={`Filtrar o painel inteiro por ${rotulo}`}
 											onFocus={() => setAtivo(indice)}
 											onBlur={() => setAtivo(null)}
 											onClick={() => onSelecionar(valor)}
