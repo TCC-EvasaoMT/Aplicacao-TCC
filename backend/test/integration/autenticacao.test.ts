@@ -748,7 +748,8 @@ test(
 					'/api/v1/analises/comparacoes?ano=2023&agrupar_por=curso',
 					'/api/v1/analises/dispersao?ano=2023',
 					'/api/v1/analises/ranking?ano=2023&dimensao=area_geral',
-					'/api/v1/analises/perfil?ano=2023&fator=sexo'
+					'/api/v1/analises/perfil?ano=2023&fator=sexo',
+					'/api/v1/analises/coorte?ano_ingresso=2022'
 				]) {
 					assert.equal((await app.inject(url)).statusCode, 200)
 				}

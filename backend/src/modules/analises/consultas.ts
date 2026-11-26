@@ -6,7 +6,8 @@ import {
 	type Agregado,
 	type FiltrosRecorte
 } from '../indicadores/index.js'
-import { origem, origemPerfil } from '../../plugins/gold.js'
+import { origem, origemCoorte, origemPerfil } from '../../plugins/gold.js'
+import type { AnoCoorte, FiltrosCoorte } from './coorte.js'
 import {
 	fatoresPerfil,
 	type AgregadoPerfil,
@@ -157,8 +158,59 @@ export function consultaPerfil({ fator, ...filtros }: FiltrosPerfil) {
 	}
 }
 
+// Turma de ingresso: cada ano do censo carregado a partir do ingresso. A turma
+// são os cursos com linha no próprio ano de ingresso; outros cursos com o mesmo
+// ano de ingresso (vínculos que chegam depois) ficam fora das somas e são
+// contados à parte. Anos sem linhas da turma voltam com contagens zero.
+const somasTurma = medidas.map(
+	(medida) => `
+  CASE WHEN count(m.${medida}) FILTER (WHERE m.da_turma AND m.vinculos_total IS NOT NULL)
+      = count(m.vinculos_total) FILTER (WHERE m.da_turma)
+    THEN (sum(m.${medida}) FILTER (WHERE m.da_turma AND m.vinculos_total IS NOT NULL))::text
+  END AS ${medida}`
+)
+const listaTurma = medidas.map((medida) => `m.${medida}`).join(', ')
+
+export function consultaCoorte({ ano_ingresso, ...filtros }: FiltrosCoorte) {
+	const { values, conditions } = parametrizarFiltros(filtros, 2)
+	return {
+		text: `WITH turma AS (
+        SELECT f.*, t.ano_censo ${origemCoorte}
+        WHERE ${['ti.ano_censo = $1', ...conditions].join(' AND ')}
+      ),
+      iniciais AS (SELECT DISTINCT id_curso FROM turma WHERE ano_censo = $1),
+      anos AS (
+        SELECT DISTINCT t.ano_censo FROM gold.fato_evasao_curso fc
+        JOIN gold.dim_tempo t USING (id_tempo) WHERE t.ano_censo >= $1
+      ),
+      marcada AS (
+        SELECT turma.*, id_curso IN (SELECT id_curso FROM iniciais) AS da_turma
+        FROM turma
+      )
+      SELECT ac.ano_censo AS ano,
+        ${somasTurma.join(',')},
+        (SELECT count(*) FROM iniciais)::integer AS cursos_iniciais,
+        ((SELECT count(*) FROM iniciais)
+          - count(DISTINCT m.id_curso) FILTER (WHERE m.da_turma))::integer AS cursos_iniciais_ausentes,
+        count(*) FILTER (WHERE m.da_turma)::integer AS registros,
+        count(*) FILTER (WHERE NOT m.da_turma)::integer AS registros_fora_da_turma,
+        (sum(m.vinculos_total) FILTER (WHERE NOT m.da_turma))::text AS vinculos_fora_da_turma,
+        coalesce(bool_or(m.da_turma AND least(${listaTurma}) < 0), false) AS flag_valor_negativo,
+        coalesce(bool_or(m.da_turma AND m.vinculos_total IS NOT NULL
+          AND num_nonnulls(${listaTurma}) < ${medidas.length}), false) AS dados_incompletos
+      FROM anos ac
+      LEFT JOIN marcada m ON m.ano_censo = ac.ano_censo
+      GROUP BY ac.ano_censo
+      ORDER BY ac.ano_censo`,
+		values: [ano_ingresso, ...values]
+	}
+}
+
 export function criarConsultasAnalises(pool: Pool) {
 	return {
+		async coorte(filtros: FiltrosCoorte): Promise<AnoCoorte[]> {
+			return (await pool.query<AnoCoorte>(consultaCoorte(filtros))).rows
+		},
 		async perfil(filtros: FiltrosPerfil): Promise<AgregadoPerfil[]> {
 			return (await pool.query<AgregadoPerfil>(consultaPerfil(filtros))).rows
 		},

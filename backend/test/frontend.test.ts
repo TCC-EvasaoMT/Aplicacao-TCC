@@ -11,6 +11,7 @@ const consultas: Dependencias = {
 		dispersao: async () => [],
 		ranking: async () => [],
 		perfil: async () => [],
+		coorte: async () => [],
 		async evolucao() {
 			return []
 		}

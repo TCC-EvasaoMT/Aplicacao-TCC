@@ -164,6 +164,7 @@ async function servidor(
 				comparacao: unused,
 				dispersao: unused,
 				perfil: unused,
+				coorte: unused,
 				ranking
 			}
 		},

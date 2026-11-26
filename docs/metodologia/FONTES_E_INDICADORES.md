@@ -75,7 +75,7 @@ O frontend mostra quatro totais (vínculos, ingressantes, matrículas e concluin
 
 As duas taxas são proporções dos vínculos de um mesmo ano. Não acompanham uma coorte e não devem ser apresentadas como fórmulas oficiais do INEP. A taxa de desistência acumulada do INEP usa ingressantes de uma mesma coorte, saídas acumuladas e falecimentos acumulados; o método anual de Silva Filho et al. usa matrículas, ingressantes e concluintes de dois anos consecutivos. Nenhum dos dois equivale ao cálculo atual. A desvinculação de um curso também não comprova, isoladamente, a saída da instituição, embora a taxa se chame evasão da IES.
 
-As duas fórmulas são as definições aprovadas na modelagem da Gold. A revisão de 23/11/2026 deixou em aberto, para decisão com o orientador, os nomes e a interpretação das taxas e a inclusão de indicadores por coorte ou pelo método anual. Até essa decisão, resumo, evolução, comparação e dispersão usam as fórmulas acima; uma mudança deve alterar dados, contratos, testes, rótulos e documentação juntos.
+As duas fórmulas são as definições aprovadas na modelagem da Gold. A revisão de 23/11/2026 deixou em aberto, para decisão com o orientador, os nomes e a interpretação das taxas e a inclusão de indicadores por coorte ou pelo método anual. A [turma de ingresso](../api/COORTE.md) é o primeiro indicador por coorte: acompanha os vínculos de uma turma sobre o tamanho inicial (vínculos no censo do ingresso), com saídas e conclusões acumuladas, e não substitui as duas taxas. Até a decisão, resumo, evolução, comparação e dispersão usam as fórmulas acima; uma mudança deve alterar dados, contratos, testes, rótulos e documentação juntos.
 
 ### Diferenças com o TCC
 

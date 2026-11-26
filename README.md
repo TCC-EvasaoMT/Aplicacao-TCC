@@ -7,7 +7,7 @@ Monorepo com React, TypeScript e Fastify. O frontend consulta a API, e o backend
 Para executar a aplicação em container e preparar a EC2 para testes de carga, consulte o [guia da imagem Docker](docs/operacao/DOCKER_EC2.md).
 
 ```text
-frontend/              React e Vite; resumo, perfil, filtros, evolução, comparações, ranking, dispersão e login
+frontend/              React e Vite; resumo, perfil, filtros, evolução, turma de ingresso, comparações, ranking, dispersão e login
 backend/               API Fastify, regras de cálculo e acesso à Gold
 backend/src/modules/   Módulos de catálogos, indicadores, análises e autenticação
 backend/src/database/  Migrações do schema app e criação de administrador
@@ -24,7 +24,7 @@ O [índice da documentação](docs/README.md) reúne arquitetura, contratos, int
 
 O frontend não importa arquivos internos do backend e não acessa o banco. Ele usa HTTP/JSON em `/api/v1`. As fórmulas de evasão continuam no backend; a interface apenas formata os resultados.
 
-A interface apresenta resumo anual com o [perfil de quem evade](docs/frontend/PERFIL.md), evolução temporal, comparação entre grupos, [ranking de áreas e modalidades](docs/frontend/RANKING.md) e [dispersão por curso](docs/frontend/DISPERSAO.md) em abas no cabeçalho, com filtros compartilhados numa gaveta. Resumo e comparação compartilham o ano; o gráfico temporal mantém seu próprio período. O tema usa Source Sans 3 servida localmente, duas taxas com igual destaque e totais em uma faixa compacta. A seção **Como interpretar os dados** reúne as explicações metodológicas.
+A interface apresenta resumo anual com o [perfil de quem evade](docs/frontend/PERFIL.md), evolução temporal com a [turma de ingresso](docs/frontend/COORTE.md), comparação entre grupos, [ranking de áreas e modalidades](docs/frontend/RANKING.md) e [dispersão por curso](docs/frontend/DISPERSAO.md) em abas no cabeçalho, com filtros compartilhados numa gaveta. Resumo e comparação compartilham o ano; o gráfico temporal mantém seu próprio período. O tema usa Source Sans 3 servida localmente, duas taxas com igual destaque e totais em uma faixa compacta. A seção **Como interpretar os dados** reúne as explicações metodológicas.
 
 A [API de evolução temporal](docs/api/ANALISES_TEMPORAIS.md) permite consultar séries anuais em `/api/v1/analises/evolucao-temporal`, com intervalo inclusivo de até 30 anos e os mesmos filtros de recorte. O [módulo de análises do frontend](docs/frontend/ANALISES.md) apresenta as duas taxas em um gráfico Recharts e uma tabela de valores e qualidade por ano. A interface usa componentes do PrimeReact 10 (licença MIT) em modo sem estilo e Tailwind CSS 4 para o layout e a identidade visual, conforme a [documentação de estilização](docs/frontend/ESTILIZACAO.md).
 

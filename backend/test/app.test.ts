@@ -26,6 +26,7 @@ function fakeConsultas(): Dependencias {
 			dispersao: async () => [],
 			ranking: async () => [],
 			perfil: async () => [],
+			coorte: async () => [],
 			async evolucao() {
 				return []
 			}
@@ -120,7 +121,8 @@ test('health e endpoints retornam 503 sem vazar erro do banco', async (t) => {
 			comparacao: fail,
 			dispersao: fail,
 			ranking: fail,
-			perfil: fail
+			perfil: fail,
+			coorte: fail
 		}
 	})
 	t.after(() => app.close())

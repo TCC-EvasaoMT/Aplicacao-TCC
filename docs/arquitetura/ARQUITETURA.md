@@ -50,12 +50,12 @@ Em desenvolvimento, `pnpm dev` inicia Fastify na porta 3000 e Vite na 5173. O na
 
 ## Módulos existentes
 
-| Módulo         | Responsabilidade                                                           | Entrada HTTP                                                                                   |
-| -------------- | -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| `catalogos`    | Listar opções disponíveis para filtros                                     | `GET /api/v1/filtros`                                                                          |
-| `indicadores`  | Agregar um recorte anual e calcular seus totais, taxas e qualidade         | `GET /api/v1/indicadores/resumo`                                                               |
-| `analises`     | Consultar evolução anual, comparar grupos, dispersão, ranking e perfil     | `GET /api/v1/analises/evolucao-temporal`, `/comparacoes`, `/dispersao`, `/ranking` e `/perfil` |
-| `autenticacao` | Autenticar, renovar e revogar sessões, trocar a senha e aplicar permissões | `/api/v1/autenticacao/*`                                                                       |
+| Módulo         | Responsabilidade                                                           | Entrada HTTP                                                                                              |
+| -------------- | -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `catalogos`    | Listar opções disponíveis para filtros                                     | `GET /api/v1/filtros`                                                                                     |
+| `indicadores`  | Agregar um recorte anual e calcular seus totais, taxas e qualidade         | `GET /api/v1/indicadores/resumo`                                                                          |
+| `analises`     | Consultar evolução, turma, comparações, dispersão, ranking e perfil        | `GET /api/v1/analises/evolucao-temporal`, `/comparacoes`, `/dispersao`, `/ranking`, `/perfil` e `/coorte` |
+| `autenticacao` | Autenticar, renovar e revogar sessões, trocar a senha e aplicar permissões | `/api/v1/autenticacao/*`                                                                                  |
 
 Saúde da aplicação, tratamento de erros e documentação da API são recursos transversais. `GET /health` pertence a `plugins/health.ts`; não é uma responsabilidade do módulo de indicadores. O controle de acesso é instalado na raiz do Fastify pelo módulo de autenticação, antes das rotas, conforme o [modelo de acesso](AUTORIZACAO.md).
 
@@ -203,6 +203,8 @@ O ranking de áreas e modalidades (RF12) fica no topo da aba Comparação: `Pain
 
 O perfil de quem evade fica na aba Resumo, abaixo dos cartões: `PainelPerfil` consulta um fator por vez com o ano e os filtros do painel e mostra as categorias na ordem do catálogo, com o texto de associação e a ressalva dos fatores circulares. Veja [perfil na interface](../frontend/PERFIL.md).
 
+A turma de ingresso fica na aba Evolução, abaixo do gráfico temporal: `PainelCoorte` acompanha os vínculos de quem ingressou no ano escolhido em cada censo seguinte, com os filtros do painel menos o ano do resumo. Veja [turma na interface](../frontend/COORTE.md).
+
 Comparações entre cursos e grupos institucionais estão implementadas na API e no frontend de análises. `PainelComparacoes` recebe catálogo, filtros e ano do resumo; mantém rascunho e seleção aplicada próprios, consulta cancelável, gráfico e tabela. O frontend omite o filtro da dimensão agrupada para manter os outros grupos visíveis; essa regra não modifica a API. Veja [comparações na interface](../frontend/COMPARACOES.md).
 
 A Gold consumida não fornece nomes ou siglas de IES nem identificadores institucionais permanentes para comparação individual. Administração do ETL depende de um contrato externo para execuções e reprocessamentos. A proteção HTTP, os logs e a autenticação já estão na aplicação; as rotas do ETL e a integração com monitoramento externo estão pendentes. Os módulos futuros serão criados junto de suas funcionalidades.
@@ -219,6 +221,7 @@ O [modelo de autorização](AUTORIZACAO.md) mantém o painel público e a admini
 - [API de dispersão por curso](../api/DISPERSAO.md)
 - [API de ranking de áreas e modalidades](../api/RANKING.md)
 - [API de perfil de quem evade](../api/PERFIL.md)
+- [API de turma de ingresso](../api/COORTE.md)
 - [Comparações na interface](../frontend/COMPARACOES.md)
 - [Estado e exportação](../frontend/ESTADO_E_EXPORTACAO.md)
 - [Interatividade e filtragem cruzada](../frontend/INTERATIVIDADE.md)

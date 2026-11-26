@@ -160,7 +160,8 @@ async function servidor(
 				comparacao: unused,
 				dispersao,
 				ranking: unused,
-				perfil: unused
+				perfil: unused,
+				coorte: unused
 			}
 		},
 		{ docs }

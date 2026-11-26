@@ -285,8 +285,11 @@ test(
 				} finally {
 					await db.query(`INSERT INTO gold.fato_evasao_coorte
             (id_tempo, id_tempo_ingresso, id_instituicao, id_curso, id_area_conhecimento,
-             id_localidade, id_oferta, codigo_curso, vinculos_total)
-            VALUES (3, 3, 3, 7, 2, 2, 1, '007', 2), (3, 3, 3, 8, 2, 2, 1, '008', 2)
+             id_localidade, id_oferta, codigo_curso, vinculos_total, alunos_cursando,
+             alunos_matricula_trancada, alunos_desvinculados, alunos_transferidos,
+             concluintes_total, alunos_falecidos)
+            VALUES (3, 3, 3, 7, 2, 2, 1, '007', 2, 2, 0, 0, 0, 0, 0),
+              (3, 3, 3, 8, 2, 2, 1, '008', 2, 2, 0, 0, 0, 0, 0)
             ON CONFLICT DO NOTHING`)
 				}
 			}
@@ -561,6 +564,88 @@ test(
 					vazio.categorias.map((c: Categoria) => c.qualidade.sem_dados),
 					[true, true]
 				)
+			}
+		)
+
+		await t.test(
+			'turma de ingresso acumula sobre o tamanho inicial e interrompe no ano faltante',
+			async () => {
+				const coorte = async (query: string) => {
+					const response = await server.inject(
+						`/api/v1/analises/coorte?${query}`
+					)
+					assert.equal(response.statusCode, 200, response.body)
+					return response.json()
+				}
+				type Ponto = {
+					ano: number
+					taxas: Record<string, number | null>
+					qualidade: {
+						sem_dados: boolean
+						cursos_iniciais_ausentes: number
+						registros_fora_da_turma: number
+						vinculos_fora_da_turma: number | null
+						flag_valor_negativo: boolean
+					}
+				}
+				// Só o 001 tem a linha de 2022; o 002 chega em 2023 e fica fora.
+				const turma = await coorte('ano_ingresso=2022')
+				assert.equal(turma.tamanho_inicial, 100)
+				assert.equal(turma.cursos_iniciais, 1)
+				assert.deepEqual(
+					turma.serie.map((p: Ponto) => [p.ano, p.taxas]),
+					[
+						[
+							2022,
+							{
+								evadiu: 0.08,
+								evadiu_ies: 0.06,
+								concluiu: 0,
+								continua: 0.92,
+								residuo: 0
+							}
+						],
+						[
+							2023,
+							{
+								evadiu: 0.15,
+								evadiu_ies: 0.14,
+								concluiu: 0.08,
+								continua: 0.73,
+								residuo: 0.04
+							}
+						],
+						[
+							2024,
+							{
+								evadiu: null,
+								evadiu_ies: null,
+								concluiu: null,
+								continua: null,
+								residuo: null
+							}
+						]
+					]
+				)
+				const [, segundo, terceiro] = turma.serie as Ponto[]
+				assert.equal(segundo!.qualidade.registros_fora_da_turma, 1)
+				assert.equal(segundo!.qualidade.vinculos_fora_da_turma, 15)
+				assert.equal(segundo!.qualidade.flag_valor_negativo, true)
+				assert.equal(terceiro!.qualidade.sem_dados, true)
+				assert.equal(terceiro!.qualidade.cursos_iniciais_ausentes, 1)
+				// Turma de 2023: todos os cursos com linha inicial, um ano de acompanhamento.
+				const recente = await coorte('ano_ingresso=2023')
+				assert.equal(recente.tamanho_inicial, 126.25)
+				assert.equal(recente.cursos_iniciais, 7)
+				assert.equal(recente.serie[0].taxas.evadiu, 10 / 126.25)
+				// Filtro de área: 002 é Computação e não tem linha de 2022.
+				const computacao = await coorte(
+					'ano_ingresso=2022&codigo_area_geral=06'
+				)
+				assert.equal(computacao.tamanho_inicial, null)
+				assert.deepEqual(computacao.serie, [])
+				// Turma anterior aos anos carregados: sem tamanho inicial.
+				assert.deepEqual((await coorte('ano_ingresso=2019')).serie, [])
 			}
 		)
 

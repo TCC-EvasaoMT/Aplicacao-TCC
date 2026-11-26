@@ -8,6 +8,8 @@ import {
 	comparacaoSchema,
 	dispersaoQuerySchema,
 	dispersaoSchema,
+	coorteQuerySchema,
+	coorteSchema,
 	perfilQuerySchema,
 	perfilSchema,
 	rankingQuerySchema,
@@ -17,6 +19,7 @@ import {
 } from './schemas.js'
 import { montarComparacao, type FiltrosComparacao } from './comparacoes.js'
 import { montarDispersao, type FiltrosDispersao } from './dispersao.js'
+import { montarCoorte, type FiltrosCoorte } from './coorte.js'
 import { montarPerfil, type FiltrosPerfil } from './perfil.js'
 import { montarRanking, type FiltrosRanking } from './ranking.js'
 
@@ -52,6 +55,35 @@ export function registrarRotas(
 				consultas.comparacao(request.query)
 			)
 			return { filtros: request.query, ...montarComparacao(agregados) }
+		}
+	)
+	app.get<{ Querystring: FiltrosCoorte }>(
+		'/api/v1/analises/coorte',
+		{
+			config: { acesso: 'publico' },
+			schema: {
+				tags: ['Análises'],
+				summary:
+					'Acompanha uma turma de ingresso: já evadiu, já concluiu e continua no curso.',
+				description:
+					'Exemplo: /api/v1/analises/coorte?ano_ingresso=2019&codigo_area_geral=01. Tamanho inicial = vínculos da turma no censo do ano de ingresso; a turma são os cursos com essa linha. Para cada ano do censo, acumula desvinculados + transferidos e concluintes e mostra cursando + trancados e o resíduo.',
+				querystring: coorteQuerySchema,
+				response: {
+					200: coorteSchema,
+					400: erroSchema,
+					500: erroSchema,
+					503: erroSchema
+				}
+			}
+		},
+		async (request) => {
+			const anos = await consultarGold(request, () =>
+				consultas.coorte(request.query)
+			)
+			return {
+				filtros: request.query,
+				...montarCoorte(anos, request.query.ano_ingresso)
+			}
 		}
 	)
 	app.get<{ Querystring: FiltrosPerfil }>(
