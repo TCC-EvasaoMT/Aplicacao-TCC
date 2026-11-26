@@ -32,9 +32,11 @@ Para o RF12, `GET /api/v1/analises/ranking` devolve todas as áreas gerais ou mo
 
 `GET /api/v1/analises/perfil` lê `fato_evasao_perfil` e `dim_perfil` para os 12 fatores de prioridade 1; `perfil.ts` guarda a lista dos fatores e monta as categorias com `calcularResumo`. As junções com as dimensões do curso vêm de `plugins/gold.ts` (`origemPerfil`). Veja o [contrato do perfil](../api/PERFIL.md).
 
+`GET /api/v1/analises/coorte` lê a `fato_evasao_coorte` para uma turma de ingresso; `coorte.ts` calcula tamanho inicial, acumulados e resíduo, e a consulta usa `origemCoorte` de `plugins/gold.ts`. Veja o [contrato da turma](../api/COORTE.md).
+
 O módulo também fornece `GET /api/v1/analises/comparacoes`, com `ano` e `agrupar_por` obrigatórios. Compara até 20 grupos por curso, área geral CINE, municípios de oferta/sede, modalidade, categoria administrativa ou organização acadêmica. Aceita os sete filtros opcionais e seleção de grupos por códigos/textos. Retorna totais, taxas e qualidade por grupo, quantidade total de grupos e indicação de truncamento. Veja [contrato e exemplos das comparações](../api/COMPARACOES.md).
 
-`index.ts` exporta o plugin `analises`, a fábrica `criarConsultasAnalises` e o tipo de consultas, com as operações `evolucao`, `comparacao`, `dispersao`, `ranking` e `perfil`. `consultas.ts` agrega por ano ou grupo; `evolucao.ts` completa lacunas; `comparacoes.ts` define as dimensões permitidas e monta os resultados. Ambos reutilizam o cálculo público de indicadores. `rotas.ts` e `schemas.ts` definem os contratos HTTP. Consulte a [API de evolução temporal](../api/ANALISES_TEMPORAIS.md) e as [comparações na interface](../frontend/COMPARACOES.md). As rotas de análise são públicas.
+`index.ts` exporta o plugin `analises`, a fábrica `criarConsultasAnalises` e o tipo de consultas, com as operações `evolucao`, `comparacao`, `dispersao`, `ranking`, `perfil` e `coorte`. `consultas.ts` agrega por ano ou grupo; `evolucao.ts` completa lacunas; `comparacoes.ts` define as dimensões permitidas e monta os resultados. Ambos reutilizam o cálculo público de indicadores. `rotas.ts` e `schemas.ts` definem os contratos HTTP. Consulte a [API de evolução temporal](../api/ANALISES_TEMPORAIS.md) e as [comparações na interface](../frontend/COMPARACOES.md). As rotas de análise são públicas.
 
 ## Autenticação
 

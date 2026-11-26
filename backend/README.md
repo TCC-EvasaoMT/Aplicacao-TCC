@@ -99,6 +99,7 @@ Sem cliente local, abra o `psql` dentro do container e execute o conteúdo de `s
 | `GET /api/v1/analises/dispersao`         | Todos os cursos do ano com matrículas, taxas e qualidade, a linha de alta evasão de cada taxa e a zona crítica; exige `ano`.                   |
 | `GET /api/v1/analises/ranking`           | Todas as áreas gerais ou modalidades do ano, ordenadas pela taxa escolhida, com empates, bases pequenas e ausências; exige `ano` e `dimensao`. |
 | `GET /api/v1/analises/perfil`            | Taxas de evasão por categoria de um dos 12 fatores de perfil, na ordem do catálogo, com o conjunto do fator; exige `ano` e `fator`.            |
+| `GET /api/v1/analises/coorte`            | Acompanha uma turma de ingresso: já evadiu, já concluiu, continua no curso e resíduo em cada censo seguinte; exige `ano_ingresso`.             |
 | `POST /api/v1/autenticacao/login`        | Inicia a sessão; retorna JWT e cookie de renovação. Exige proteção CSRF.                                                                       |
 | `POST /api/v1/autenticacao/renovar`      | Rotaciona o cookie e emite novo JWT. Exige proteção CSRF.                                                                                      |
 | `POST /api/v1/autenticacao/logout`       | Revoga a sessão do cookie. Exige proteção CSRF.                                                                                                |

@@ -21,8 +21,8 @@ Para instalar e executar, comece pelo [README da raiz](../README.md). Para enten
 - [Arquitetura da aplicação](arquitetura/ARQUITETURA.md) e [módulos do backend](arquitetura/MODULOS_BACKEND.md).
 - [Fontes e indicadores](metodologia/FONTES_E_INDICADORES.md).
 - [Preparação do backend, catálogo, resumo e fórmulas](../backend/README.md).
-- [API de evolução temporal](api/ANALISES_TEMPORAIS.md), [API de comparações](api/COMPARACOES.md), [API de dispersão por curso](api/DISPERSAO.md), [API de ranking de áreas e modalidades](api/RANKING.md) e [API de perfil de quem evade](api/PERFIL.md).
-- [Filtros do painel](frontend/FILTROS.md), [evolução temporal](frontend/ANALISES.md), [comparações](frontend/COMPARACOES.md), [dispersão por curso](frontend/DISPERSAO.md), [ranking de áreas e modalidades](frontend/RANKING.md) e [perfil de quem evade](frontend/PERFIL.md).
+- [API de evolução temporal](api/ANALISES_TEMPORAIS.md), [API de comparações](api/COMPARACOES.md), [API de dispersão por curso](api/DISPERSAO.md), [API de ranking de áreas e modalidades](api/RANKING.md), [API de perfil de quem evade](api/PERFIL.md) e [API de turma de ingresso](api/COORTE.md).
+- [Filtros do painel](frontend/FILTROS.md), [evolução temporal](frontend/ANALISES.md), [comparações](frontend/COMPARACOES.md), [dispersão por curso](frontend/DISPERSAO.md), [ranking de áreas e modalidades](frontend/RANKING.md), [perfil de quem evade](frontend/PERFIL.md) e [turma de ingresso](frontend/COORTE.md).
 - [Interatividade](frontend/INTERATIVIDADE.md), [estado e exportação](frontend/ESTADO_E_EXPORTACAO.md) , [estilização](frontend/ESTILIZACAO.md) e [login e sessão](frontend/AUTENTICACAO.md).
 - [Proteção da API e logs](operacao/SEGURANCA_API.md), [acesso administrativo](arquitetura/AUTORIZACAO.md), [banco da aplicação](arquitetura/BANCO_APLICACAO.md) e [validação](operacao/VALIDACAO.md).
 - [Requisitos do TCC e lacunas](tcc/RASTREABILIDADE.md).
