@@ -1,4 +1,4 @@
--- Fixture de teste: DDL das sete tabelas consumidas pela API, sem carga nem migração.
+-- Fixture de teste: DDL das oito tabelas consumidas pela API, sem carga nem migração.
 -- Fonte: TCC-EvasaoMT/Pipeline-TCC/sql/gold.sql
 -- Commit: ff66b7d44306a257fedde422a771848cc9a7899f; blob: 95f77bb83d4e38de29b39a7466794de9eb3a3b39.
 CREATE SCHEMA gold;
@@ -94,3 +94,25 @@ CREATE TABLE gold.fato_evasao_curso (
     PRIMARY KEY (id_tempo, id_curso)
 );
 
+-- Lida somente na linha do ano de ingresso igual ao ano do censo, para os ingressantes.
+CREATE TABLE gold.fato_evasao_coorte (
+    id_tempo                   integer NOT NULL REFERENCES gold.dim_tempo,
+    id_tempo_ingresso          integer NOT NULL REFERENCES gold.dim_tempo,
+    id_instituicao             integer NOT NULL REFERENCES gold.dim_instituicao,
+    id_curso                   integer NOT NULL REFERENCES gold.dim_curso,
+    id_area_conhecimento       integer NOT NULL REFERENCES gold.dim_area_conhecimento,
+    id_localidade              integer NOT NULL REFERENCES gold.dim_localidade,
+    id_oferta                  integer NOT NULL REFERENCES gold.dim_oferta,
+    codigo_curso               text NOT NULL,
+    vinculos_total             numeric,
+    alunos_cursando            numeric,
+    alunos_matricula_trancada  numeric,
+    alunos_desvinculados       numeric,
+    alunos_transferidos        numeric,
+    concluintes_total          numeric,
+    alunos_falecidos           numeric,
+    ingressantes_total         numeric,
+    flag_valor_negativo        boolean,
+    flag_grupo_pequeno         boolean,
+    PRIMARY KEY (id_tempo, id_tempo_ingresso, id_curso)
+);

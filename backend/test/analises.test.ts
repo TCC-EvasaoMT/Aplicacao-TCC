@@ -12,7 +12,6 @@ const registro: AgregadoAnual = {
 	ano: 2023,
 	vinculos_total: '1000',
 	ingressantes_total: '120',
-	matriculas_total: '670',
 	concluintes_total: '120',
 	alunos_cursando: '550',
 	alunos_desvinculados: '190',
@@ -21,6 +20,7 @@ const registro: AgregadoAnual = {
 	alunos_falecidos: '0',
 	registros_com_alunos: 2,
 	registros_sem_alunos: 0,
+	registros_sem_ingressantes: 0,
 	flag_valor_negativo: false,
 	dados_incompletos: false
 }

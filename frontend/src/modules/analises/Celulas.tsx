@@ -90,10 +90,28 @@ function Ausente() {
 	)
 }
 
-export function CelulaNumero({ valor }: { valor: number | null }) {
+export function CelulaNumero({
+	valor,
+	minimo = false
+}: {
+	valor: number | null
+	minimo?: boolean
+}) {
 	return (
 		<td className={classesTabela.numero}>
-			{valor === null ? <Ausente /> : numero.format(valor)}
+			{valor === null ? (
+				<Ausente />
+			) : (
+				<>
+					{minimo && (
+						<>
+							<span aria-hidden="true">≥ </span>
+							<span className="sr-only">ao menos </span>
+						</>
+					)}
+					{numero.format(valor)}
+				</>
+			)}
 		</td>
 	)
 }

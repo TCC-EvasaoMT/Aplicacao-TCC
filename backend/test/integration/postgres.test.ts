@@ -247,6 +247,52 @@ test(
 		)
 
 		await t.test(
+			'matrículas e ingressantes não usam as colunas com ruído da Gold',
+			async () => {
+				const curso = await resumo({ codigo_curso: '001' })
+				assert.equal(curso.totais.matriculas_total, 50 + 20)
+				// Só a coorte que ingressou em 2023; a de 2022 é distrator.
+				assert.equal(curso.totais.ingressantes_total, 20)
+				assert.equal(curso.qualidade.registros_sem_ingressantes, 0)
+				assert.equal(curso.qualidade.ingressantes_minimo, false)
+				// A Gold marca valor negativo por causa das colunas descartadas.
+				assert.equal(curso.qualidade.flag_valor_negativo, false)
+				const anterior = await resumo({ ano: '2022', codigo_curso: '001' })
+				assert.equal(anterior.totais.ingressantes_total, 100)
+				assert.equal(anterior.totais.matriculas_total, 800)
+			}
+		)
+
+		await t.test(
+			'curso sem linha de ingresso torna o total de ingressantes um mínimo',
+			async () => {
+				const filtro = { categoria_administrativa: 'Pública Municipal' }
+				await db.query('DELETE FROM gold.fato_evasao_coorte WHERE id_curso = 7')
+				try {
+					const parcial = await resumo(filtro)
+					assert.equal(parcial.totais.ingressantes_total, 2)
+					assert.equal(parcial.qualidade.registros_sem_ingressantes, 1)
+					assert.equal(parcial.qualidade.ingressantes_minimo, true)
+					// As outras medidas não ficam incompletas por isso.
+					assert.equal(parcial.qualidade.dados_incompletos, false)
+					assert.equal(parcial.totais.matriculas_total, 26)
+					await db.query(
+						'DELETE FROM gold.fato_evasao_coorte WHERE id_curso = 8'
+					)
+					const nenhum = await resumo(filtro)
+					assert.equal(nenhum.totais.ingressantes_total, null)
+					assert.equal(nenhum.qualidade.registros_sem_ingressantes, 2)
+				} finally {
+					await db.query(`INSERT INTO gold.fato_evasao_coorte
+            (id_tempo, id_tempo_ingresso, id_instituicao, id_curso, id_area_conhecimento,
+             id_localidade, id_oferta, codigo_curso, vinculos_total)
+            VALUES (3, 3, 3, 7, 2, 2, 1, '007', 2), (3, 3, 3, 8, 2, 2, 1, '008', 2)
+            ON CONFLICT DO NOTHING`)
+				}
+			}
+		)
+
+		await t.test(
 			'ruído, dados parciais e grupos pequenos têm sinalização explícita',
 			async () => {
 				const ruido = await resumo({ codigo_curso: '005' })
@@ -384,6 +430,7 @@ test(
 				await db.query(`BEGIN;
       INSERT INTO gold.dim_curso (id_curso, codigo_curso, nome_curso) VALUES (101, 'temporario', 'Pedagogia');
       UPDATE gold.fato_evasao_curso SET id_curso = 101 WHERE id_curso = 1;
+      UPDATE gold.fato_evasao_coorte SET id_curso = 101 WHERE id_curso = 1;
       DELETE FROM gold.dim_curso WHERE id_curso = 1;
       UPDATE gold.dim_curso SET codigo_curso = '001' WHERE id_curso = 101;
       COMMIT;`)

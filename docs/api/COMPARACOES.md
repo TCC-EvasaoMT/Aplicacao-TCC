@@ -52,7 +52,7 @@ Um grupo solicitado que não tem registros no ano/recorte não é retornado: nã
 
 Cada grupo reutiliza as regras do [resumo anual](../../backend/README.md#cálculos-e-qualidade). A base é a soma dos vínculos menos a soma dos falecidos; evasão do curso usa desvinculados mais transferidos, e evasão da IES usa desvinculados. As taxas são proporções e usam as somas, nunca médias das taxas dos cursos.
 
-Valores negativos e decimais permanecem no resultado. Base ausente ou não positiva e numerador ausente produzem taxa `null`. Medidas parcialmente ausentes continuam `null`, com `dados_incompletos=true`. A sinalização de grupo pequeno é recalculada pela base agregada, com limite estrito de 30.
+Valores negativos e decimais permanecem no resultado. Base ausente ou não positiva e numerador ausente produzem taxa `null`. Medidas parcialmente ausentes continuam `null`, com `dados_incompletos=true`. Ingressantes seguem outra regra: em cada grupo, o total soma os cursos com linha de ingresso na coorte e, faltando algum, `ingressantes_minimo=true`. A sinalização de grupo pequeno é recalculada pela base agregada, com limite estrito de 30.
 
 Um grupo com apenas docentes continua presente, com medidas de alunos nulas, `sem_dados=true` e `registros_sem_alunos` maior que zero. Isso é diferente de um grupo sem qualquer registro, que não aparece na lista.
 

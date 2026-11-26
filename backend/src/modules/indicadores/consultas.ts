@@ -52,10 +52,16 @@ const somas = medidas.map(
   END AS ${medida}`
 )
 
+// A flag da Gold também marca o ruído das colunas descartadas; aqui contam
+// apenas as medidas exibidas. least() ignora nulos.
+const negativo = `least(${medidas.map((m) => `f.${m}`).join(', ')}, ci.vinculos_total) < 0`
+
 export const agregacaoSQL = `${somas.join(',')},
+      (sum(ci.vinculos_total) FILTER (WHERE f.vinculos_total IS NOT NULL))::text AS ingressantes_total,
+      count(*) FILTER (WHERE f.vinculos_total IS NOT NULL AND ci.vinculos_total IS NULL)::integer AS registros_sem_ingressantes,
       count(f.vinculos_total)::integer AS registros_com_alunos,
       count(*) FILTER (WHERE f.vinculos_total IS NULL)::integer AS registros_sem_alunos,
-      bool_or(f.flag_valor_negativo) AS flag_valor_negativo,
+      bool_or(f.vinculos_total IS NOT NULL AND ${negativo}) AS flag_valor_negativo,
       bool_or(f.vinculos_total IS NOT NULL AND num_nonnulls(${medidas.map((m) => `f.${m}`).join(',')}) < ${medidas.length}) AS dados_incompletos`
 
 export function consultaResumo(filtros: Filtros) {

@@ -46,7 +46,18 @@ A modelagem descreve ainda fatos de coorte, perfil e contexto docente. A API atu
 
 ## Medidas e taxas
 
-O [resumo anual](../../backend/README.md#cálculos-e-qualidade) retorna nove totais: vínculos, ingressantes, matrículas, concluintes, cursando, desvinculados, transferidos, trancados e falecidos. O SQL soma as medidas do recorte; funções TypeScript calculam as taxas:
+O [resumo anual](../../backend/README.md#cálculos-e-qualidade) retorna nove totais: vínculos, ingressantes, matrículas, concluintes, cursando, desvinculados, transferidos, trancados e falecidos. O SQL soma as medidas do recorte; funções TypeScript calculam as taxas e as matrículas.
+
+Ingressantes e matrículas não vêm das colunas de mesmo nome da `fato_evasao_curso`. Na extração do SEDAP+, o ruído dessas duas somas supera o próprio valor: ingressantes passam de três vezes os vínculos, e matrículas não acompanham cursando mais concluintes. A decisão de 25/11/2026 manteve a pipeline e mudou o cálculo na aplicação:
+
+| Medida       | Origem                                                                                                                           |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------- |
+| Matrículas   | Cursando + concluintes, as situações de vínculo cursando ou formado na definição do INEP                                         |
+| Ingressantes | Vínculos da `fato_evasao_coorte` cujo ano de ingresso é o próprio ano do censo; total mínimo quando falta a linha de algum curso |
+
+A linha de ingresso falta para 16% a 34% dos cursos por ano, por não haver ingressantes ou por omissão de grupos pelo SEDAP+. O total soma os cursos com a linha e é apresentado como mínimo, com a quantidade de cursos sem ingressantes informados.
+
+As taxas usam somas de contagens com ruído pequeno:
 
 | Indicador       | Fórmula sobre as somas do recorte              |
 | --------------- | ---------------------------------------------- |
@@ -56,7 +67,7 @@ O [resumo anual](../../backend/README.md#cálculos-e-qualidade) retorna nove tot
 
 Uma taxa `0.20` representa 20%. A agregação ocorre antes da divisão; não se faz média das taxas dos cursos. Transferência entra na evasão do curso e não na da IES. Trancamento e conclusão não entram nesses numeradores.
 
-Os valores decimais e negativos são preservados. Ausência de dados não vira zero; medidas incompletas geram total `null`. Base ausente ou não positiva e numerador ausente geram taxa `null`. A qualidade informa registros sem alunos, dados incompletos, negativos na origem e base agregada inferior a 30. Linhas só com docentes não produzem contagens de alunos.
+Os valores decimais e negativos são preservados. Ausência de dados não vira zero; medidas incompletas geram total `null`. Base ausente ou não positiva e numerador ausente geram taxa `null`. A qualidade informa registros sem alunos, cursos sem ingressantes informados, dados incompletos, valores negativos nas medidas exibidas e base agregada inferior a 30. Linhas só com docentes não produzem contagens de alunos.
 
 O frontend mostra quatro totais (vínculos, ingressantes, matrículas e concluintes) e duas taxas. Os outros totais estão na API, mas não têm cartões próprios. A variação anual usa os resultados de dois censos e não acompanha uma coorte. Nenhuma dessas visualizações demonstra uma causa da evasão.
 

@@ -25,6 +25,8 @@ const ponto: PontoTemporal = {
 		sem_dados: false,
 		registros_com_alunos: 1,
 		registros_sem_alunos: 0,
+		registros_sem_ingressantes: 1,
+		ingressantes_minimo: true,
 		dados_incompletos: true,
 		flag_valor_negativo: true,
 		flag_grupo_pequeno: true
@@ -61,7 +63,7 @@ test('CSV da evolução e da comparação preservam ausências, negativos e deci
 	assert.ok(cabecalho?.startsWith('Ano;Vínculos;Matrículas'))
 	assert.equal(
 		linha,
-		'2023;20,5;;2;0;20,5;0,0366;-0,122;não;1;0;sim;sim;sim;codigo_curso=005'
+		'2023;20,5;;2;sim;0;20,5;0,0366;-0,122;não;1;0;1;sim;sim;sim;codigo_curso=005'
 	)
 	const grupo: GrupoComparacao = {
 		...ponto,

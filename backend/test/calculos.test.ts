@@ -2,7 +2,9 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import {
 	calcularResumo,
+	ingressantesDoRecorte,
 	medidas,
+	totais,
 	type Agregado
 } from '../src/modules/indicadores/calculos.js'
 
@@ -10,7 +12,6 @@ function agregado(changes: Partial<Agregado> = {}): Agregado {
 	return {
 		vinculos_total: '1000',
 		ingressantes_total: '100',
-		matriculas_total: '700',
 		concluintes_total: '200',
 		alunos_cursando: '500',
 		alunos_desvinculados: '100',
@@ -19,6 +20,7 @@ function agregado(changes: Partial<Agregado> = {}): Agregado {
 		alunos_falecidos: '0',
 		registros_com_alunos: 2,
 		registros_sem_alunos: 0,
+		registros_sem_ingressantes: 0,
 		flag_valor_negativo: false,
 		dados_incompletos: false,
 		...changes
@@ -78,11 +80,15 @@ test('sem dados de alunos não é zero, mesmo havendo docentes', () => {
 	const resumo = calcularResumo(
 		agregado({
 			...valoresNulos,
+			ingressantes_total: null,
 			registros_com_alunos: 0,
 			registros_sem_alunos: 1
 		})
 	)
-	assert.deepEqual(resumo.totais, valoresNulos)
+	assert.deepEqual(
+		resumo.totais,
+		Object.fromEntries(totais.map((t) => [t, null]))
+	)
 	assert.equal(resumo.base_risco, null)
 	assert.equal(resumo.qualidade.sem_dados, true)
 	assert.equal(resumo.qualidade.flag_grupo_pequeno, null)
@@ -90,4 +96,35 @@ test('sem dados de alunos não é zero, mesmo havendo docentes', () => {
 
 test('recusa números não finitos para não serializar resultados enganosos', () => {
 	assert.throws(() => calcularResumo(agregado({ vinculos_total: 'NaN' })))
+})
+
+test('ingressantes somam os cursos com linha de ingresso e viram mínimo quando falta algum', () => {
+	assert.deepEqual(ingressantesDoRecorte(120, 0, 3), {
+		total: 120,
+		minimo: false
+	})
+	assert.deepEqual(ingressantesDoRecorte(120, 1, 3), {
+		total: 120,
+		minimo: true
+	})
+	// Zero com curso sem linha ainda é um limite inferior verdadeiro.
+	assert.deepEqual(ingressantesDoRecorte(0, 2, 3), { total: 0, minimo: true })
+	// Sem nenhuma linha, ou sem alunos, o total é desconhecido.
+	assert.deepEqual(ingressantesDoRecorte(null, 3, 3), {
+		total: null,
+		minimo: false
+	})
+	assert.deepEqual(ingressantesDoRecorte(null, 0, 0), {
+		total: null,
+		minimo: false
+	})
+})
+
+test('curso sem ingressantes informados não torna as outras medidas incompletas', () => {
+	const resumo = calcularResumo(agregado({ registros_sem_ingressantes: 1 }))
+	assert.equal(resumo.totais.ingressantes_total, 100)
+	assert.equal(resumo.qualidade.ingressantes_minimo, true)
+	assert.equal(resumo.qualidade.registros_sem_ingressantes, 1)
+	assert.equal(resumo.qualidade.dados_incompletos, false)
+	assert.equal(resumo.totais.matriculas_total, 500 + 200)
 })

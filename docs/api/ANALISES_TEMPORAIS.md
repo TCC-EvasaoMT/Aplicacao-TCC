@@ -38,6 +38,7 @@ Cada entrada possui `ano`, `totais`, `base_risco`, `taxas` e `qualidade`. Os cam
 - Medidas parcialmente ausentes produzem totais `null`, com sinalização de dados incompletos.
 - Sem registros no ano e recorte, todas as medidas, base e taxas são `null`; `sem_dados=true` e os contadores de registros são zero.
 - Anos com somente docentes também têm medidas de alunos `null`, mas `registros_sem_alunos` informa a presença dessas linhas.
+- Ingressantes vêm da coorte e podem ser um mínimo no ano: `qualidade.ingressantes_minimo` e `registros_sem_ingressantes` informam os cursos sem linha de ingresso. Matrículas são cursando mais concluintes.
 - A marca de grupo pequeno é calculada sobre a base de cada ano, nunca sobre a soma de toda a série.
 
 A API não interpola lacunas. A visualização representa a ausência de informação com interrupções nas linhas, sem ligar pontos como se houvesse dados intermediários. Esta série descreve censos anuais; não acompanha a trajetória de uma coorte nem atribui causas às mudanças.
