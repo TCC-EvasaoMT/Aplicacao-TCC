@@ -50,12 +50,12 @@ Em desenvolvimento, `pnpm dev` inicia Fastify na porta 3000 e Vite na 5173. O na
 
 ## Módulos existentes
 
-| Módulo         | Responsabilidade                                                           | Entrada HTTP                                                                  |
-| -------------- | -------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| `catalogos`    | Listar opções disponíveis para filtros                                     | `GET /api/v1/filtros`                                                         |
-| `indicadores`  | Agregar um recorte anual e calcular seus totais, taxas e qualidade         | `GET /api/v1/indicadores/resumo`                                              |
-| `analises`     | Consultar evolução anual e comparar grupos no mesmo ano                    | `GET /api/v1/analises/evolucao-temporal` e `GET /api/v1/analises/comparacoes` |
-| `autenticacao` | Autenticar, renovar e revogar sessões, trocar a senha e aplicar permissões | `/api/v1/autenticacao/*`                                                      |
+| Módulo         | Responsabilidade                                                           | Entrada HTTP                                                            |
+| -------------- | -------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `catalogos`    | Listar opções disponíveis para filtros                                     | `GET /api/v1/filtros`                                                   |
+| `indicadores`  | Agregar um recorte anual e calcular seus totais, taxas e qualidade         | `GET /api/v1/indicadores/resumo`                                        |
+| `analises`     | Consultar evolução anual, comparar grupos e dispersão por curso            | `GET /api/v1/analises/evolucao-temporal`, `/comparacoes` e `/dispersao` |
+| `autenticacao` | Autenticar, renovar e revogar sessões, trocar a senha e aplicar permissões | `/api/v1/autenticacao/*`                                                |
 
 Saúde da aplicação, tratamento de erros e documentação da API são recursos transversais. `GET /health` pertence a `plugins/health.ts`; não é uma responsabilidade do módulo de indicadores. O controle de acesso é instalado na raiz do Fastify pelo módulo de autenticação, antes das rotas, conforme o [modelo de acesso](AUTORIZACAO.md).
 
@@ -210,6 +210,7 @@ O [modelo de autorização](AUTORIZACAO.md) mantém o painel público e a admini
 - [API de evolução temporal](../api/ANALISES_TEMPORAIS.md)
 - [Evolução temporal na interface](../frontend/ANALISES.md)
 - [API de comparações](../api/COMPARACOES.md)
+- [API de dispersão por curso](../api/DISPERSAO.md)
 - [Comparações na interface](../frontend/COMPARACOES.md)
 - [Estado e exportação](../frontend/ESTADO_E_EXPORTACAO.md)
 - [Interatividade e filtragem cruzada](../frontend/INTERATIVIDADE.md)

@@ -745,7 +745,8 @@ test(
 					'/api/v1/filtros',
 					'/api/v1/indicadores/resumo?ano=2023',
 					'/api/v1/analises/evolucao-temporal?ano_inicial=2022&ano_final=2023',
-					'/api/v1/analises/comparacoes?ano=2023&agrupar_por=curso'
+					'/api/v1/analises/comparacoes?ano=2023&agrupar_por=curso',
+					'/api/v1/analises/dispersao?ano=2023'
 				]) {
 					assert.equal((await app.inject(url)).statusCode, 200)
 				}

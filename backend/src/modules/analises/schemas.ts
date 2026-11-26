@@ -5,6 +5,7 @@ import {
 } from '../indicadores/index.js'
 import { MAX_ANOS } from './evolucao.js'
 import { agrupamentos, MAX_GRUPOS } from './comparacoes.js'
+import { BASE_MINIMA, taxasDispersao } from './dispersao.js'
 
 export const comparacaoQuerySchema = {
 	type: 'object',
@@ -138,6 +139,98 @@ export const evolucaoSchema = {
 				additionalProperties: false,
 				required: ['ano', 'totais', 'base_risco', 'taxas', 'qualidade'],
 				properties: { ano: anoSchema, ...resultadoResumoProperties }
+			}
+		}
+	}
+}
+
+export const dispersaoQuerySchema = {
+	type: 'object',
+	additionalProperties: false,
+	required: ['ano'],
+	properties: { ano: anoSchema, ...filtrosRecorteProperties }
+}
+
+const porTaxa = (schema: object, descricao: string) => ({
+	type: 'object',
+	additionalProperties: false,
+	required: [...taxasDispersao],
+	description: descricao,
+	properties: Object.fromEntries(taxasDispersao.map((t) => [t, schema]))
+})
+const contagem = { type: 'integer', minimum: 0 }
+
+export const dispersaoSchema = {
+	type: 'object',
+	additionalProperties: false,
+	required: ['filtros', 'referencias', 'cursos'],
+	properties: {
+		filtros: dispersaoQuerySchema,
+		referencias: {
+			type: 'object',
+			additionalProperties: false,
+			required: [
+				'base_minima',
+				'alta_evasao',
+				'cursos_na_referencia',
+				'cursos_fora_da_referencia'
+			],
+			properties: {
+				base_minima: {
+					type: 'integer',
+					const: BASE_MINIMA,
+					description:
+						'Base de risco mínima para a zona crítica; mesmo limite de flag_grupo_pequeno.'
+				},
+				alta_evasao: porTaxa(
+					{ type: 'number', nullable: true },
+					'Linha de alta evasão de cada taxa: soma dos numeradores dividida pela soma das bases dos cursos com a taxa calculável. null quando nenhum curso tem a taxa.'
+				),
+				cursos_na_referencia: porTaxa(
+					contagem,
+					'Cursos usados no cálculo de cada linha.'
+				),
+				cursos_fora_da_referencia: porTaxa(
+					contagem,
+					'Cursos sem a taxa calculável (base não positiva, medida ausente ou só docentes).'
+				)
+			}
+		},
+		cursos: {
+			type: 'array',
+			description:
+				'Um item por código de curso, em ordem textual do código. Não é ranking.',
+			items: {
+				type: 'object',
+				additionalProperties: false,
+				required: [
+					'curso',
+					'totais',
+					'base_risco',
+					'taxas',
+					'qualidade',
+					'zona_critica'
+				],
+				properties: {
+					curso: {
+						type: 'object',
+						additionalProperties: false,
+						required: ['codigo', 'nome'],
+						properties: {
+							codigo: {
+								type: 'string',
+								nullable: true,
+								description: 'Código original do curso; null quando ausente.'
+							},
+							nome: { type: 'string', nullable: true }
+						}
+					},
+					...resultadoResumoProperties,
+					zona_critica: porTaxa(
+						{ type: 'boolean' },
+						`Taxa do curso maior que a linha de alta evasão e base de risco de pelo menos ${BASE_MINIMA}.`
+					)
+				}
 			}
 		}
 	}

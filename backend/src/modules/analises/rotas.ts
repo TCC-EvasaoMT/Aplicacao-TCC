@@ -6,10 +6,13 @@ import { MAX_ANOS, montarSerie } from './evolucao.js'
 import {
 	comparacaoQuerySchema,
 	comparacaoSchema,
+	dispersaoQuerySchema,
+	dispersaoSchema,
 	evolucaoQuerySchema,
 	evolucaoSchema
 } from './schemas.js'
 import { montarComparacao, type FiltrosComparacao } from './comparacoes.js'
+import { montarDispersao, type FiltrosDispersao } from './dispersao.js'
 
 export function registrarRotas(
 	app: FastifyInstance,
@@ -43,6 +46,31 @@ export function registrarRotas(
 				consultas.comparacao(request.query)
 			)
 			return { filtros: request.query, ...montarComparacao(agregados) }
+		}
+	)
+	app.get<{ Querystring: FiltrosDispersao }>(
+		'/api/v1/analises/dispersao',
+		{
+			config: { acesso: 'publico' },
+			schema: {
+				tags: ['Análises'],
+				summary: 'Relaciona matrículas e evasão de cada curso em um ano.',
+				description:
+					'Exemplo: /api/v1/analises/dispersao?ano=2023&codigo_area_geral=01. Devolve todos os cursos do recorte, a linha de alta evasão de cada taxa e a zona crítica (taxa acima da linha e base de risco de pelo menos 30). A ordem é pelo código do curso, não um ranking.',
+				querystring: dispersaoQuerySchema,
+				response: {
+					200: dispersaoSchema,
+					400: erroSchema,
+					500: erroSchema,
+					503: erroSchema
+				}
+			}
+		},
+		async (request) => {
+			const agregados = await consultarGold(request, () =>
+				consultas.dispersao(request.query)
+			)
+			return { filtros: request.query, ...montarDispersao(agregados) }
 		}
 	)
 	app.get<{ Querystring: FiltrosEvolucao }>(

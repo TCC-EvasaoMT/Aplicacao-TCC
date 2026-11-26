@@ -21,7 +21,7 @@ Para instalar e executar, comece pelo [README da raiz](../README.md). Para enten
 - [Arquitetura da aplicação](arquitetura/ARQUITETURA.md) e [módulos do backend](arquitetura/MODULOS_BACKEND.md).
 - [Fontes e indicadores](metodologia/FONTES_E_INDICADORES.md).
 - [Preparação do backend, catálogo, resumo e fórmulas](../backend/README.md).
-- [API de evolução temporal](api/ANALISES_TEMPORAIS.md) e [API de comparações](api/COMPARACOES.md).
+- [API de evolução temporal](api/ANALISES_TEMPORAIS.md), [API de comparações](api/COMPARACOES.md) e [API de dispersão por curso](api/DISPERSAO.md).
 - [Filtros do painel](frontend/FILTROS.md), [evolução temporal](frontend/ANALISES.md) e [comparações](frontend/COMPARACOES.md).
 - [Interatividade](frontend/INTERATIVIDADE.md), [estado e exportação](frontend/ESTADO_E_EXPORTACAO.md) , [estilização](frontend/ESTILIZACAO.md) e [login e sessão](frontend/AUTENTICACAO.md).
 - [Proteção da API e logs](operacao/SEGURANCA_API.md), [acesso administrativo](arquitetura/AUTORIZACAO.md), [banco da aplicação](arquitetura/BANCO_APLICACAO.md) e [validação](operacao/VALIDACAO.md).
