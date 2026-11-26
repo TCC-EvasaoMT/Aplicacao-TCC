@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Button } from 'primereact/button'
 import { Message } from 'primereact/message'
-import { PainelComparacoes, PainelEvolucao } from '../analises'
+import { PainelComparacoes, PainelDispersao, PainelEvolucao } from '../analises'
 import { Carregando } from '../../lib/Estados'
 import { empilhar, exibicao } from '../../lib/exibicao'
 import { mensagemErro } from '../../lib/http'
@@ -377,6 +377,21 @@ export function PainelIndicadores({ aba }: { aba: AbaPainel }) {
 				hidden={aba !== 'comparacao'}
 			>
 				<PainelComparacoes
+					catalogo={catalogo}
+					selecao={selecao}
+					atualizacao={tentativa}
+					indisponivel={carregandoCatalogo || !!erroCatalogo}
+					onAnoChange={(ano) => alterar('ano', ano)}
+					onSelecaoChange={aplicar}
+				/>
+			</div>
+			<div
+				role="tabpanel"
+				id="painel-dispersao"
+				aria-labelledby="aba-dispersao"
+				hidden={aba !== 'dispersao'}
+			>
+				<PainelDispersao
 					catalogo={catalogo}
 					selecao={selecao}
 					atualizacao={tentativa}

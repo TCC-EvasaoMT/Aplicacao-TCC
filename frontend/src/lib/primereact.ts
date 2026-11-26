@@ -210,14 +210,15 @@ export const tema: PrimeReactPTOptions = {
 		}
 	},
 	// Abas dos gráficos sobre a faixa verde do cabeçalho: a ativa assume a cor
-	// do fundo da página, como uma pasta aberta sobre o conteúdo.
+	// do fundo da página, como uma pasta aberta sobre o conteúdo. Abaixo de
+	// 400 px, espaço e fonte menores para as quatro abas caberem em 320 px.
 	tabmenu: {
-		menu: { className: 'm-0 flex list-none gap-1 p-0' },
+		menu: { className: 'm-0 flex list-none gap-0.5 p-0 min-[400px]:gap-1' },
 		menuitem: { className: 'flex flex-1 sm:flex-none' },
 		inkbar: { className: 'hidden' },
 		action: (opcoes) => ({
 			className: classNames(
-				'flex flex-1 items-center justify-center rounded-t-lg px-3 py-3 text-center text-sm leading-tight font-semibold no-underline transition-colors duration-150 focus-visible:-outline-offset-4 motion-reduce:transition-none sm:px-5 sm:text-base',
+				'flex flex-1 items-center justify-center rounded-t-lg px-1.5 py-3 text-center text-[0.8125rem] leading-tight min-[400px]:px-3 min-[400px]:text-sm font-semibold no-underline transition-colors duration-150 focus-visible:-outline-offset-4 motion-reduce:transition-none sm:px-5 sm:text-base',
 				opcoes?.props.activeIndex === opcoes?.context.index
 					? 'bg-panel-background text-panel-green focus-visible:outline-panel-green'
 					: 'text-white/85 hover:bg-white/10 hover:text-white focus-visible:outline-white'

@@ -15,6 +15,28 @@ export function consultarComparacao(query: string, signal: AbortSignal) {
 	return consultar<Comparacao>(`/api/v1/analises/comparacoes?${query}`, signal)
 }
 
+export type TaxaDispersao = keyof Resumo['taxas']
+type PorTaxa<T> = Record<TaxaDispersao, T>
+
+export interface CursoDispersao extends Resumo {
+	curso: { codigo: string | null; nome: string | null }
+	zona_critica: PorTaxa<boolean>
+}
+
+export interface Dispersao {
+	referencias: {
+		base_minima: number
+		alta_evasao: PorTaxa<number | null>
+		cursos_na_referencia: PorTaxa<number>
+		cursos_fora_da_referencia: PorTaxa<number>
+	}
+	cursos: CursoDispersao[]
+}
+
+export function consultarDispersao(query: string, signal: AbortSignal) {
+	return consultar<Dispersao>(`/api/v1/analises/dispersao?${query}`, signal)
+}
+
 export interface PontoTemporal extends Resumo {
 	ano: number
 }

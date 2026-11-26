@@ -1,4 +1,4 @@
-import type { GrupoComparacao, PontoTemporal } from './api'
+import type { CursoDispersao, GrupoComparacao, PontoTemporal } from './api'
 
 // CSV para planilhas em português: separador ";", vírgula decimal e
 // valores da API sem arredondamento. Taxas seguem como proporções (0,1 = 10%).
@@ -82,6 +82,27 @@ export function csvComparacao(grupos: GrupoComparacao[], recorte: string) {
 			grupo.grupo.valor,
 			grupo.grupo.nome,
 			...medidas(grupo, recorte)
+		])
+	)
+}
+
+export function csvDispersao(cursos: CursoDispersao[], recorte: string) {
+	return gerarCsv(
+		[
+			'Código do curso',
+			'Nome do curso',
+			...colunasMedidas.slice(0, -1),
+			'Zona crítica (evasão do curso)',
+			'Zona crítica (evasão da instituição)',
+			'Recorte'
+		],
+		cursos.map((curso) => [
+			curso.curso.codigo,
+			curso.curso.nome,
+			...medidas(curso, recorte).slice(0, -1),
+			curso.zona_critica.evasao_curso,
+			curso.zona_critica.evasao_ies,
+			recorte
 		])
 	)
 }

@@ -5,7 +5,8 @@
 export const abasPainel = [
 	{ id: 'resumo', label: 'Resumo' },
 	{ id: 'evolucao', label: 'Evolução' },
-	{ id: 'comparacao', label: 'Comparação' }
+	{ id: 'comparacao', label: 'Comparação' },
+	{ id: 'dispersao', label: 'Dispersão' }
 ] as const
 
 export type AbaPainel = (typeof abasPainel)[number]['id']

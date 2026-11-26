@@ -60,6 +60,7 @@ test('comparação da URL valida a dimensão, remove repetidos e limita a 20 gru
 test('aba da URL aceita só as abas existentes', () => {
 	assert.equal(lerAba(new URLSearchParams('aba=comparacao')), 'comparacao')
 	assert.equal(lerAba(new URLSearchParams('aba=evolucao')), 'evolucao')
+	assert.equal(lerAba(new URLSearchParams('aba=dispersao')), 'dispersao')
 	assert.equal(lerAba(new URLSearchParams('aba=outra')), 'resumo')
 	assert.equal(lerAba(new URLSearchParams('')), 'resumo')
 })
