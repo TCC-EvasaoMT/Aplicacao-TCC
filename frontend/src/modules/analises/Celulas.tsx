@@ -6,19 +6,30 @@ import { formatarTaxa } from './apresentacao'
 const numero = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 })
 
 // Classes das tabelas da evolução e da comparação.
-const celula =
-	'min-w-20 border-b border-panel-border p-2 sm:min-w-[105px] sm:p-3 motion-safe:transition-colors motion-safe:duration-150'
-const cabecalho = cx(
-	celula,
+const base =
+	'border-b border-panel-border p-2 sm:p-3 motion-safe:transition-colors motion-safe:duration-150'
+const largura = 'min-w-20 sm:min-w-[105px]'
+const fundoCabecalho =
 	'border-panel-green bg-panel-green align-bottom font-semibold text-white'
-)
-const corpo = cx(celula, 'bg-panel-surface align-top')
+const fundoCorpo = 'bg-panel-surface align-top'
+const cabecalho = cx(base, largura, fundoCabecalho)
+const corpo = cx(base, largura, fundoCorpo)
 export const classesTabela = {
 	cabecalho: cx(cabecalho, 'text-left'),
 	cabecalhoNumero: cx(cabecalho, 'text-right'),
 	linhaCabecalho: cx(corpo, 'text-left font-semibold'),
 	texto: corpo,
 	numero: cx(corpo, 'text-right whitespace-nowrap')
+}
+
+// Mesmas células sem largura mínima, para colunas que definem a própria largura
+// (combinar duas larguras mínimas deixaria a ordem do CSS decidir).
+export const classesTabelaCompacta = {
+	cabecalho: cx(base, fundoCabecalho, 'text-left'),
+	cabecalhoNumero: cx(base, fundoCabecalho, 'text-right'),
+	linhaCabecalho: cx(base, fundoCorpo, 'text-left font-semibold'),
+	texto: cx(base, fundoCorpo),
+	numero: cx(base, fundoCorpo, 'text-right whitespace-nowrap')
 }
 
 // Filtragem cruzada: linha da tabela ligada ao gráfico. A linha selecionada
@@ -92,13 +103,15 @@ function Ausente() {
 
 export function CelulaNumero({
 	valor,
-	minimo = false
+	minimo = false,
+	compacta = false
 }: {
 	valor: number | null
 	minimo?: boolean
+	compacta?: boolean
 }) {
 	return (
-		<td className={classesTabela.numero}>
+		<td className={(compacta ? classesTabelaCompacta : classesTabela).numero}>
 			{valor === null ? (
 				<Ausente />
 			) : (

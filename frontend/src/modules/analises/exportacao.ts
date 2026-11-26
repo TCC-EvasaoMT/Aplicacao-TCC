@@ -1,4 +1,9 @@
-import type { CursoDispersao, GrupoComparacao, PontoTemporal } from './api'
+import type {
+	CursoDispersao,
+	GrupoComparacao,
+	GrupoRanking,
+	PontoTemporal
+} from './api'
 
 // CSV para planilhas em português: separador ";", vírgula decimal e
 // valores da API sem arredondamento. Taxas seguem como proporções (0,1 = 10%).
@@ -103,6 +108,27 @@ export function csvDispersao(cursos: CursoDispersao[], recorte: string) {
 			curso.zona_critica.evasao_curso,
 			curso.zona_critica.evasao_ies,
 			recorte
+		])
+	)
+}
+
+const situacoesCsv: Record<GrupoRanking['situacao'], string> = {
+	classificado: 'classificado',
+	base_pequena: 'base pequena',
+	sem_taxa: 'sem taxa',
+	sem_identificador: 'sem identificador'
+}
+
+export function csvRanking(grupos: GrupoRanking[], recorte: string) {
+	return gerarCsv(
+		['Posição', 'Empate', 'Situação', 'Código', 'Nome', ...colunasMedidas],
+		grupos.map((grupo) => [
+			grupo.posicao,
+			grupo.empate,
+			situacoesCsv[grupo.situacao],
+			grupo.grupo.valor,
+			grupo.grupo.nome,
+			...medidas(grupo, recorte)
 		])
 	)
 }
