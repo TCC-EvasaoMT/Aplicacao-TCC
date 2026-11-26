@@ -37,6 +37,7 @@ test('evolução valida período antes de consultar e preserva os sete filtros',
 		analises: {
 			comparacao: async () => [],
 			dispersao: async () => [],
+			ranking: async () => [],
 			async evolucao(filtros) {
 				chamadas.push(filtros)
 				return []

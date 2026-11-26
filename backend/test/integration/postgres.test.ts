@@ -406,6 +406,77 @@ test(
 		await testarComparacoes(t, server, db)
 
 		await t.test(
+			'ranking cobre todas as categorias, repete o resumo de cada uma e classifica só bases suficientes',
+			async () => {
+				const ranking = async (query: string) => {
+					const response = await server.inject(
+						`/api/v1/analises/ranking?${query}`
+					)
+					assert.equal(response.statusCode, 200, response.body)
+					return response.json()
+				}
+				type Item = {
+					grupo: { valor: string | null }
+					posicao: number | null
+					situacao: string
+				}
+				const linhas = (resultado: { grupos: Item[] }) =>
+					resultado.grupos.map((g) => [g.grupo.valor, g.posicao, g.situacao])
+				const areas = await ranking('ano=2023&dimensao=area_geral')
+				// A área 01 tem o curso 006 sem desvinculados; o grupo sem código só
+				// tem docentes.
+				assert.deepEqual(linhas(areas), [
+					['06', 1, 'classificado'],
+					['01', null, 'sem_taxa'],
+					[null, null, 'sem_identificador']
+				])
+				const modalidades = await ranking('ano=2023&dimensao=modalidade')
+				assert.deepEqual(linhas(modalidades), [
+					['A distância', 1, 'classificado'],
+					['Não informado', null, 'sem_taxa'],
+					['Presencial', null, 'sem_taxa']
+				])
+				for (const [filtro, resultado] of [
+					['codigo_area_geral', areas],
+					['modalidade', modalidades]
+				] as const)
+					for (const item of resultado.grupos) {
+						if (item.grupo.valor === null) continue
+						const {
+							grupo: _g,
+							situacao: _s,
+							posicao: _p,
+							empate: _e,
+							...valores
+						} = item
+						const { filtros: _f, ...esperado } = await resumo({
+							[filtro]: item.grupo.valor
+						})
+						assert.deepEqual(valores, esperado, item.grupo.valor)
+					}
+				const federal = 'ano=2023&categoria_administrativa=P%C3%BAblica+Federal'
+				assert.deepEqual(
+					linhas(await ranking(`${federal}&dimensao=area_geral`)),
+					[
+						['06', 1, 'classificado'],
+						['01', 2, 'classificado']
+					]
+				)
+				const porIes = await ranking(
+					`${federal}&dimensao=modalidade&taxa=evasao_ies`
+				)
+				assert.equal(porIes.filtros.taxa, 'evasao_ies')
+				assert.deepEqual(linhas(porIes), [
+					['A distância', 1, 'classificado'],
+					['Presencial', 2, 'classificado']
+				])
+				const vazio = await ranking('ano=1999&dimensao=area_geral')
+				assert.deepEqual(vazio.grupos, [])
+				assert.equal(vazio.classificados, 0)
+			}
+		)
+
+		await t.test(
 			'dispersão repete o resumo de cada curso e calcula a referência sem cursos sem taxa',
 			async () => {
 				const dispersao = async (query: string) => {

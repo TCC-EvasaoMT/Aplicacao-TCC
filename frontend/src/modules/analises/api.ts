@@ -37,6 +37,27 @@ export function consultarDispersao(query: string, signal: AbortSignal) {
 	return consultar<Dispersao>(`/api/v1/analises/dispersao?${query}`, signal)
 }
 
+export type DimensaoRanking = 'area_geral' | 'modalidade'
+export type SituacaoRanking =
+	'classificado' | 'base_pequena' | 'sem_taxa' | 'sem_identificador'
+
+export interface GrupoRanking extends Resumo {
+	grupo: { valor: string | null; nome: string | null }
+	situacao: SituacaoRanking
+	posicao: number | null
+	empate: boolean
+}
+
+export interface Ranking {
+	base_minima: number
+	classificados: number
+	grupos: GrupoRanking[]
+}
+
+export function consultarRanking(query: string, signal: AbortSignal) {
+	return consultar<Ranking>(`/api/v1/analises/ranking?${query}`, signal)
+}
+
 export interface PontoTemporal extends Resumo {
 	ano: number
 }

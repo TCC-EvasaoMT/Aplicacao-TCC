@@ -28,9 +28,11 @@ O `index.ts` também expõe o contrato de cálculo, os schemas de recorte e resu
 
 Para o RF10, `GET /api/v1/analises/dispersao` devolve todos os cursos de um ano, a linha de alta evasão de cada taxa e a zona crítica; `dispersao.ts` concentra essa regra. Veja o [contrato da dispersão](../api/DISPERSAO.md).
 
+Para o RF12, `GET /api/v1/analises/ranking` devolve todas as áreas gerais ou modalidades de um ano, classificadas pela taxa escolhida; `ranking.ts` decide empates, bases pequenas e ausências. Veja o [contrato do ranking](../api/RANKING.md).
+
 O módulo também fornece `GET /api/v1/analises/comparacoes`, com `ano` e `agrupar_por` obrigatórios. Compara até 20 grupos por curso, área geral CINE, municípios de oferta/sede, modalidade, categoria administrativa ou organização acadêmica. Aceita os sete filtros opcionais e seleção de grupos por códigos/textos. Retorna totais, taxas e qualidade por grupo, quantidade total de grupos e indicação de truncamento. Veja [contrato e exemplos das comparações](../api/COMPARACOES.md).
 
-`index.ts` exporta o plugin `analises`, a fábrica `criarConsultasAnalises` e o tipo de consultas, com as operações `evolucao`, `comparacao` e `dispersao`. `consultas.ts` agrega por ano ou grupo; `evolucao.ts` completa lacunas; `comparacoes.ts` define as dimensões permitidas e monta os resultados. Ambos reutilizam o cálculo público de indicadores. `rotas.ts` e `schemas.ts` definem os contratos HTTP. Consulte a [API de evolução temporal](../api/ANALISES_TEMPORAIS.md) e as [comparações na interface](../frontend/COMPARACOES.md). Dispersão e rankings estão pendentes. As rotas disponíveis são públicas.
+`index.ts` exporta o plugin `analises`, a fábrica `criarConsultasAnalises` e o tipo de consultas, com as operações `evolucao`, `comparacao`, `dispersao` e `ranking`. `consultas.ts` agrega por ano ou grupo; `evolucao.ts` completa lacunas; `comparacoes.ts` define as dimensões permitidas e monta os resultados. Ambos reutilizam o cálculo público de indicadores. `rotas.ts` e `schemas.ts` definem os contratos HTTP. Consulte a [API de evolução temporal](../api/ANALISES_TEMPORAIS.md) e as [comparações na interface](../frontend/COMPARACOES.md). As rotas de análise são públicas.
 
 ## Autenticação
 

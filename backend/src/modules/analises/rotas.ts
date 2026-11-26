@@ -8,11 +8,14 @@ import {
 	comparacaoSchema,
 	dispersaoQuerySchema,
 	dispersaoSchema,
+	rankingQuerySchema,
+	rankingSchema,
 	evolucaoQuerySchema,
 	evolucaoSchema
 } from './schemas.js'
 import { montarComparacao, type FiltrosComparacao } from './comparacoes.js'
 import { montarDispersao, type FiltrosDispersao } from './dispersao.js'
+import { montarRanking, type FiltrosRanking } from './ranking.js'
 
 export function registrarRotas(
 	app: FastifyInstance,
@@ -46,6 +49,35 @@ export function registrarRotas(
 				consultas.comparacao(request.query)
 			)
 			return { filtros: request.query, ...montarComparacao(agregados) }
+		}
+	)
+	app.get<{ Querystring: FiltrosRanking }>(
+		'/api/v1/analises/ranking',
+		{
+			config: { acesso: 'publico' },
+			schema: {
+				tags: ['Análises'],
+				summary:
+					'Classifica as áreas gerais ou as modalidades pela taxa de evasão.',
+				description:
+					'Exemplo: /api/v1/analises/ranking?ano=2023&dimensao=area_geral&taxa=evasao_curso. Devolve todas as categorias do recorte. Ordena da maior para a menor taxa; taxas iguais dividem a posição (1, 2, 2, 4). Grupos com base de risco abaixo de 30, sem taxa ou sem identificador aparecem sem posição.',
+				querystring: rankingQuerySchema,
+				response: {
+					200: rankingSchema,
+					400: erroSchema,
+					500: erroSchema,
+					503: erroSchema
+				}
+			}
+		},
+		async (request) => {
+			const agregados = await consultarGold(request, () =>
+				consultas.ranking(request.query)
+			)
+			return {
+				filtros: request.query,
+				...montarRanking(agregados, request.query.taxa)
+			}
 		}
 	)
 	app.get<{ Querystring: FiltrosDispersao }>(

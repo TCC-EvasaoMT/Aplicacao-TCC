@@ -6,6 +6,7 @@ import {
 import { MAX_ANOS } from './evolucao.js'
 import { agrupamentos, MAX_GRUPOS } from './comparacoes.js'
 import { BASE_MINIMA, taxasDispersao } from './dispersao.js'
+import { dimensoesRanking, situacoes, taxasRanking } from './ranking.js'
 
 export const comparacaoQuerySchema = {
 	type: 'object',
@@ -230,6 +231,100 @@ export const dispersaoSchema = {
 						{ type: 'boolean' },
 						`Taxa do curso maior que a linha de alta evasão e base de risco de pelo menos ${BASE_MINIMA}.`
 					)
+				}
+			}
+		}
+	}
+}
+
+export const rankingQuerySchema = {
+	type: 'object',
+	additionalProperties: false,
+	required: ['ano', 'dimensao'],
+	properties: {
+		ano: anoSchema,
+		dimensao: {
+			type: 'string',
+			enum: [...dimensoesRanking],
+			description: 'Área geral CINE ou modalidade.'
+		},
+		taxa: {
+			type: 'string',
+			enum: [...taxasRanking],
+			default: 'evasao_curso',
+			description: 'Taxa usada na ordenação, da maior para a menor.'
+		},
+		...filtrosRecorteProperties
+	}
+}
+
+export const rankingSchema = {
+	type: 'object',
+	additionalProperties: false,
+	required: ['filtros', 'base_minima', 'classificados', 'grupos'],
+	properties: {
+		filtros: {
+			type: 'object',
+			additionalProperties: false,
+			required: ['ano', 'dimensao', 'taxa'],
+			properties: rankingQuerySchema.properties
+		},
+		base_minima: {
+			type: 'integer',
+			const: BASE_MINIMA,
+			description:
+				'Base de risco mínima para receber posição; mesmo limite de flag_grupo_pequeno.'
+		},
+		classificados: {
+			type: 'integer',
+			minimum: 0,
+			description: 'Quantidade de grupos com posição.'
+		},
+		grupos: {
+			type: 'array',
+			description:
+				'Todas as categorias do recorte: primeiro as classificadas, da maior para a menor taxa; depois base pequena, sem taxa e sem identificador, cada uma em ordem de código.',
+			items: {
+				type: 'object',
+				additionalProperties: false,
+				required: [
+					'grupo',
+					'totais',
+					'base_risco',
+					'taxas',
+					'qualidade',
+					'situacao',
+					'posicao',
+					'empate'
+				],
+				properties: {
+					grupo: {
+						type: 'object',
+						additionalProperties: false,
+						required: ['valor', 'nome'],
+						properties: {
+							valor: { type: 'string', nullable: true },
+							nome: { type: 'string', nullable: true }
+						}
+					},
+					...resultadoResumoProperties,
+					situacao: {
+						type: 'string',
+						enum: [...situacoes],
+						description:
+							'classificado; base_pequena (base de risco abaixo do mínimo); sem_taxa (base não positiva, medida ausente ou só docentes); sem_identificador.'
+					},
+					posicao: {
+						type: 'integer',
+						minimum: 1,
+						nullable: true,
+						description:
+							'Classificação por competição (1, 2, 2, 4); null fora da classificação.'
+					},
+					empate: {
+						type: 'boolean',
+						description: 'Divide a posição com outro grupo de mesma taxa.'
+					}
 				}
 			}
 		}

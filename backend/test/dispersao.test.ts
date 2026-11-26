@@ -155,7 +155,12 @@ async function servidor(
 			health: unused,
 			indicadores: { resumo: unused },
 			catalogos: { filtros: unused },
-			analises: { evolucao: unused, comparacao: unused, dispersao }
+			analises: {
+				evolucao: unused,
+				comparacao: unused,
+				dispersao,
+				ranking: unused
+			}
 		},
 		{ docs }
 	)
