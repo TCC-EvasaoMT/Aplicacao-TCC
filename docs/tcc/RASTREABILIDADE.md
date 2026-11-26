@@ -62,7 +62,7 @@ As figuras 5 a 12 descrevem uma fato `fato_desempenho_curso`, identificação no
 
 O protótipo da figura 13 prevê vagas e desvinculados entre os cartões. O painel substitui esse conjunto por vínculos e duas taxas, além de ingressantes, matrículas e concluintes. A variação em pontos percentuais contra o ano anterior já existe. O protótipo da figura 14 prevê quatro visualizações simultâneas, incluindo dispersão e rankings; a comparação atual apresenta uma dimensão por vez. É preciso implementar o que falta ou aprovar a revisão desse escopo com o orientador.
 
-O objetivo geral menciona fatores associados à evasão. As telas atuais são descritivas: não identificam causas nem risco individual. Perfis, coortes e contexto docente existem na modelagem de referência, mas ainda não têm consultas ou telas nesta aplicação. Antes de incluí-los como entregas obrigatórias, delimitar quais perguntas analíticas o TCC precisa responder.
+O objetivo geral menciona fatores associados à evasão. O [perfil de quem evade](../api/PERFIL.md) responde a essa parte com os 12 fatores de prioridade 1 da `fato_evasao_perfil`: taxas por categoria em MT ou no recorte filtrado, com texto de associação, não de causa, e ressalva nos fatores com relação circular (apoio social e atividade extracurricular). Os 35 fatores de prioridade 2, a razão de taxas, as coortes e o contexto docente existem na modelagem de referência e ainda não têm consultas ou telas. As telas não identificam causas nem risco individual.
 
 ## Ordem sugerida para fechar as lacunas
 
