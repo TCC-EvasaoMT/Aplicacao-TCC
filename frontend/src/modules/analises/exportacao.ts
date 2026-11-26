@@ -1,5 +1,6 @@
 import type {
 	CategoriaPerfil,
+	PontoCoorte,
 	CursoDispersao,
 	GrupoComparacao,
 	GrupoRanking,
@@ -176,6 +177,57 @@ export function csvPerfil(
 			c.qualidade.dados_incompletos,
 			c.qualidade.flag_valor_negativo,
 			c.qualidade.flag_grupo_pequeno,
+			recorte
+		])
+	)
+}
+
+// Turma de ingresso: proporções sobre o tamanho inicial, sem arredondamento.
+export function csvCoorte(
+	anoIngresso: number,
+	tamanhoInicial: number,
+	serie: PontoCoorte[],
+	recorte: string
+) {
+	return gerarCsv(
+		[
+			'Ano de ingresso',
+			'Tamanho inicial',
+			'Ano do censo',
+			'Anos desde o ingresso',
+			'Vínculos no ano',
+			'Já evadiu do curso (proporção)',
+			'Já saiu da instituição (proporção)',
+			'Já concluiu (proporção)',
+			'Continua no curso (proporção)',
+			'Resíduo (proporção)',
+			'Sem dados da turma',
+			'Cursos da turma ausentes no ano',
+			'Registros fora da turma',
+			'Vínculos fora da turma',
+			'Dados incompletos',
+			'Valores negativos na origem',
+			'Turma inferior a 30',
+			'Recorte'
+		],
+		serie.map((p) => [
+			anoIngresso,
+			tamanhoInicial,
+			p.ano,
+			p.anos_desde_ingresso,
+			p.totais.vinculos_total,
+			p.taxas.evadiu,
+			p.taxas.evadiu_ies,
+			p.taxas.concluiu,
+			p.taxas.continua,
+			p.taxas.residuo,
+			p.qualidade.sem_dados,
+			p.qualidade.cursos_iniciais_ausentes,
+			p.qualidade.registros_fora_da_turma,
+			p.qualidade.vinculos_fora_da_turma,
+			p.qualidade.dados_incompletos,
+			p.qualidade.flag_valor_negativo,
+			p.qualidade.flag_grupo_pequeno,
 			recorte
 		])
 	)

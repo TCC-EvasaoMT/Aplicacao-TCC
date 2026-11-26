@@ -84,6 +84,54 @@ export function consultarPerfil(query: string, signal: AbortSignal) {
 	return consultar<Perfil>(`/api/v1/analises/perfil?${query}`, signal)
 }
 
+export interface PontoCoorte {
+	ano: number
+	anos_desde_ingresso: number
+	totais: {
+		vinculos_total: number | null
+		concluintes_total: number | null
+		alunos_cursando: number | null
+		alunos_desvinculados: number | null
+		alunos_transferidos: number | null
+		alunos_matricula_trancada: number | null
+		alunos_falecidos: number | null
+	}
+	acumulados: {
+		evadidos: number | null
+		desvinculados: number | null
+		concluintes: number | null
+	}
+	continua: number | null
+	taxas: {
+		evadiu: number | null
+		evadiu_ies: number | null
+		concluiu: number | null
+		continua: number | null
+		residuo: number | null
+	}
+	qualidade: {
+		sem_dados: boolean
+		registros: number
+		cursos_iniciais_ausentes: number
+		registros_fora_da_turma: number
+		vinculos_fora_da_turma: number | null
+		dados_incompletos: boolean
+		flag_valor_negativo: boolean
+		flag_grupo_pequeno: boolean
+	}
+}
+
+export interface Coorte {
+	tamanho_inicial: number | null
+	base_minima: number
+	cursos_iniciais: number
+	serie: PontoCoorte[]
+}
+
+export function consultarCoorte(query: string, signal: AbortSignal) {
+	return consultar<Coorte>(`/api/v1/analises/coorte?${query}`, signal)
+}
+
 export interface PontoTemporal extends Resumo {
 	ano: number
 }

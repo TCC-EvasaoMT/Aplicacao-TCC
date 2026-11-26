@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Button } from 'primereact/button'
 import { Message } from 'primereact/message'
 import {
+	PainelCoorte,
 	PainelComparacoes,
 	PainelDispersao,
 	PainelEvolucao,
@@ -399,6 +400,12 @@ export function PainelIndicadores({ aba }: { aba: AbaPainel }) {
 					anos={catalogo?.anos ?? []}
 					selecao={selecao}
 					onAnoChange={(ano) => alterar('ano', ano)}
+					atualizacao={tentativa}
+					indisponivel={carregandoCatalogo || !!erroCatalogo}
+				/>
+				<PainelCoorte
+					anos={catalogo?.anos ?? []}
+					selecao={selecao}
 					atualizacao={tentativa}
 					indisponivel={carregandoCatalogo || !!erroCatalogo}
 				/>
