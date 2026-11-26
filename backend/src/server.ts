@@ -64,7 +64,7 @@ for (const signal of ['SIGINT', 'SIGTERM'] as const) {
 	})
 }
 try {
-	await app.listen({ host: '127.0.0.1', port: config.port })
+	await app.listen({ host: config.host, port: config.port })
 } catch {
 	app.log.error('Não foi possível iniciar o servidor HTTP')
 	await app.close()

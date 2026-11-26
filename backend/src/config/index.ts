@@ -26,6 +26,7 @@ export function readConfig(env: NodeJS.ProcessEnv = process.env) {
 		throw new Error('NODE_ENV deve ser development, test ou production')
 	}
 	return {
+		host: env.HTTP_HOST ?? '127.0.0.1',
 		autenticacao: configurarAutenticacao(env),
 		port: port('PORT', 3000),
 		maxRequisicoes: Number(maxRequisicoes),
