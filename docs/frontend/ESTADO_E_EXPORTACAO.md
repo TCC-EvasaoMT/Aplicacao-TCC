@@ -16,12 +16,13 @@ Os rótulos seguem o formato `Nome (código)`, e os textos distinguem singular e
 
 ## Parâmetros na URL
 
-| Parâmetro                          | Painel     | Observação                                                      |
-| ---------------------------------- | ---------- | --------------------------------------------------------------- |
-| `ano` e os sete filtros de recorte | Resumo     | Saneados pelo catálogo, como em **Atualizar dados**             |
-| `ano_inicial`, `ano_final`         | Evolução   | Só quando um período foi aplicado; inválido é ignorado          |
-| `agrupar_por`, `grupos` (repetido) | Comparação | Só quando difere do padrão; até 20 grupos, sem repetir          |
-| `aba`                              | Cabeçalho  | `evolucao` ou `comparacao`; o resumo é o padrão e não é gravado |
+| Parâmetro                          | Painel     | Observação                                                                   |
+| ---------------------------------- | ---------- | ---------------------------------------------------------------------------- |
+| `ano` e os sete filtros de recorte | Resumo     | Saneados pelo catálogo, como em **Atualizar dados**                          |
+| `ano_inicial`, `ano_final`         | Evolução   | Só quando um período foi aplicado; inválido é ignorado                       |
+| `agrupar_por`, `grupos` (repetido) | Comparação | Só quando difere do padrão; até 20 grupos, sem repetir                       |
+| `taxa_dispersao`                   | Dispersão  | `evasao_ies`; a evasão do curso é o padrão e não é gravada                   |
+| `aba`                              | Cabeçalho  | `evolucao`, `comparacao` ou `dispersao`; o resumo é o padrão e não é gravado |
 
 Cada painel grava apenas as próprias chaves com `history.replaceState`, sem criar entradas no histórico. Um ano fora do catálogo é ajustado ao mais recente disponível, com aviso. Sem filtros, a seleção automática pode recuar até um ano com dados de alunos.
 
@@ -31,6 +32,7 @@ O arquivo atende planilhas em português: separador `;`, vírgula decimal, UTF-8
 
 - `evasao-mt-evolucao-<inicial>-<final>.csv`: uma linha por ano.
 - `evasao-mt-comparacao-<dimensao>-<ano>.csv`: uma linha por grupo, com código e nome.
+- `evasao-mt-dispersao-<ano>.csv`: uma linha por curso, com código, nome e a zona crítica de cada taxa.
 
 As colunas trazem os quatro totais, com uma coluna indicando se ingressantes é um mínimo, a base de risco, as duas taxas como proporção da API (0,1 = 10%), sem arredondamento, e as marcas de qualidade. Ausências ficam vazias, nunca zero. A última coluna descreve o recorte com os nomes dos parâmetros, por exemplo `ano_inicial=2022; ano_final=2024; codigo_curso=001`.
 

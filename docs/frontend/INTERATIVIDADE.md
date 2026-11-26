@@ -4,16 +4,17 @@ Resumo, evolução e comparação compartilham o recorte. Clicar num grupo aplic
 
 ## O que cada clique faz
 
-Resumo, evolução e comparação ficam em abas no cabeçalho. Um clique num gráfico altera o recorte também das outras abas, que são atualizadas mesmo ocultas; a faixa do recorte mostra o efeito sem trocar de aba.
+Resumo, evolução, comparação e dispersão ficam em abas no cabeçalho. Um clique num gráfico altera o recorte também das outras abas, que são atualizadas mesmo ocultas; a faixa do recorte mostra o efeito sem trocar de aba.
 
-| Onde                                   | Efeito                                                               |
-| -------------------------------------- | -------------------------------------------------------------------- |
-| Barra ou nome de grupo na comparação   | Aplica o grupo como filtro (ex.: `codigo_curso=001`); repetir remove |
-| Botão na primeira coluna da comparação | O mesmo, pelo teclado e leitores de tela (`aria-pressed`)            |
-| Ano no gráfico da evolução             | Escolhe o ano do resumo e da comparação                              |
-| Botão de ano na tabela da evolução     | O mesmo, pelo teclado e leitores de tela                             |
-| × num filtro da faixa do recorte       | Remove aquele filtro; **Limpar tudo** remove todos e mantém o ano    |
-| **Desfazer última mudança**            | No estado vazio, volta ao recorte anterior                           |
+| Onde                                   | Efeito                                                                                                |
+| -------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Barra ou nome de grupo na comparação   | Aplica o grupo como filtro (ex.: `codigo_curso=001`); repetir remove                                  |
+| Botão na primeira coluna da comparação | O mesmo, pelo teclado e leitores de tela (`aria-pressed`)                                             |
+| Ponto ou nome de curso na dispersão    | Aplica `codigo_curso`; a dispersão continua com todos os cursos e destaca o escolhido; repetir remove |
+| Ano no gráfico da evolução             | Escolhe o ano do resumo e da comparação                                                               |
+| Botão de ano na tabela da evolução     | O mesmo, pelo teclado e leitores de tela                                                              |
+| × num filtro da faixa do recorte       | Remove aquele filtro; **Limpar tudo** remove todos e mantém o ano                                     |
+| **Desfazer última mudança**            | No estado vazio, volta ao recorte anterior                                                            |
 
 O filtro aplicado pelo clique é um filtro comum: aparece na gaveta de filtros, na faixa do recorte e na URL, e vale para resumo e evolução. Grupo sem identificador (**Não informado (sem identificador)**) não é filtrável, pois a API não aceita filtro por valor ausente.
 

@@ -1,6 +1,6 @@
 # API de dispersão por curso
 
-`GET /api/v1/analises/dispersao` pertence ao módulo `analises`, é pública e usa a Gold existente. Atende ao RF10 do TCC: “para um ano do Censo selecionado, uma visualização de dispersão relacionando a taxa de evasão [...] e o total de matrículas de cada curso, com linhas de referência distinguindo cursos de alta evasão sobre base significativa”. O protótipo da figura 14 chama de **zona crítica** a região em que as duas condições se cumprem. A interface ainda não usa esta rota; o gráfico é a próxima entrega.
+`GET /api/v1/analises/dispersao` pertence ao módulo `analises`, é pública e usa a Gold existente. Atende ao RF10 do TCC: “para um ano do Censo selecionado, uma visualização de dispersão relacionando a taxa de evasão [...] e o total de matrículas de cada curso, com linhas de referência distinguindo cursos de alta evasão sobre base significativa”. O protótipo da figura 14 chama de **zona crítica** a região em que as duas condições se cumprem. A [dispersão na interface](../frontend/DISPERSAO.md) apresenta o gráfico, a tabela e o CSV.
 
 ## Consulta
 

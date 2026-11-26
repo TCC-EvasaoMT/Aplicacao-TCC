@@ -21,7 +21,7 @@ O [índice da documentação](docs/README.md) reúne arquitetura, contratos, int
 
 O frontend não importa arquivos internos do backend e não acessa o banco. Ele usa HTTP/JSON em `/api/v1`. As fórmulas de evasão continuam no backend; a interface apenas formata os resultados.
 
-A interface organiza filtros compartilhados, resumo anual, evolução temporal e comparação entre grupos. Resumo e comparação compartilham o ano; o gráfico temporal mantém seu próprio período. O tema usa Source Sans 3 servida localmente, duas taxas com igual destaque e totais em uma faixa compacta. A seção **Como interpretar os dados** reúne as explicações metodológicas.
+A interface organiza filtros compartilhados, resumo anual, evolução temporal, comparação entre grupos e [dispersão por curso](docs/frontend/DISPERSAO.md), em abas no cabeçalho. Resumo e comparação compartilham o ano; o gráfico temporal mantém seu próprio período. O tema usa Source Sans 3 servida localmente, duas taxas com igual destaque e totais em uma faixa compacta. A seção **Como interpretar os dados** reúne as explicações metodológicas.
 
 A [API de evolução temporal](docs/api/ANALISES_TEMPORAIS.md) permite consultar séries anuais em `/api/v1/analises/evolucao-temporal`, com intervalo inclusivo de até 30 anos e os mesmos filtros de recorte. O [módulo de análises do frontend](docs/frontend/ANALISES.md) apresenta as duas taxas em um gráfico Recharts e uma tabela de valores e qualidade por ano. A interface usa componentes do PrimeReact 10 (licença MIT) em modo sem estilo e Tailwind CSS 4 para o layout e a identidade visual, conforme a [documentação de estilização](docs/frontend/ESTILIZACAO.md).
 
