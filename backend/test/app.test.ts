@@ -38,6 +38,8 @@ function fakeConsultas(): Dependencias {
 					...Object.fromEntries(medidas.map((m) => [m, null])),
 					registros_com_alunos: 0,
 					registros_sem_alunos: 0,
+					registros_sem_ingressantes: 0,
+					ingressantes_total: null,
 					flag_valor_negativo: null,
 					dados_incompletos: null
 				} as Agregado

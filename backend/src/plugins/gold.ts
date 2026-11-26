@@ -8,7 +8,10 @@ export const origem = `
   JOIN gold.dim_area_conhecimento a USING (id_area_conhecimento)
   JOIN gold.dim_localidade l USING (id_localidade)
   JOIN gold.dim_oferta o USING (id_oferta)
-  JOIN gold.dim_instituicao i USING (id_instituicao)`
+  JOIN gold.dim_instituicao i USING (id_instituicao)
+  LEFT JOIN gold.fato_evasao_coorte ci
+    ON ci.id_tempo = f.id_tempo AND ci.id_curso = f.id_curso
+    AND ci.id_tempo_ingresso = f.id_tempo`
 
 export async function consultarGold<T>(
 	request: FastifyRequest,

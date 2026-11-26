@@ -1,4 +1,4 @@
-import { medidas } from './calculos.js'
+import { totais } from './calculos.js'
 
 const codigo = {
 	type: 'string',
@@ -77,6 +77,8 @@ export const resumoSchema = {
 			sem_dados: false,
 			registros_com_alunos: 1,
 			registros_sem_alunos: 0,
+			registros_sem_ingressantes: 0,
+			ingressantes_minimo: false,
 			dados_incompletos: false,
 			flag_valor_negativo: false,
 			flag_grupo_pequeno: false
@@ -88,8 +90,20 @@ export const resumoSchema = {
 		totais: {
 			type: 'object',
 			additionalProperties: false,
-			required: [...medidas],
-			properties: Object.fromEntries(medidas.map((m) => [m, numeroNulo]))
+			required: [...totais],
+			properties: {
+				...Object.fromEntries(totais.map((t) => [t, numeroNulo])),
+				ingressantes_total: {
+					...numeroNulo,
+					description:
+						'Vínculos da coorte com ano de ingresso igual ao do censo. É um mínimo quando qualidade.ingressantes_minimo é true.'
+				},
+				matriculas_total: {
+					...numeroNulo,
+					description:
+						'Cursando mais concluintes (vínculo cursando ou formado, definição do INEP).'
+				}
+			}
 		},
 		base_risco: {
 			...numeroNulo,
@@ -119,6 +133,8 @@ export const resumoSchema = {
 				'sem_dados',
 				'registros_com_alunos',
 				'registros_sem_alunos',
+				'registros_sem_ingressantes',
+				'ingressantes_minimo',
 				'dados_incompletos',
 				'flag_valor_negativo',
 				'flag_grupo_pequeno'
@@ -132,6 +148,17 @@ export const resumoSchema = {
 					description:
 						'Linhas sem medidas de alunos, por exemplo cursos só com docentes.'
 				},
+				registros_sem_ingressantes: {
+					type: 'integer',
+					minimum: 0,
+					description:
+						'Linhas com alunos sem a linha de ingresso na coorte: curso sem ingressantes no ano ou grupo omitido pelo SEDAP+.'
+				},
+				ingressantes_minimo: {
+					type: 'boolean',
+					description:
+						'ingressantes_total soma só as linhas que têm ingresso; o valor real pode ser maior.'
+				},
 				dados_incompletos: {
 					type: 'boolean',
 					description:
@@ -140,7 +167,7 @@ export const resumoSchema = {
 				flag_valor_negativo: {
 					type: 'boolean',
 					description:
-						'Alguma linha do recorte tem a marca de valor negativo na Gold.'
+						'Alguma medida exibida é negativa em alguma linha do recorte, por causa do ruído do SEDAP+.'
 				},
 				flag_grupo_pequeno: {
 					type: 'boolean',

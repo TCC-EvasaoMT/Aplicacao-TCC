@@ -5,8 +5,10 @@ export const MAX_ANOS = 30
 
 const semRegistros = {
 	...Object.fromEntries(medidas.map((medida) => [medida, null])),
+	ingressantes_total: null,
 	registros_com_alunos: 0,
 	registros_sem_alunos: 0,
+	registros_sem_ingressantes: 0,
 	flag_valor_negativo: null,
 	dados_incompletos: null
 } as Agregado
