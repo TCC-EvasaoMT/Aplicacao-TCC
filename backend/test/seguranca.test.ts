@@ -199,4 +199,11 @@ test('Swagger restringe scripts, documenta 429 e fica ausente em produção', as
 		readConfig({ ...env, HTTP_RATE_LIMIT_MAX: '300' }).maxRequisicoes,
 		300
 	)
+	for (const value of ['', ' ', 'localhost', '0.0.0.0:3000', '256.0.0.1']) {
+		assert.throws(() => readConfig({ ...env, HTTP_HOST: value }), /HTTP_HOST/)
+	}
+	assert.equal(readConfig(env).host, '127.0.0.1')
+	for (const value of ['0.0.0.0', '::', '::1', '10.0.1.25']) {
+		assert.equal(readConfig({ ...env, HTTP_HOST: value }).host, value)
+	}
 })

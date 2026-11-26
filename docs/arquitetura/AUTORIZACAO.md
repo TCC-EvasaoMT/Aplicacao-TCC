@@ -21,7 +21,7 @@ node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"
 
 Com `AUTH_ENABLED=true`, configuração incompleta impede a inicialização. Banco ou schema indisponível impede login e acesso protegido, com erro controlado; não há fallback que conceda acesso. `/health` continua verificando somente a Gold e não comprova a disponibilidade da autenticação.
 
-Para acesso por Vite e seu proxy, use `AUTH_ORIGIN=http://127.0.0.1:5173`, inclusive ao abrir `/docs/` através do Vite. `localhost` e `127.0.0.1` são origens diferentes. Em produção a origem deve usar HTTPS, e o servidor em loopback deve ficar atrás de um ingresso HTTPS configurado. Não há CORS para origens externas.
+Para acesso por Vite e seu proxy, use `AUTH_ORIGIN=http://127.0.0.1:5173`, inclusive ao abrir `/docs/` através do Vite. `localhost` e `127.0.0.1` são origens diferentes. Em produção a origem deve usar HTTPS, e o servidor deve ficar atrás de um ingresso HTTPS configurado, seja em loopback (padrão) ou no container, que escuta em `0.0.0.0` ([imagem Docker](../operacao/DOCKER_EC2.md)). Não há CORS para origens externas.
 
 ## Contrato HTTP
 

@@ -1,3 +1,4 @@
+import { isIP } from 'node:net'
 import { configurarAutenticacao } from './autenticacao.js'
 
 export function readConfig(env: NodeJS.ProcessEnv = process.env) {
@@ -25,7 +26,15 @@ export function readConfig(env: NodeJS.ProcessEnv = process.env) {
 	if (!['development', 'test', 'production'].includes(environment)) {
 		throw new Error('NODE_ENV deve ser development, test ou production')
 	}
+	const host = env.HTTP_HOST ?? '127.0.0.1'
+	// Só IP literal: nomes como localhost podem resolver para outra interface.
+	if (isIP(host) === 0) {
+		throw new Error(
+			'HTTP_HOST deve ser um endereço IP, como 127.0.0.1 ou 0.0.0.0'
+		)
+	}
 	return {
+		host,
 		autenticacao: configurarAutenticacao(env),
 		port: port('PORT', 3000),
 		maxRequisicoes: Number(maxRequisicoes),
