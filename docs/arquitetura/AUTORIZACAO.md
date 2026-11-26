@@ -6,12 +6,12 @@ O painel é público. A autenticação administrativa do backend usa credenciais
 
 Siga [Banco da aplicação](BANCO_APLICACAO.md) para criar as roles e o schema, executar as migrações, conceder privilégios e criar o primeiro administrador. Não existe cadastro público nem senha padrão. Senhas são armazenadas como hashes Argon2id, com salt individual, 19 MiB de memória, duas iterações e paralelismo 1; não são criptografadas de forma reversível.
 
-| Variável                                      | Uso                                                                                                                                   |
-| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `AUTH_ENABLED`                                | `true` ativa as quatro rotas de autenticação. Padrão `false`, mantendo a demonstração pública existente. Não libera rotas protegidas. |
-| `AUTH_JWT_SECRET`                             | Segredo aleatório exclusivo, com pelo menos 64 caracteres hexadecimais. Obrigatório quando habilitado.                                |
-| `AUTH_ORIGIN`                                 | Origem exata do navegador, sem barra final ou caminho. Ex.: `http://127.0.0.1:3000` para Swagger direto.                              |
-| `APP_POSTGRES_USER` / `APP_POSTGRES_PASSWORD` | Credenciais da role restrita de autenticação. Host, porta e banco são os mesmos `POSTGRES_*` usados pela Gold.                        |
+| Variável                                      | Uso                                                                                                                                    |
+| --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `AUTH_ENABLED`                                | `true` ativa as cinco rotas de autenticação. Padrão `false`, mantendo a demonstração pública existente. Não libera rotas protegidas.   |
+| `AUTH_JWT_SECRET`                             | Segredo aleatório exclusivo, com pelo menos 64 caracteres hexadecimais. Obrigatório quando habilitado.                                 |
+| `AUTH_ORIGIN`                                 | Origem exata do navegador, sem barra final ou caminho. `http://127.0.0.1:5173` no `pnpm dev`; `http://127.0.0.1:3000` no `pnpm start`. |
+| `APP_POSTGRES_USER` / `APP_POSTGRES_PASSWORD` | Credenciais da role restrita de autenticação. Host, porta e banco são os mesmos `POSTGRES_*` usados pela Gold.                         |
 
 Gere o segredo localmente; não compartilhe a saída nem a inclua em commits:
 
@@ -45,7 +45,7 @@ Exemplo do corpo de login (valores ilustrativos):
 
 A resposta contém `access_token`, `token_type: "Bearer"`, `expires_in: 600` e `usuario: { id, email, permissoes }`. Não contém senha, hash ou token de renovação no JSON. As respostas de autenticação e acesso protegido usam `Cache-Control: no-store`.
 
-Credenciais incorretas, usuário inexistente e conta desativada recebem o mesmo `401`. O login permite cinco tentativas por minuto por IP (IPv6 /64) e por e-mail normalizado, incluindo tentativas bem-sucedidas. O excesso retorna `429` com `Retry-After`. Os contadores são locais ao processo e reiniciam com ele; o limite geral da API também se aplica. Antes de distribuir em réplicas, use armazenamento compartilhado para os limites.
+Credenciais incorretas, usuário inexistente e conta desativada recebem o mesmo `401`. O login permite cinco tentativas por minuto por IP (IPv6 /64) e por e-mail normalizado, incluindo tentativas bem-sucedidas. O excesso retorna `429` com `Retry-After`. Os contadores são locais ao processo e reiniciam com ele; o limite geral da API também se aplica. Antes de distribuir em réplicas, use armazenamento compartilhado para os limites. Atrás de um proxy, enquanto `trustProxy` estiver desativado, todos os acessos chegam com o IP do proxy e dividem o mesmo limite de login; configure os proxies confiáveis antes da implantação.
 
 ## Troca de senha
 
@@ -69,13 +69,15 @@ O logout revoga a sessão identificada pelo cookie e todos os seus JWTs; não en
 
 ## Autorização por rota
 
-| Recurso                                          | Visitante | Conta autenticada           |
-| ------------------------------------------------ | --------- | --------------------------- |
-| Painel, catálogo, resumo, evolução e comparações | Permitido | Permitido                   |
-| `/health`                                        | Permitido | Permitido                   |
-| `/autenticacao/me`                               | `401`     | Permitido com sessão válida |
-| Histórico do ETL (futuro)                        | `401`     | Exigirá `etl:consultar`     |
-| Reprocessamento do ETL (futuro)                  | `401`     | Exigirá `etl:reprocessar`   |
+| Recurso                                          | Visitante | Conta autenticada                           |
+| ------------------------------------------------ | --------- | ------------------------------------------- |
+| Painel, catálogo, resumo, evolução e comparações | Permitido | Permitido                                   |
+| `/health`                                        | Permitido | Permitido                                   |
+| `/autenticacao/login`, `renovar` e `logout`      | Permitido | Permitido                                   |
+| `/autenticacao/me`                               | `401`     | Permitido com sessão válida                 |
+| `/autenticacao/senha`                            | `401`     | Permitido com sessão válida e a senha atual |
+| Histórico do ETL (futuro)                        | `401`     | Exigirá `etl:consultar`                     |
+| Reprocessamento do ETL (futuro)                  | `401`     | Exigirá `etl:reprocessar`                   |
 
 `registrarAcesso`, exportado pelo módulo `autenticacao`, instala o controle antes dos módulos. Toda rota sob `/api/` deve declarar `config.acesso`; a ausência ou um valor desconhecido impede seu registro. Valores permitidos: `publico`, `autenticado`, `etl:consultar` e `etl:reprocessar`. As consultas existentes declaram `publico`. Exemplo para uma futura rota:
 
@@ -90,7 +92,7 @@ app.get(
 )
 ```
 
-Sessão ausente, inválida, expirada ou revogada retorna `401`. Sessão válida sem a permissão exigida retorna `403`. `request.identidade` contém a identidade obtida do banco. A configuração de segurança no Swagger apenas documenta o Bearer; a proteção efetiva vem de `config.acesso` e do hook.
+Sessão ausente, inválida, expirada ou revogada retorna `401`. Sessão válida sem a permissão exigida retorna `403`. `request.identidade` contém a identidade obtida do banco, e `request.sessaoId`, a sessão do JWT. A configuração de segurança no Swagger apenas documenta o Bearer; a proteção efetiva vem de `config.acesso` e do hook.
 
 O comando de criação de administrador concede explicitamente as duas permissões. Não há rota HTTP para promover usuários. Para bloquear uma conta, use a conexão de manutenção, conferindo o e-mail antes de executar:
 

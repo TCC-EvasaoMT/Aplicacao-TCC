@@ -21,7 +21,7 @@ git pull --ff-only
 git switch -c feat/filtro-por-curso
 ```
 
-Faça alterações, execute `pnpm check` e, quando mudar consultas, execute também `pnpm test:integration` com PostgreSQL de teste. Confira e selecione os arquivos do commit:
+Faça alterações, execute `pnpm check` e, quando mudar consultas, grants ou autenticação, execute também `pnpm test:integration` com PostgreSQL de teste. Confira e selecione os arquivos do commit:
 
 ```powershell
 git status
@@ -70,7 +70,7 @@ tipo(escopo): descrição
 | `ci`       | Automação no GitHub                           | `ci: valida aplicação com PostgreSQL`                        |
 | `chore`    | Manutenção sem encaixe mais específico        | `chore: ajusta arquivos ignorados pelo Git`                  |
 
-Use `frontend` e `backend` quando isso ajudar. O escopo é opcional; mudanças que atravessam a aplicação podem omiti-lo. Escreva a descrição em português, explicando a mudança, e mantenha cada commit focado em uma intenção. Alterações independentes devem ficar em commits separados. Alterações de front e back necessárias para a mesma funcionalidade podem ficar juntas.
+Use um escopo quando isso ajudar: `frontend`, `backend` ou o módulo, como `analises` e `auth`. O escopo é opcional; mudanças que atravessam a aplicação podem omiti-lo. Escreva a descrição em português, explicando a mudança, e mantenha cada commit focado em uma intenção. Alterações independentes devem ficar em commits separados. Alterações de front e back necessárias para a mesma funcionalidade podem ficar juntas.
 
 Para incompatibilidade em um contrato publicado, sinalize com `!` e explique a migração:
 
@@ -98,7 +98,7 @@ A configuração recomendada de `main` exige PR, uma aprovação de outro integr
 
 Consulte o [índice](docs/README.md) antes de criar um arquivo. Mantenha contratos em `docs/api`, interface em `docs/frontend`, decisões estruturais em `docs/arquitetura` e execução em `docs/operacao`. Fontes e definições ficam em `docs/metodologia`; a comparação com o texto acadêmico fica em `docs/tcc`.
 
-Descreva o comportamento disponível na `main`. Identifique funcionalidades de branches adiadas e diferencie testes executados de roteiros ainda pendentes. Ao mover um documento, atualize links e âncoras, inclusive nos READMEs. Mudanças de funcionalidade devem atualizar a documentação do módulo e a matriz de requisitos; o mapa de desenvolvimento permanece local em `docs-codex/`.
+Descreva o comportamento disponível na `main`. Identifique funcionalidades pendentes e diferencie testes executados de roteiros ainda pendentes. Ao mover um documento, atualize links e âncoras, inclusive nos READMEs. Mudanças de funcionalidade devem atualizar a documentação do módulo e a matriz de requisitos; o mapa de desenvolvimento permanece local em `docs-codex/`.
 
 ## O que versionar
 

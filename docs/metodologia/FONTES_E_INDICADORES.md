@@ -71,6 +71,14 @@ Os valores decimais e negativos são preservados. Ausência de dados não vira z
 
 O frontend mostra quatro totais (vínculos, ingressantes, matrículas e concluintes) e duas taxas. Os outros totais estão na API, mas não têm cartões próprios. A variação anual usa os resultados de dois censos e não acompanha uma coorte. Nenhuma dessas visualizações demonstra uma causa da evasão.
 
+### Limites da definição atual
+
+As duas taxas são proporções dos vínculos de um mesmo ano. Não acompanham uma coorte e não devem ser apresentadas como fórmulas oficiais do INEP. A taxa de desistência acumulada do INEP usa ingressantes de uma mesma coorte, saídas acumuladas e falecimentos acumulados; o método anual de Silva Filho et al. usa matrículas, ingressantes e concluintes de dois anos consecutivos. Nenhum dos dois equivale ao cálculo atual. A desvinculação de um curso também não comprova, isoladamente, a saída da instituição, embora a taxa se chame evasão da IES.
+
+As duas fórmulas são as definições aprovadas na modelagem da Gold. A revisão de 23/11/2026 deixou em aberto, para decisão com o orientador, os nomes e a interpretação das taxas e a inclusão de indicadores por coorte ou pelo método anual. Até essa decisão, resumo, evolução, comparação e dispersão usam as fórmulas acima; uma mudança deve alterar dados, contratos, testes, rótulos e documentação juntos.
+
+### Diferenças com o TCC
+
 Vagas e inscritos não existem no contrato atual. A fórmula do TCC I, desvinculados divididos por matrículas, também difere das duas taxas adotadas. A [matriz de requisitos](../tcc/RASTREABILIDADE.md) registra essas divergências.
 
 ## Origem, rastreabilidade e validação

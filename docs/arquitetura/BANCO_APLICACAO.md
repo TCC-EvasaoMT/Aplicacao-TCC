@@ -35,7 +35,7 @@ Depois, como `tcc_app_owner` ou administrador, execute na raiz do monorepo (o `p
 psql -h 127.0.0.1 -p 5432 -U tcc_app_owner -d NOME_DO_BANCO -W -v auth_role=tcc_auth -f backend/sql/permissoes-app.sql
 ```
 
-Repita a concessão quando novas migrações adicionarem tabelas usadas pela API. Não há concessão automática de acesso a todas as tabelas futuras.
+Repita a concessão quando novas migrações adicionarem tabelas usadas pela API ou quando o script mudar, como na troca de senha, que passou a conceder `UPDATE` na coluna `senha_hash`. Não há concessão automática de acesso a todas as tabelas futuras.
 
 ## Primeiro administrador
 
