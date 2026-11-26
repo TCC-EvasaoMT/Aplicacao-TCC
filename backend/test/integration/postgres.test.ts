@@ -477,6 +477,94 @@ test(
 		)
 
 		await t.test(
+			'perfil soma cada categoria do fator, mostra as vazias e não mistura fatores',
+			async () => {
+				const perfil = async (query: string) => {
+					const response = await server.inject(
+						`/api/v1/analises/perfil?${query}`
+					)
+					assert.equal(response.statusCode, 200, response.body)
+					return response.json()
+				}
+				type Categoria = {
+					categoria: { codigo: string | null; nome: string }
+					base_risco: number | null
+					taxas: { evasao_curso: number | null; evasao_ies: number | null }
+					qualidade: {
+						sem_dados: boolean
+						flag_valor_negativo: boolean
+						flag_grupo_pequeno: boolean | null
+						dados_incompletos: boolean
+					}
+				}
+				const linhas = (resultado: { categorias: Categoria[] }) =>
+					resultado.categorias.map((c) => [
+						c.categoria.codigo,
+						c.base_risco,
+						c.taxas.evasao_curso
+					])
+				// O código 7 só tem registro em 2022: em 2023 é categoria sem dados.
+				const apoio = await perfil('ano=2023&fator=apoio_social')
+				assert.deepEqual(linhas(apoio), [
+					['1', 112.5, 0.5 / 112.5],
+					['0', 907.5, 244.5 / 907.5],
+					['7', null, null]
+				])
+				assert.equal(
+					apoio.categorias[2].categoria.nome,
+					'Código 7 não previsto no catálogo'
+				)
+				assert.equal(apoio.categorias[2].qualidade.sem_dados, true)
+				// O 007 tem desvinculados negativos na categoria Sim.
+				assert.equal(apoio.categorias[0].qualidade.flag_valor_negativo, true)
+				assert.equal(apoio.categorias[1].taxas.evasao_ies, 193.5 / 907.5)
+				assert.equal(apoio.conjunto.base_risco, 1020)
+				assert.equal(apoio.conjunto.taxas.evasao_curso, 245 / 1020)
+				// O 006 masculino não tem desvinculados: a taxa fica null, sem zerar.
+				const sexo = await perfil('ano=2023&fator=sexo')
+				assert.deepEqual(linhas(sexo), [
+					['1', 572, 122 / 572],
+					['2', 478, null]
+				])
+				assert.equal(sexo.categorias[1].qualidade.dados_incompletos, true)
+				assert.equal(sexo.conjunto.taxas.evasao_curso, null)
+				const federal = await perfil(
+					'ano=2023&fator=sexo&categoria_administrativa=P%C3%BAblica+Federal'
+				)
+				assert.deepEqual(linhas(federal), [
+					['1', 560, 119 / 560],
+					['2', 440, 121 / 440]
+				])
+				const pequeno = await perfil(
+					'ano=2023&fator=sexo&categoria_administrativa=P%C3%BAblica+Municipal'
+				)
+				assert.deepEqual(
+					pequeno.categorias.map(
+						(c: Categoria) => c.qualidade.flag_grupo_pequeno
+					),
+					[true, true]
+				)
+				const area = await perfil(
+					'ano=2023&fator=apoio_social&codigo_area_geral=01'
+				)
+				assert.deepEqual(linhas(area), [
+					['1', 10, 0],
+					['0', 90, 15 / 90],
+					['7', null, null]
+				])
+				// Fator sem categorias na base: 200, lista vazia.
+				const turno = await perfil('ano=2023&fator=turno')
+				assert.deepEqual(turno.categorias, [])
+				assert.equal(turno.conjunto, null)
+				const vazio = await perfil('ano=1999&fator=sexo')
+				assert.deepEqual(
+					vazio.categorias.map((c: Categoria) => c.qualidade.sem_dados),
+					[true, true]
+				)
+			}
+		)
+
+		await t.test(
 			'dispersão repete o resumo de cada curso e calcula a referência sem cursos sem taxa',
 			async () => {
 				const dispersao = async (query: string) => {
@@ -545,6 +633,9 @@ test(
 				const urlComparacao =
 					'/api/v1/analises/comparacoes?ano=2023&agrupar_por=curso&grupos=001'
 				const comparacaoAntes = (await server.inject(urlComparacao)).json()
+				const urlPerfil =
+					'/api/v1/analises/perfil?ano=2023&fator=sexo&codigo_curso=001'
+				const perfilAntes = (await server.inject(urlPerfil)).json()
 				await db.query(
 					`BEGIN; DROP SCHEMA gold CASCADE; ${schema} ${dados} COMMIT;`
 				)
@@ -563,6 +654,7 @@ test(
       INSERT INTO gold.dim_curso (id_curso, codigo_curso, nome_curso) VALUES (101, 'temporario', 'Pedagogia');
       UPDATE gold.fato_evasao_curso SET id_curso = 101 WHERE id_curso = 1;
       UPDATE gold.fato_evasao_coorte SET id_curso = 101 WHERE id_curso = 1;
+      UPDATE gold.fato_evasao_perfil SET id_curso = 101 WHERE id_curso = 1;
       DELETE FROM gold.dim_curso WHERE id_curso = 1;
       UPDATE gold.dim_curso SET codigo_curso = '001' WHERE id_curso = 101;
       COMMIT;`)
@@ -573,6 +665,7 @@ test(
 					(await server.inject(urlComparacao)).json(),
 					comparacaoAntes
 				)
+				assert.deepEqual((await server.inject(urlPerfil)).json(), perfilAntes)
 			}
 		)
 

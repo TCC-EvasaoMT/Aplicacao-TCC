@@ -159,7 +159,8 @@ async function servidor(
 				evolucao: unused,
 				comparacao: unused,
 				dispersao,
-				ranking: unused
+				ranking: unused,
+				perfil: unused
 			}
 		},
 		{ docs }

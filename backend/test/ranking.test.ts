@@ -163,6 +163,7 @@ async function servidor(
 				evolucao: unused,
 				comparacao: unused,
 				dispersao: unused,
+				perfil: unused,
 				ranking
 			}
 		},

@@ -19,7 +19,8 @@ test('logs mantêm correlação e resultado sem expor credenciais ou URLs recebi
 				evolucao: fail,
 				comparacao: fail,
 				dispersao: fail,
-				ranking: fail
+				ranking: fail,
+				perfil: fail
 			}
 		},
 		{

@@ -8,6 +8,8 @@ import {
 	comparacaoSchema,
 	dispersaoQuerySchema,
 	dispersaoSchema,
+	perfilQuerySchema,
+	perfilSchema,
 	rankingQuerySchema,
 	rankingSchema,
 	evolucaoQuerySchema,
@@ -15,6 +17,7 @@ import {
 } from './schemas.js'
 import { montarComparacao, type FiltrosComparacao } from './comparacoes.js'
 import { montarDispersao, type FiltrosDispersao } from './dispersao.js'
+import { montarPerfil, type FiltrosPerfil } from './perfil.js'
 import { montarRanking, type FiltrosRanking } from './ranking.js'
 
 export function registrarRotas(
@@ -49,6 +52,34 @@ export function registrarRotas(
 				consultas.comparacao(request.query)
 			)
 			return { filtros: request.query, ...montarComparacao(agregados) }
+		}
+	)
+	app.get<{ Querystring: FiltrosPerfil }>(
+		'/api/v1/analises/perfil',
+		{
+			config: { acesso: 'publico' },
+			schema: {
+				tags: ['Análises'],
+				summary: 'Taxas de evasão por categoria de um fator de perfil.',
+				description:
+					'Exemplo: /api/v1/analises/perfil?ano=2023&fator=apoio_social&codigo_area_geral=01. Um fator por consulta, com todas as categorias do catálogo na ordem dele e o conjunto do fator. Mostra associação, não causa.',
+				querystring: perfilQuerySchema,
+				response: {
+					200: perfilSchema,
+					400: erroSchema,
+					500: erroSchema,
+					503: erroSchema
+				}
+			}
+		},
+		async (request) => {
+			const agregados = await consultarGold(request, () =>
+				consultas.perfil(request.query)
+			)
+			return {
+				filtros: request.query,
+				...montarPerfil(agregados, request.query.fator)
+			}
 		}
 	)
 	app.get<{ Querystring: FiltrosRanking }>(
