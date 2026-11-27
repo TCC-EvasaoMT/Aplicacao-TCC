@@ -14,8 +14,13 @@ test('Argon2id preserva a senha, usa salt e rejeita senhas fora dos limites', as
 	assert.notEqual(a, b)
 	assert.equal(await verificarSenha(a, senha), true)
 	assert.equal(await verificarSenha(a, senha + ' '), false)
-	await assert.rejects(criarHash('curta'))
-	await assert.rejects(criarHash('x'.repeat(129)))
+	for (const tamanho of [7, 65]) {
+		await assert.rejects(criarHash('😀'.repeat(tamanho)), /8 e 64/)
+	}
+	for (const tamanho of [8, 64]) {
+		const limite = '😀'.repeat(tamanho)
+		assert.equal(await verificarSenha(await criarHash(limite), limite), true)
+	}
 })
 
 test('autenticação não aceita configuração parcial ou origem insegura em produção', () => {

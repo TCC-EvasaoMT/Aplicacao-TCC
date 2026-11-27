@@ -1,8 +1,9 @@
 import { argon2id, hash, verify } from 'argon2'
 
 export function validarSenha(senha: string) {
-	if ([...senha].length < 15 || [...senha].length > 128) {
-		throw new Error('A senha deve ter entre 15 e 128 caracteres.')
+	const tamanho = [...senha].length
+	if (tamanho < 8 || tamanho > 64) {
+		throw new Error('A senha deve ter entre 8 e 64 caracteres.')
 	}
 }
 

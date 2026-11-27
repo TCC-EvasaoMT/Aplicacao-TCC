@@ -1,7 +1,11 @@
 import { createHash, randomBytes, randomUUID } from 'node:crypto'
 import type { Pool } from 'pg'
 
-export const permissoes = ['etl:consultar', 'etl:reprocessar'] as const
+export const permissoes = [
+	'etl:consultar',
+	'etl:reprocessar',
+	'painel:consultar'
+] as const
 export type Permissao = (typeof permissoes)[number]
 export interface Identidade {
 	id: string

@@ -1,11 +1,8 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react'
-import { Button } from 'primereact/button'
-import { InputText } from 'primereact/inputtext'
+import { useEffect, useRef, useState } from 'react'
 import { Sidebar } from 'primereact/sidebar'
-import { ErroHttp } from '../../lib/http'
-import { Ajuda, classes } from '../../lib/ui'
-import { MAX_UTF16_SENHA, mensagemLogin } from './regras'
-import { encerrarSessao, iniciarSessao } from './sessao'
+import { Ajuda } from '../../lib/ui'
+import { CamposLogin } from './CamposLogin'
+import { encerrarSessao } from './sessao'
 import { useSessao } from './useSessao'
 import { usePaginaInerte } from './usePaginaInerte'
 import { AlterarSenha } from './AlterarSenha'
@@ -91,38 +88,13 @@ function FormularioLogin({
 	aberto: boolean
 	onFechar: () => void
 }) {
-	const [email, setEmail] = useState('')
-	const [senha, setSenha] = useState('')
-	const [erro, setErro] = useState('')
-	const [enviando, setEnviando] = useState(false)
-	const campoEmail = useRef<HTMLInputElement>(null)
 	usePaginaInerte(aberto)
-	useEffect(() => {
-		if (aberto) return
-		setSenha('')
-		setErro('')
-	}, [aberto])
-	async function enviar(evento: FormEvent) {
-		evento.preventDefault()
-		setEnviando(true)
-		setErro('')
-		try {
-			await iniciarSessao(email.trim(), senha)
-			onFechar()
-		} catch (falha) {
-			setErro(mensagemLogin(falha instanceof ErroHttp ? falha.status : null))
-			setSenha('')
-			campoEmail.current?.focus()
-		} finally {
-			setEnviando(false)
-		}
-	}
 	return (
 		<Sidebar
 			visible={aberto}
 			position="right"
 			blockScroll
-			onShow={() => campoEmail.current?.focus()}
+			onShow={() => document.getElementById('login-email')?.focus()}
 			aria-labelledby="login-titulo"
 			header={
 				<h2 id="login-titulo" className="text-white">
@@ -135,51 +107,7 @@ function FormularioLogin({
 				Para equipes autorizadas a administrar a atualização dos dados. O painel
 				continua disponível sem login.
 			</Ajuda>
-			<form className="mt-4 grid gap-4" onSubmit={enviar}>
-				<div>
-					<label className={classes.rotulo} htmlFor="login-email">
-						E-mail
-					</label>
-					<InputText
-						id="login-email"
-						ref={campoEmail}
-						type="email"
-						autoComplete="username"
-						required
-						maxLength={254}
-						value={email}
-						invalid={!!erro}
-						aria-invalid={!!erro}
-						aria-describedby={erro ? 'login-erro' : undefined}
-						onChange={(evento) => setEmail(evento.target.value)}
-					/>
-				</div>
-				<div>
-					<label className={classes.rotulo} htmlFor="login-senha">
-						Senha
-					</label>
-					<InputText
-						id="login-senha"
-						type="password"
-						autoComplete="current-password"
-						required
-						maxLength={MAX_UTF16_SENHA}
-						value={senha}
-						invalid={!!erro}
-						aria-invalid={!!erro}
-						aria-describedby={erro ? 'login-erro' : undefined}
-						onChange={(evento) => setSenha(evento.target.value)}
-					/>
-				</div>
-				<p
-					id="login-erro"
-					role="alert"
-					className="m-0 text-sm font-semibold text-panel-danger empty:hidden"
-				>
-					{erro}
-				</p>
-				<Button type="submit" label="Entrar" loading={enviando} />
-			</form>
+			<CamposLogin prefixo="login" onEntrou={onFechar} />
 		</Sidebar>
 	)
 }

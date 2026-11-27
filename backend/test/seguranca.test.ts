@@ -213,6 +213,17 @@ test('Swagger restringe scripts, documenta 429 e fica ausente em produção', as
 	for (const value of ['0.0.0.0', '::', '::1', '10.0.1.25']) {
 		assert.equal(readConfig({ ...env, HTTP_HOST: value }).host, value)
 	}
+	assert.equal(readConfig(env).painelPublico, true)
+	for (const value of ['nao', 'FALSE', ''])
+		assert.throws(
+			() => readConfig({ ...env, PAINEL_PUBLICO: value }),
+			/PAINEL_PUBLICO/
+		)
+	// Painel restrito sem login deixaria tudo negado: o servidor não inicia.
+	assert.throws(
+		() => readConfig({ ...env, PAINEL_PUBLICO: 'false' }),
+		/PAINEL_PUBLICO=false exige AUTH_ENABLED=true/
+	)
 	assert.deepEqual(readConfig(env).proxiesConfiaveis, [])
 	assert.deepEqual(
 		readConfig({ ...env, HTTP_TRUST_PROXY: '' }).proxiesConfiaveis,

@@ -1,4 +1,6 @@
 export { AcessoAdministrativo } from './AcessoAdministrativo'
+export { TelaAcesso } from './TelaAcesso'
+export { useAcessoPainel } from './useAcessoPainel'
 export { useSessao } from './useSessao'
 export { tokenAcesso } from './sessao'
 export type { Usuario } from './api'

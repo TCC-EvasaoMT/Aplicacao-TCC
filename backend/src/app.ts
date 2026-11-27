@@ -46,6 +46,8 @@ export async function buildApp(
 		frontendDir?: string
 		maxRequisicoes?: number
 		proxiesConfiaveis?: string[]
+		// false: as consultas exigem login com painel:consultar.
+		painelPublico?: boolean
 	} = {}
 ) {
 	const app = Fastify({
@@ -98,7 +100,8 @@ export async function buildApp(
 	})
 	registrarLogs(app)
 	await registrarSeguranca(app, options.maxRequisicoes)
-	await registrarAcesso(app, dependencias.autenticacao)
+	const painelPublico = options.painelPublico ?? true
+	await registrarAcesso(app, dependencias.autenticacao, painelPublico)
 	if (!options.frontendDir) {
 		app.setNotFoundHandler((_request, reply) =>
 			reply
@@ -148,6 +151,37 @@ export async function buildApp(
 			dependencias.autenticacao.config
 		)
 	await app.register(health, { consultar: dependencias.health })
+	// Pública: a interface precisa saber, antes do login, se o painel é restrito.
+	app.get(
+		'/api/v1/configuracao',
+		{
+			config: { acesso: 'publico' },
+			schema: {
+				tags: ['Operação'],
+				summary:
+					'Informa se o painel exige login e se o login está habilitado.',
+				response: {
+					200: {
+						type: 'object',
+						additionalProperties: false,
+						required: ['painel_restrito', 'autenticacao'],
+						properties: {
+							painel_restrito: {
+								type: 'boolean',
+								description:
+									'true: as consultas exigem login com painel:consultar (PAINEL_PUBLICO=false).'
+							},
+							autenticacao: { type: 'boolean' }
+						}
+					}
+				}
+			}
+		},
+		async () => ({
+			painel_restrito: !painelPublico,
+			autenticacao: !!dependencias.autenticacao
+		})
+	)
 	await app.register(catalogos, { consultas: dependencias.catalogos })
 	await app.register(indicadores, { consultas: dependencias.indicadores })
 	await app.register(analises, { consultas: dependencias.analises })

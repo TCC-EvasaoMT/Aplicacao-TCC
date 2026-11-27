@@ -40,7 +40,7 @@ pnpm install --frozen-lockfile
 
 Se `backend/.env` ainda não existir, crie-o a partir de `backend/.env.example` e configure o usuário de leitura do banco. A [documentação do backend](backend/README.md) explica as permissões e a carga da Gold. Uma configuração local já existente é preservada ao migrar para o monorepo.
 
-O painel continua público. O backend também oferece [autenticação administrativa JWT/Bearer](docs/arquitetura/AUTORIZACAO.md), habilitada por configuração. O [guia do banco da aplicação](docs/arquitetura/BANCO_APLICACAO.md) explica a criação do schema `app`, migrações e primeiro administrador no PostgreSQL existente, sem alterar a pipeline. O cabeçalho do painel tem os botões **Entrar**, **Alterar senha** e **Sair**, descritos em [login e sessão no painel](docs/frontend/AUTENTICACAO.md).
+O painel é público por padrão e pode ser restrito a contas com a permissão `painel:consultar` (`PAINEL_PUBLICO=false`). O backend também oferece [autenticação administrativa JWT/Bearer](docs/arquitetura/AUTORIZACAO.md), habilitada por configuração. O [guia do banco da aplicação](docs/arquitetura/BANCO_APLICACAO.md) explica a criação do schema `app`, migrações e primeiro administrador no PostgreSQL existente, sem alterar a pipeline. O cabeçalho do painel tem os botões **Entrar**, **Alterar senha** e **Sair**, descritos em [login e sessão no painel](docs/frontend/AUTENTICACAO.md).
 
 Pare os servidores antigos antes de iniciar o conjunto, para liberar as portas 3000 e 5173:
 
@@ -123,7 +123,7 @@ Com Docker Desktop aberto e as portas `3000` e `5173` livres, execute em um term
 pnpm dev:demo:auth
 ```
 
-O comando cria as roles técnicas de manutenção e autenticação, prepara `app`, executa as migrações reais do backend e aplica as permissões. Na primeira execução, pede senha e confirmação para **`admin@demo.local`** (15 a 128 caracteres, entrada oculta). Não há senha padrão de administrador. Nas próximas execuções, preserva a senha, o estado e as permissões dessa conta. A Gold sintética continua sendo recarregada.
+O comando cria as roles técnicas de manutenção e autenticação, prepara `app`, executa as migrações reais do backend e aplica as permissões. Na primeira execução, pede senha e confirmação para **`admin@demo.local`** (8 a 64 caracteres, entrada oculta). Não há senha padrão de administrador. Nas próximas execuções, preserva a senha, o estado e as permissões dessa conta. A Gold sintética continua sendo recarregada.
 
 No painel, em [http://127.0.0.1:5173/](http://127.0.0.1:5173/):
 
@@ -166,6 +166,6 @@ O workflow do GitHub Actions está configurado para executar `pnpm check` e a in
 
 ## Colaboração
 
-A [proteção da API pública](docs/operacao/SEGURANCA_API.md) documenta cabeçalhos de segurança, limites HTTP e a cota de consultas configurável por `HTTP_RATE_LIMIT_MAX`. O painel permanece público; o [acesso administrativo](docs/arquitetura/AUTORIZACAO.md) usa login próprio, ainda sem telas de administração do ETL.
+A [proteção da API pública](docs/operacao/SEGURANCA_API.md) documenta cabeçalhos de segurança, limites HTTP e a cota de consultas configurável por `HTTP_RATE_LIMIT_MAX`. O painel é público por padrão; o [acesso administrativo](docs/arquitetura/AUTORIZACAO.md) usa login próprio, ainda sem telas de administração do ETL.
 
 Use uma branch curta por tarefa, PR para `main` e Conventional Commits em português. O [guia de contribuição](CONTRIBUTING.md) explica nomes de branches, commits, revisão e a primeira publicação. Frontend e backend pertencem ao mesmo repositório; a pipeline permanece separada.

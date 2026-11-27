@@ -1,4 +1,4 @@
-import { ErroHttp } from '../../lib/http'
+import { definirCredencial, ErroHttp } from '../../lib/http'
 import {
 	entrar,
 	renovar,
@@ -19,6 +19,8 @@ interface Sessao {
 let sessao: Sessao | null = null
 let renovacao: Promise<Sessao | null> | null = null
 let restauracao: Promise<Usuario | null> | null = null
+// Por que a última sessão terminou: a tela de acesso avisa quando expirou.
+let motivoSaida: 'voluntaria' | 'expirada' | null = null
 const ouvintes = new Set<(usuario: Usuario | null) => void>()
 
 // Evita chamar /renovar em toda visita anônima.
@@ -47,6 +49,8 @@ function temMarca() {
 
 // Renovações não são anunciadas, para não dispará-las em cascata nas outras abas.
 function definir(nova: Sessao | null, aviso?: 'entrou' | 'saiu') {
+	if (nova) motivoSaida = null
+	else if (sessao && motivoSaida !== 'voluntaria') motivoSaida = 'expirada'
 	sessao = nova
 	marcar(!!nova)
 	for (const ouvinte of ouvintes) ouvinte(nova?.usuario ?? null)
@@ -103,6 +107,8 @@ export function observarSessao(ouvinte: (usuario: Usuario | null) => void) {
 
 export const usuarioAtual = () => sessao?.usuario ?? null
 
+export const motivoUltimaSaida = () => motivoSaida
+
 export async function iniciarSessao(email: string, senha: string) {
 	return aplicar(await entrar(email, senha), 'entrou').usuario
 }
@@ -118,6 +124,7 @@ export function restaurarSessao() {
 }
 
 export async function encerrarSessao() {
+	motivoSaida = 'voluntaria'
 	try {
 		await sair()
 	} finally {
@@ -144,3 +151,10 @@ export async function tokenAcesso(): Promise<string | null> {
 	if (!sessao && !temMarca()) return null
 	return (await renovarSessao())?.token ?? null
 }
+
+// Consultas do painel levam o Bearer quando há sessão; um 401 renova uma vez.
+definirCredencial({
+	token: tokenAcesso,
+	renovar: async () =>
+		sessao || temMarca() ? ((await renovarSessao())?.token ?? null) : null
+})

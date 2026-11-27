@@ -22,3 +22,17 @@ test('rotas da API exigem classificação explícita e auth desabilitada não ab
 	assert.equal((await app.inject('/api/publica')).statusCode, 200)
 	assert.equal((await app.inject('/api/administracao')).statusCode, 401)
 })
+
+test('rotas do painel são públicas por padrão e o painel restrito exige autenticação', async (t) => {
+	const app = Fastify()
+	t.after(() => app.close())
+	await registrarAcesso(app)
+	app.get('/api/consulta', { config: { acesso: 'painel' } }, async () => ({
+		ok: true
+	}))
+	assert.equal((await app.inject('/api/consulta')).statusCode, 200)
+	await assert.rejects(
+		registrarAcesso(Fastify(), undefined, false),
+		/exige autenticação/
+	)
+})

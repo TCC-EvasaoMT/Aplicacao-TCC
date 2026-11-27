@@ -3,18 +3,25 @@ import { Accordion, AccordionTab } from 'primereact/accordion'
 import { TabMenu } from 'primereact/tabmenu'
 import { gravarUrl, lerUrl } from './lib/url'
 import { abasPainel, lerAba, PainelIndicadores } from './modules/indicadores'
-import { AcessoAdministrativo } from './modules/autenticacao'
+import {
+	AcessoAdministrativo,
+	TelaAcesso,
+	useAcessoPainel
+} from './modules/autenticacao'
 
 const notaLeitura = 'mt-3 max-w-[78ch] text-sm text-panel-muted'
 
 export function App() {
+	// Painel restrito: login antes das abas; público: liberado direto.
+	const acesso = useAcessoPainel()
+	const liberado = acesso.estado === 'liberado'
 	const [aba, setAba] = useState(() => lerAba(lerUrl()))
 	const indice = abasPainel.findIndex((item) => item.id === aba)
 	useEffect(() => {
 		gravarUrl(['aba'], aba === abasPainel[0].id ? [] : [['aba', aba]])
 	}, [aba])
 	return (
-		<>
+		<div className="flex min-h-dvh flex-col">
 			<a
 				className="fixed top-2 left-4 z-50 -translate-y-[150%] rounded bg-panel-surface px-4 py-3 font-semibold text-panel-green shadow-lg focus:translate-y-0"
 				href="#conteudo"
@@ -40,7 +47,7 @@ export function App() {
 							<span className="hidden text-sm text-white/80 lg:inline">
 								Ensino superior público
 							</span>
-							<AcessoAdministrativo />
+							{liberado && <AcessoAdministrativo />}
 						</div>
 					</div>
 					<h1 className="mt-6 mb-2">Evasão no ensino superior</h1>
@@ -49,51 +56,65 @@ export function App() {
 					</p>
 					{/* O TabMenu se declara menu de navegação; aqui ele controla os
 					    painéis da página, então segue o padrão de abas. */}
-					<TabMenu
-						className="mt-6 sm:mt-8"
-						model={[...abasPainel]}
-						activeIndex={indice}
-						onTabChange={(evento) => setAba(abasPainel[evento.index]!.id)}
-						pt={{
-							menu: { role: 'tablist', 'aria-label': 'Seções do painel' },
-							action: (opcoes) => ({
-								role: 'tab',
-								id: `aba-${opcoes?.context.item.id}`,
-								'aria-selected': opcoes?.context.index === indice,
-								'aria-controls': `painel-${opcoes?.context.item.id}`
-							})
-						}}
-					/>
+					{liberado && (
+						<TabMenu
+							className="mt-6 sm:mt-8"
+							model={[...abasPainel]}
+							activeIndex={indice}
+							onTabChange={(evento) => setAba(abasPainel[evento.index]!.id)}
+							pt={{
+								menu: { role: 'tablist', 'aria-label': 'Seções do painel' },
+								action: (opcoes) => ({
+									role: 'tab',
+									id: `aba-${opcoes?.context.item.id}`,
+									'aria-selected': opcoes?.context.index === indice,
+									'aria-controls': `painel-${opcoes?.context.item.id}`
+								})
+							}}
+						/>
+					)}
 				</div>
 			</header>
 			<main
 				id="conteudo"
 				tabIndex={-1}
-				className="mx-auto max-w-[1440px] px-[4%] pt-4 pb-10"
+				className="mx-auto w-full max-w-[1440px] flex-1 px-[4%] pt-4 pb-10"
 			>
-				<PainelIndicadores aba={aba} />
-				<Accordion className="mt-10 rounded-lg border border-panel-line bg-panel-surface px-4 py-3 sm:px-6">
-					<AccordionTab header="Como interpretar os dados">
-						<p className={notaLeitura}>
-							A base de risco corresponde aos vínculos aluno-curso, descontados
-							os falecidos. Um estudante em dois cursos representa dois
-							vínculos. Os resultados refletem a base conectada e ajudam a
-							descrever a evasão; não identificam, isoladamente, suas causas.
-						</p>
-						<p className={notaLeitura}>
-							Município de oferta é o local do curso; município da sede é o da
-							instituição. Em EaD, a sede não substitui um local de oferta
-							ausente. As características institucionais podem representar mais
-							de uma instituição.
-						</p>
-						<p className={notaLeitura}>
-							A evolução compara censos anuais, sem acompanhar a trajetória de
-							uma coorte. Lacunas indicam dados ou taxas indisponíveis, não
-							zero. Valores negativos e sinalizações de qualidade são
-							preservados em cada recorte.
-						</p>
-					</AccordionTab>
-				</Accordion>
+				{acesso.estado === 'liberado' ? (
+					<PainelIndicadores aba={aba} />
+				) : (
+					<TelaAcesso
+						estado={acesso.estado}
+						email={acesso.usuario?.email}
+						sessaoExpirou={acesso.sessaoExpirou}
+						onTentarNovamente={acesso.tentarNovamente}
+					/>
+				)}
+				{liberado && (
+					<Accordion className="mt-10 rounded-lg border border-panel-line bg-panel-surface px-4 py-3 sm:px-6">
+						<AccordionTab header="Como interpretar os dados">
+							<p className={notaLeitura}>
+								A base de risco corresponde aos vínculos aluno-curso,
+								descontados os falecidos. Um estudante em dois cursos representa
+								dois vínculos. Os resultados refletem a base conectada e ajudam
+								a descrever a evasão; não identificam, isoladamente, suas
+								causas.
+							</p>
+							<p className={notaLeitura}>
+								Município de oferta é o local do curso; município da sede é o da
+								instituição. Em EaD, a sede não substitui um local de oferta
+								ausente. As características institucionais podem representar
+								mais de uma instituição.
+							</p>
+							<p className={notaLeitura}>
+								A evolução compara censos anuais, sem acompanhar a trajetória de
+								uma coorte. Lacunas indicam dados ou taxas indisponíveis, não
+								zero. Valores negativos e sinalizações de qualidade são
+								preservados em cada recorte.
+							</p>
+						</AccordionTab>
+					</Accordion>
+				)}
 			</main>
 			<footer className="bg-panel-green text-sm text-white/80">
 				<div className="mx-auto flex max-w-[1440px] flex-wrap justify-between gap-4 px-[4%] py-5">
@@ -105,6 +126,6 @@ export function App() {
 					)}
 				</div>
 			</footer>
-		</>
+		</div>
 	)
 }

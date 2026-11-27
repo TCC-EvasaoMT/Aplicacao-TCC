@@ -55,3 +55,17 @@ export async function trocarSenha(
 		token
 	)
 }
+
+export interface Configuracao {
+	painel_restrito: boolean
+	autenticacao: boolean
+}
+
+export async function consultarConfiguracao(signal: AbortSignal) {
+	const response = await fetch('/api/v1/configuracao', {
+		signal,
+		headers: { Accept: 'application/json' }
+	})
+	if (!response.ok) throw new ErroHttp(response.status)
+	return response.json() as Promise<Configuracao>
+}

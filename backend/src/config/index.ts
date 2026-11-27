@@ -27,6 +27,13 @@ export function readConfig(env: NodeJS.ProcessEnv = process.env) {
 	if (!['development', 'test', 'production'].includes(environment)) {
 		throw new Error('NODE_ENV deve ser development, test ou production')
 	}
+	const painel = env.PAINEL_PUBLICO ?? 'true'
+	if (!['true', 'false'].includes(painel))
+		throw new Error('PAINEL_PUBLICO deve ser true ou false')
+	const autenticacao = configurarAutenticacao(env)
+	// Painel restrito sem login deixaria todas as consultas negadas.
+	if (painel === 'false' && !autenticacao)
+		throw new Error('PAINEL_PUBLICO=false exige AUTH_ENABLED=true')
 	const host = env.HTTP_HOST ?? '127.0.0.1'
 	// Só IP literal: nomes como localhost podem resolver para outra interface.
 	if (isIP(host) === 0) {
@@ -36,7 +43,8 @@ export function readConfig(env: NodeJS.ProcessEnv = process.env) {
 	}
 	return {
 		host,
-		autenticacao: configurarAutenticacao(env),
+		autenticacao,
+		painelPublico: painel === 'true',
 		port: port('PORT', 3000),
 		maxRequisicoes: Number(maxRequisicoes),
 		proxiesConfiaveis: lerProxiesConfiaveis(env.HTTP_TRUST_PROXY),

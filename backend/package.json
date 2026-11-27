@@ -9,6 +9,8 @@
 	"scripts": {
 		"db:migrate": "node --env-file-if-exists=.env --import tsx src/database/cli.ts migrar",
 		"auth:criar-admin": "node --env-file-if-exists=.env --import tsx src/database/cli.ts criar-admin",
+		"auth:criar-leitor": "node --env-file-if-exists=.env --import tsx src/database/cli.ts criar-leitor",
+		"auth:desativar": "node --env-file-if-exists=.env --import tsx src/database/cli.ts desativar",
 		"dev": "node --env-file-if-exists=.env --import tsx --watch src/server.ts",
 		"build": "tsc -p tsconfig.build.json",
 		"start": "node --env-file-if-exists=.env dist/server.js --serve-frontend",

@@ -1,6 +1,23 @@
 # Login e sessão no painel
 
-O painel continua público: login não é necessário para consultar indicadores, evolução ou comparações. O login identifica quem poderá usar a administração do ETL, que ainda não tem telas. Contrato HTTP, sessões e permissões estão em [acesso ao painel e à administração](../arquitetura/AUTORIZACAO.md).
+O painel é público por padrão: login não é necessário para consultar indicadores e análises. O login identifica quem poderá usar a administração do ETL, que ainda não tem telas. Quando o servidor restringe o painel (`PAINEL_PUBLICO=false`), o login passa a ser exigido antes das abas, como descrito abaixo. Contrato HTTP, sessões e permissões estão em [acesso ao painel e à administração](../arquitetura/AUTORIZACAO.md).
+
+## Painel restrito
+
+![Tela de login do painel restrito com os campos de e-mail e senha](../imagens/login-painel-restrito.png)
+
+Ao abrir, a interface consulta `GET /api/v1/configuracao`. Com `painel_restrito: false`, nada muda. Com `true`, as abas e o botão **Entrar** do cabeçalho somem e a tela de acesso ocupa o conteúdo:
+
+| Estado        | Tela                                                                          |
+| ------------- | ----------------------------------------------------------------------------- |
+| Verificando   | "Verificando acesso…", enquanto a configuração e a sessão são lidas           |
+| Sem sessão    | "Entre para consultar o painel", com o formulário de login e o foco no e-mail |
+| Sem permissão | "Conta sem acesso ao painel", com o e-mail da conta e **Sair**                |
+| Falha         | "Não foi possível verificar o acesso", com **Tentar novamente**               |
+
+Com sessão e `painel:consultar`, as abas aparecem. A verificação de permissão na tela só evita mostrar um painel vazio; quem nega é o servidor (`403`).
+
+As consultas passam a levar o Bearer da sessão. Num `401`, `consultar` renova a sessão uma vez e repete a consulta; se a renovação também falhar (sessão expirada, revogada ou conta desativada), a sessão é encerrada e a tela de acesso volta com "Sua sessão terminou. Entre novamente para continuar.". A URL é preservada, então o recorte volta depois do login. O CSV usa os dados já carregados e não muda.
 
 ## Controles no cabeçalho
 
@@ -30,7 +47,7 @@ Erros aparecem num parágrafo com `role="alert"`, ligado aos campos por `aria-de
 | `429`        | Muitas tentativas; aguardar um minuto                |
 | outros       | Não foi possível entrar agora                        |
 
-**Alteração de senha.** O formulário pede a senha atual, a nova e a confirmação. Antes de enviar, confere de 15 a 128 caracteres, nova senha diferente da atual e confirmação idêntica, levando o foco ao campo a corrigir. Essa conferência evita gastar as cinco tentativas por minuto da rota. Os caracteres são contados como no servidor: um emoji vale um caractere, e não duas unidades UTF-16 como em `length`. Pelo mesmo motivo, o `maxLength` dos campos de senha é o dobro do limite e não corta senhas válidas.
+**Alteração de senha.** O formulário pede a senha atual, a nova e a confirmação. Antes de enviar, confere de 8 a 64 caracteres, nova senha diferente da atual e confirmação idêntica, levando o foco ao campo a corrigir. Essa conferência evita gastar as cinco tentativas por minuto da rota. Os caracteres são contados como no servidor: um emoji vale um caractere, e não duas unidades UTF-16 como em `length`. O formulário indica quando a nova senha ultrapassa o limite, inclusive ao colar um texto longo.
 
 Senha atual incorreta (`422`) limpa e foca **Senha atual**, preservando a nova senha digitada. Em caso de sucesso, os campos são limpos e uma mensagem informa que as outras sessões da conta foram encerradas. Abas deste navegador continuam conectadas, porque compartilham a mesma sessão.
 
