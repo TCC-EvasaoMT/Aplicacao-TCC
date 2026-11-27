@@ -90,28 +90,31 @@ export function App() {
 						onTentarNovamente={acesso.tentarNovamente}
 					/>
 				)}
-				<Accordion className="mt-10 rounded-lg border border-panel-line bg-panel-surface px-4 py-3 sm:px-6">
-					<AccordionTab header="Como interpretar os dados">
-						<p className={notaLeitura}>
-							A base de risco corresponde aos vínculos aluno-curso, descontados
-							os falecidos. Um estudante em dois cursos representa dois
-							vínculos. Os resultados refletem a base conectada e ajudam a
-							descrever a evasão; não identificam, isoladamente, suas causas.
-						</p>
-						<p className={notaLeitura}>
-							Município de oferta é o local do curso; município da sede é o da
-							instituição. Em EaD, a sede não substitui um local de oferta
-							ausente. As características institucionais podem representar mais
-							de uma instituição.
-						</p>
-						<p className={notaLeitura}>
-							A evolução compara censos anuais, sem acompanhar a trajetória de
-							uma coorte. Lacunas indicam dados ou taxas indisponíveis, não
-							zero. Valores negativos e sinalizações de qualidade são
-							preservados em cada recorte.
-						</p>
-					</AccordionTab>
-				</Accordion>
+				{liberado && (
+					<Accordion className="mt-10 rounded-lg border border-panel-line bg-panel-surface px-4 py-3 sm:px-6">
+						<AccordionTab header="Como interpretar os dados">
+							<p className={notaLeitura}>
+								A base de risco corresponde aos vínculos aluno-curso,
+								descontados os falecidos. Um estudante em dois cursos representa
+								dois vínculos. Os resultados refletem a base conectada e ajudam
+								a descrever a evasão; não identificam, isoladamente, suas
+								causas.
+							</p>
+							<p className={notaLeitura}>
+								Município de oferta é o local do curso; município da sede é o da
+								instituição. Em EaD, a sede não substitui um local de oferta
+								ausente. As características institucionais podem representar
+								mais de uma instituição.
+							</p>
+							<p className={notaLeitura}>
+								A evolução compara censos anuais, sem acompanhar a trajetória de
+								uma coorte. Lacunas indicam dados ou taxas indisponíveis, não
+								zero. Valores negativos e sinalizações de qualidade são
+								preservados em cada recorte.
+							</p>
+						</AccordionTab>
+					</Accordion>
+				)}
 			</main>
 			<footer className="bg-panel-green text-sm text-white/80">
 				<div className="mx-auto flex max-w-[1440px] flex-wrap justify-between gap-4 px-[4%] py-5">
