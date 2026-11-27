@@ -1,5 +1,6 @@
 import {
 	calcularResumo,
+	expressaoCapital,
 	type Agregado,
 	type FiltrosRecorte
 } from '../indicadores/index.js'
@@ -42,6 +43,21 @@ export const agrupamentos = {
 		valor: 'i.organizacao_academica',
 		nome: 'i.organizacao_academica',
 		filtro: 'organizacao_academica'
+	},
+	grau_academico: {
+		valor: 'c.grau_academico',
+		nome: 'c.grau_academico',
+		filtro: 'grau_academico'
+	},
+	capital: {
+		valor: expressaoCapital,
+		nome: expressaoCapital,
+		filtro: 'capital'
+	},
+	turno: {
+		valor: 'o.turno',
+		nome: 'o.turno',
+		filtro: 'turno'
 	}
 } as const satisfies Record<
 	string,

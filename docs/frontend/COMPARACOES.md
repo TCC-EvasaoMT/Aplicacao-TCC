@@ -18,13 +18,15 @@ Ao marcar 20 opções, as demais ficam desabilitadas até que alguma seja desmar
 
 **Ano do resumo** e **Ano da comparação** controlam o mesmo estado. Alterar qualquer um atualiza imediatamente resumo e comparação, preservando o período independente da evolução temporal.
 
-Os sete filtros globais são combinados por E e se aplicam às três consultas, com uma exceção: a comparação não envia o filtro da dimensão pela qual agrupa. Com `codigo_curso=001` e agrupamento por curso, todos os cursos seguem visíveis e o 001 fica em destaque; resumo e evolução recebem o filtro normalmente. Veja [Interatividade e filtragem cruzada](INTERATIVIDADE.md). Grupos selecionados dentro da comparação combinam-se por OU, respeitando os demais filtros.
+Grau acadêmico, capital ou interior e turno do curso entraram como dimensões e filtros em 26/11/2026. Ao escolher uma delas, a tela mostra a ressalva da dimensão (grau do último ano observado; turno do curso, não do aluno; cursos sem município de oferta fora de capital e interior). Em capital ou interior, o grupo sem município aparece como "Sem município de oferta (EaD ou não informado)", sem botão de filtro.
+
+Os dez filtros globais são combinados por E e se aplicam às três consultas, com uma exceção: a comparação não envia o filtro da dimensão pela qual agrupa. Com `codigo_curso=001` e agrupamento por curso, todos os cursos seguem visíveis e o 001 fica em destaque; resumo e evolução recebem o filtro normalmente. Veja [Interatividade e filtragem cruzada](INTERATIVIDADE.md). Grupos selecionados dentro da comparação combinam-se por OU, respeitando os demais filtros.
 
 Agrupamento e seleção de grupos têm um rascunho e uma configuração aplicada. Editar esses campos não dispara a consulta; a tela avisa quando existem mudanças pendentes e identifica o agrupamento aplicado junto ao resultado. Trocar de dimensão limpa a seleção do rascunho. Alterar o ano ou os filtros globais atualiza a configuração já aplicada.
 
 As opções vêm do catálogo de toda a base e podem não ter registros naquele ano. A API omite grupos sem correspondência; a interface lista os identificadores ausentes e não cria linhas com zero. Um grupo com registros somente de docentes continua aparecendo, com medidas indisponíveis e avisos próprios.
 
-**Atualizar dados**, no resumo, recarrega catálogo e as três consultas, preservando a configuração comparativa. Uma seleção de grupo que deixou o catálogo permanece disponível para desmarcar, identificada como **fora do catálogo atual**. Ela não é descartada silenciosamente, pois esvaziar a seleção ampliaria a consulta para todos os grupos. **Limpar filtros** remove somente os sete filtros globais; mantém ano, período e configuração comparativa.
+**Atualizar dados**, no resumo, recarrega catálogo e as três consultas, preservando a configuração comparativa. Uma seleção de grupo que deixou o catálogo permanece disponível para desmarcar, identificada como **fora do catálogo atual**. Ela não é descartada silenciosamente, pois esvaziar a seleção ampliaria a consulta para todos os grupos. **Limpar filtros** remove somente os dez filtros globais; mantém ano, período e configuração comparativa.
 
 ## Organização e consulta
 
@@ -60,7 +62,7 @@ Um clique no grupo aplica ou remove seu filtro global; os botões da tabela ofer
 
 ## Verificação
 
-`frontend/test/comparacoes.test.ts` cobre os sete filtros, parâmetros repetidos, textos acentuados, zeros iniciais, seleção vazia, dimensões do catálogo, limite de 20, ausência de grupos e identificadores nulos. Os testes de apresentação compartilhada cobrem taxas negativas, acima de 100%, base zero, docentes e qualidade.
+`frontend/test/comparacoes.test.ts` cobre os dez filtros, parâmetros repetidos, textos acentuados, zeros iniciais, seleção vazia, dimensões do catálogo, limite de 20, ausência de grupos e identificadores nulos. Os testes de apresentação compartilhada cobrem taxas negativas, acima de 100%, base zero, docentes e qualidade.
 
 Na base de demonstração, use 2023:
 

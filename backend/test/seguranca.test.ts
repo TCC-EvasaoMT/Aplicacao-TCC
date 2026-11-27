@@ -16,7 +16,10 @@ const consultas: Dependencias = {
 				municipios_sede: [],
 				modalidades: [],
 				categorias_administrativas: [],
-				organizacoes_academicas: []
+				organizacoes_academicas: [],
+				graus_academicos: [],
+				capitais: [],
+				turnos: []
 			}
 		}
 	},

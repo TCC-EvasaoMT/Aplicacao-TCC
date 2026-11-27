@@ -51,6 +51,22 @@ export const filtrosQuerySchema = {
 			...codigo,
 			description:
 				'Município da sede da instituição, inclusive para cursos EaD.'
+		},
+		grau_academico: {
+			...texto,
+			description:
+				'Valor retornado em graus_academicos: o grau do último ano observado do curso.'
+		},
+		capital: {
+			type: 'string',
+			enum: ['Capital', 'Interior'],
+			description:
+				'Município de oferta na capital ou no interior; cursos sem município de oferta (EaD) não entram em nenhum dos dois.'
+		},
+		turno: {
+			...texto,
+			description:
+				'Valor retornado em turnos: turno de oferta do curso, não o turno do aluno do perfil.'
 		}
 	}
 }

@@ -11,9 +11,16 @@ export interface Filtros {
 	categoria_administrativa?: string
 	organizacao_academica?: string
 	codigo_municipio_sede?: string
+	grau_academico?: string
+	capital?: string
+	turno?: string
 }
 
 export type FiltrosRecorte = Omit<Filtros, 'ano'>
+
+// eh_capital é booleano; como filtro e grupo vira texto. Sem município de
+// oferta (EaD ou não informado), fica null.
+export const expressaoCapital = `CASE WHEN l.eh_capital THEN 'Capital' WHEN NOT l.eh_capital THEN 'Interior' END`
 
 const colunasFiltro: Record<keyof Filtros, string> = {
 	ano: 't.ano_censo',
@@ -23,7 +30,10 @@ const colunasFiltro: Record<keyof Filtros, string> = {
 	modalidade: 'o.modalidade_ensino',
 	categoria_administrativa: 'i.categoria_administrativa',
 	organizacao_academica: 'i.organizacao_academica',
-	codigo_municipio_sede: 'i.codigo_municipio_sede'
+	codigo_municipio_sede: 'i.codigo_municipio_sede',
+	grau_academico: 'c.grau_academico',
+	capital: expressaoCapital,
+	turno: 'o.turno'
 }
 
 export function parametrizarFiltros(

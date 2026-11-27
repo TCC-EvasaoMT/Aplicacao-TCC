@@ -33,7 +33,7 @@ O PrimeReact ainda injeta uma folha de estilo pequena com `.p-hidden-accessible`
 | Componente                 | Uso                                                                                    |
 | -------------------------- | -------------------------------------------------------------------------------------- |
 | `Button`                   | Todas as ações; `outlined` para as secundárias, sólido para aplicar período e comparar |
-| `Dropdown` (`CampoLista`)  | Ano do resumo e da comparação, sete filtros e agrupamento                              |
+| `Dropdown` (`CampoLista`)  | Ano do resumo e da comparação, dez filtros e agrupamento                               |
 | `InputText`                | Anos do período (`keyfilter="pint"`), busca de grupos e campos de login e senha        |
 | `Checkbox`                 | Seleção de até 20 grupos                                                               |
 | `Message`                  | Erros de consulta, de período e do limite de erro dos gráficos                         |
@@ -94,7 +94,7 @@ A escala tipográfica usa título de 28 a 32 px, seções de 20 px, texto de 16 
 
 ## Uso nos módulos
 
-- **Indicadores:** os sete filtros ficam numa gaveta lateral (`Sidebar`), em uma coluna, com **Ver resultados**, **Limpar filtros** e **Copiar link** ao final. Ela ocupa a largura da tela no celular e 416 px a partir de 576 px. O botão **Filtros**, na faixa do recorte, mostra quantos filtros estão aplicados. O seletor de ano fica no cabeçalho do resumo. Os cartões das taxas usam `bg-panel-chip` e `bg-panel-secondary-soft`.
+- **Indicadores:** os dez filtros ficam numa gaveta lateral (`Sidebar`), em uma coluna, com **Ver resultados**, **Limpar filtros** e **Copiar link** ao final. Ela ocupa a largura da tela no celular e 416 px a partir de 576 px. O botão **Filtros**, na faixa do recorte, mostra quantos filtros estão aplicados. O seletor de ano fica no cabeçalho do resumo. Os cartões das taxas usam `bg-panel-chip` e `bg-panel-secondary-soft`.
 - **Análises:** os campos de período e o botão de aplicação ficam no cabeçalho da seção, à direita do título, e passam para baixo dele em telas estreitas. Os gráficos usam `classes.quadroGrafico`, de `lib/ui.tsx`. O campo inválido recebe borda vermelha, `aria-invalid` e foco; o erro aparece numa `Message`. As tabelas têm rolagem horizontal própria, sem ampliar a página, e legenda antes dos dados. A comparação usa um painel recolhível para a seleção opcional de grupos e barras horizontais nas mesmas cores das taxas. Abaixo de 576 px, o gráfico de comparação coloca o nome do grupo acima das barras. Estados vazio, carregando e erro, botões principais sólidos e filtros recolhidos no celular estão em [Estado e exportação](ESTADO_E_EXPORTACAO.md). Veja [Comparações na interface](COMPARACOES.md).
 - **Tema:** o fundo, a cor do texto, a tipografia dos títulos e o contorno de foco estão em `@layer base`. As únicas regras fora das camadas tratam de elementos internos do Recharts e da animação de entrada dos chips.
 

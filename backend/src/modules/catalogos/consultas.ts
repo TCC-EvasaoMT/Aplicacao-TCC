@@ -1,5 +1,6 @@
 import type { Pool } from 'pg'
 import { origem } from '../../plugins/gold.js'
+import { expressaoCapital } from '../indicadores/index.js'
 
 const catalogoSQL = `
   WITH dados AS MATERIALIZED (
@@ -7,7 +8,8 @@ const catalogoSQL = `
       a.codigo_area_geral, a.area_geral,
       l.codigo_municipio AS codigo_municipio_oferta, l.municipio AS municipio_oferta,
       o.modalidade_ensino AS modalidade, i.categoria_administrativa, i.organizacao_academica,
-      i.codigo_municipio_sede, i.municipio_sede
+      i.codigo_municipio_sede, i.municipio_sede,
+      c.grau_academico, ${expressaoCapital} AS capital, o.turno
     ${origem}
   )
   SELECT jsonb_build_object(
@@ -30,7 +32,10 @@ const catalogoSQL = `
     ${[
 			['modalidades', 'modalidade'],
 			['categorias_administrativas', 'categoria_administrativa'],
-			['organizacoes_academicas', 'organizacao_academica']
+			['organizacoes_academicas', 'organizacao_academica'],
+			['graus_academicos', 'grau_academico'],
+			['capitais', 'capital'],
+			['turnos', 'turno']
 		]
 			.map(
 				([campo, coluna]) => `'${campo}', (

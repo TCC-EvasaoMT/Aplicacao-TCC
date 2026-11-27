@@ -160,6 +160,84 @@ test(
 		)
 
 		await t.test(
+			'grau, capital e turno filtram e agrupam como as outras dimensões',
+			async () => {
+				const ordenar = (lista: (string | null)[]) =>
+					[...lista].sort((a, b) => String(a).localeCompare(String(b)))
+				const filtros = (await server.inject('/api/v1/filtros')).json()
+				assert.deepEqual(filtros.graus_academicos.sort(), [
+					'Bacharelado',
+					'Licenciatura',
+					'Tecnológico'
+				])
+				assert.deepEqual(filtros.capitais.sort(), ['Capital', 'Interior'])
+				assert.deepEqual(ordenar(filtros.turnos), [
+					'Não informado',
+					'Não se aplica (EaD)',
+					'Noturno'
+				])
+				// O 003 (só docentes) não tem grau; 002 (EaD) e 003 não têm município de oferta.
+				for (const [dimensao, esperado] of [
+					[
+						'grau_academico',
+						['Bacharelado', 'Licenciatura', 'Tecnológico', null]
+					],
+					['capital', ['Capital', 'Interior', null]],
+					['turno', ['Não informado', 'Não se aplica (EaD)', 'Noturno']]
+				] as const) {
+					const comparacao = (
+						await server.inject(
+							`/api/v1/analises/comparacoes?ano=2023&agrupar_por=${dimensao}`
+						)
+					).json()
+					const grupos = comparacao.grupos as {
+						grupo: { valor: string | null }
+					}[]
+					assert.deepEqual(
+						ordenar(grupos.map((g) => g.grupo.valor)),
+						ordenar([...esperado]),
+						dimensao
+					)
+					for (const { grupo, ...valores } of grupos) {
+						if (grupo.valor === null) continue
+						const { filtros: _f, ...filtrado } = await resumo({
+							[dimensao]: grupo.valor
+						})
+						assert.deepEqual(valores, filtrado, `${dimensao}=${grupo.valor}`)
+					}
+				}
+				// O filtro vale nas outras análises.
+				const dispersao = (
+					await server.inject(
+						'/api/v1/analises/dispersao?ano=2023&capital=Interior'
+					)
+				).json()
+				assert.deepEqual(
+					dispersao.cursos.map(
+						(c: { curso: { codigo: string } }) => c.curso.codigo
+					),
+					['004', '005', '006', '007', '008']
+				)
+				const ranking = (
+					await server.inject(
+						'/api/v1/analises/ranking?ano=2023&dimensao=modalidade&grau_academico=Bacharelado'
+					)
+				).json()
+				assert.deepEqual(
+					ranking.grupos.map(
+						(g: { grupo: { valor: string } }) => g.grupo.valor
+					),
+					['A distância', 'Presencial']
+				)
+				for (const url of [
+					'/api/v1/indicadores/resumo?ano=2023&capital=Sim',
+					'/api/v1/analises/comparacoes?ano=2023&agrupar_por=capital&grupos=Litoral'
+				])
+					assert.equal((await server.inject(url)).statusCode, 400, url)
+			}
+		)
+
+		await t.test(
 			'taxa pondera cursos por base e não usa média das taxas',
 			async () => {
 				const result = await resumo({

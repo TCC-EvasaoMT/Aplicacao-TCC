@@ -193,7 +193,7 @@ A integração também testa a recuperação após reconstrução da Gold e reap
 
 ## Interface e próximos módulos
 
-O módulo `analises` oferece a API de evolução temporal e utiliza o contrato público de indicadores para manter as mesmas regras de agregação e cálculo. No frontend, `modules/analises` consulta essa API e apresenta gráfico Recharts e tabela acessível; o painel de indicadores compõe sua entrada pública e compartilha os sete filtros de recorte. Apenas tipos públicos de indicadores são importados por análises. O intervalo temporal é independente do ano do resumo e as taxas não são recalculadas no cliente.
+O módulo `analises` oferece a API de evolução temporal e utiliza o contrato público de indicadores para manter as mesmas regras de agregação e cálculo. No frontend, `modules/analises` consulta essa API e apresenta gráfico Recharts e tabela acessível; o painel de indicadores compõe sua entrada pública e compartilha os dez filtros de recorte. Apenas tipos públicos de indicadores são importados por análises. O intervalo temporal é independente do ano do resumo e as taxas não são recalculadas no cliente.
 
 No frontend, `modules/autenticacao` reúne o login, a restauração e a renovação da sessão e a alteração de senha, com controles no cabeçalho. Não importa outros módulos do painel. Veja [login e sessão no painel](../frontend/AUTENTICACAO.md).
 

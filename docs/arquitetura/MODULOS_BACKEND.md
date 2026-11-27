@@ -14,7 +14,7 @@ O catálogo é global, não recebe filtros e não é reduzido conforme a seleç�
 
 ## Indicadores
 
-`backend/src/modules/indicadores` fornece `GET /api/v1/indicadores/resumo`. Recebe um ano obrigatório e até sete filtros opcionais, com um valor por parâmetro e combinação por **E**.
+`backend/src/modules/indicadores` fornece `GET /api/v1/indicadores/resumo`. Recebe um ano obrigatório e até dez filtros opcionais, com um valor por parâmetro e combinação por **E**.
 
 `index.ts` exporta o plugin `indicadores`, a fábrica `criarConsultasIndicadores` e o tipo de suas consultas. `rotas.ts` coordena a consulta e o cálculo; `schemas.ts` valida entrada e resposta; `consultas.ts` agrega as medidas usando parâmetros SQL; `calculos.ts` calcula taxas e sinalizações de qualidade.
 
@@ -24,7 +24,7 @@ O `index.ts` também expõe o contrato de cálculo, os schemas de recorte e resu
 
 ## Análises
 
-`backend/src/modules/analises` fornece `GET /api/v1/analises/evolucao-temporal`, com `ano_inicial`, `ano_final` e os mesmos sete filtros opcionais do resumo. Retorna uma série crescente de até 30 anos, incluindo lacunas com medidas `null`.
+`backend/src/modules/analises` fornece `GET /api/v1/analises/evolucao-temporal`, com `ano_inicial`, `ano_final` e os mesmos dez filtros opcionais do resumo. Retorna uma série crescente de até 30 anos, incluindo lacunas com medidas `null`.
 
 Para o RF10, `GET /api/v1/analises/dispersao` devolve todos os cursos de um ano, a linha de alta evasão de cada taxa e a zona crítica; `dispersao.ts` concentra essa regra. Veja o [contrato da dispersão](../api/DISPERSAO.md).
 
@@ -34,7 +34,7 @@ Para o RF12, `GET /api/v1/analises/ranking` devolve todas as áreas gerais ou mo
 
 `GET /api/v1/analises/coorte` lê a `fato_evasao_coorte` para uma turma de ingresso; `coorte.ts` calcula tamanho inicial, acumulados e resíduo, e a consulta usa `origemCoorte` de `plugins/gold.ts`. Veja o [contrato da turma](../api/COORTE.md).
 
-O módulo também fornece `GET /api/v1/analises/comparacoes`, com `ano` e `agrupar_por` obrigatórios. Compara até 20 grupos por curso, área geral CINE, municípios de oferta/sede, modalidade, categoria administrativa ou organização acadêmica. Aceita os sete filtros opcionais e seleção de grupos por códigos/textos. Retorna totais, taxas e qualidade por grupo, quantidade total de grupos e indicação de truncamento. Veja [contrato e exemplos das comparações](../api/COMPARACOES.md).
+O módulo também fornece `GET /api/v1/analises/comparacoes`, com `ano` e `agrupar_por` obrigatórios. Compara até 20 grupos por curso, área geral CINE, municípios de oferta/sede, modalidade, categoria administrativa, organização acadêmica, grau acadêmico, capital ou interior e turno do curso. Aceita os dez filtros opcionais e seleção de grupos por códigos/textos. Retorna totais, taxas e qualidade por grupo, quantidade total de grupos e indicação de truncamento. Veja [contrato e exemplos das comparações](../api/COMPARACOES.md).
 
 `index.ts` exporta o plugin `analises`, a fábrica `criarConsultasAnalises` e o tipo de consultas, com as operações `evolucao`, `comparacao`, `dispersao`, `ranking`, `perfil` e `coorte`. `consultas.ts` agrega por ano ou grupo; `evolucao.ts` completa lacunas; `comparacoes.ts` define as dimensões permitidas e monta os resultados. Ambos reutilizam o cálculo público de indicadores. `rotas.ts` e `schemas.ts` definem os contratos HTTP. Consulte a [API de evolução temporal](../api/ANALISES_TEMPORAIS.md) e as [comparações na interface](../frontend/COMPARACOES.md). As rotas de análise são públicas.
 

@@ -34,10 +34,37 @@ export const dimensoesComparacao = {
 		rotulo: 'Organização acadêmica',
 		catalogo: 'organizacoes_academicas',
 		filtro: 'organizacao_academica'
-	}
+	},
+	grau_academico: {
+		rotulo: 'Grau acadêmico',
+		catalogo: 'graus_academicos',
+		filtro: 'grau_academico'
+	},
+	capital: {
+		rotulo: 'Capital ou interior',
+		catalogo: 'capitais',
+		filtro: 'capital'
+	},
+	turno: { rotulo: 'Turno do curso', catalogo: 'turnos', filtro: 'turno' }
 } as const
 
 export type DimensaoComparacao = keyof typeof dimensoesComparacao
+
+// Ressalvas mostradas na comparação quando a dimensão é escolhida.
+export const avisosDimensao: Partial<Record<DimensaoComparacao, string>> = {
+	grau_academico:
+		'O grau é o do último ano observado de cada curso, aplicado a todos os anos.',
+	capital:
+		'Cursos sem município de oferta, como os de EaD, ficam no grupo sem município, que não é filtrável.',
+	turno:
+		'Turno de oferta do curso. Não é o turno do aluno, que aparece no perfil de quem evade.'
+}
+
+// Rótulo do grupo sem identificador quando a dimensão tem um significado
+// próprio para ele.
+const semIdentificador: Partial<Record<DimensaoComparacao, string>> = {
+	capital: 'Sem município de oferta (EaD ou não informado)'
+}
 export interface SelecaoComparacao {
 	agrupar_por: DimensaoComparacao
 	grupos: string[]
@@ -60,11 +87,15 @@ export function lerComparacao(parametros: URLSearchParams): SelecaoComparacao {
 	return { agrupar_por: dimensao as DimensaoComparacao, grupos }
 }
 
-export function rotuloGrupo(grupo: {
-	valor: string | null
-	nome: string | null
-}) {
-	if (grupo.valor === null) return 'Não informado (sem identificador)'
+export function rotuloGrupo(
+	grupo: { valor: string | null; nome: string | null },
+	dimensao?: DimensaoComparacao
+) {
+	if (grupo.valor === null)
+		return (
+			(dimensao && semIdentificador[dimensao]) ??
+			'Não informado (sem identificador)'
+		)
 	return grupo.nome && grupo.nome !== grupo.valor
 		? `${grupo.nome} (${grupo.valor})`
 		: grupo.valor
@@ -80,7 +111,7 @@ export function opcoesComparacao(
 				typeof opcao === 'string'
 					? { valor: opcao, nome: opcao }
 					: { valor: opcao.codigo, nome: opcao.nome }
-			return { valor: grupo.valor, rotulo: rotuloGrupo(grupo) }
+			return { valor: grupo.valor, rotulo: rotuloGrupo(grupo, dimensao) }
 		}
 	)
 }

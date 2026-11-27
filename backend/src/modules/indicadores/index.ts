@@ -8,6 +8,7 @@ export {
 } from './consultas.js'
 export {
 	agregacaoSQL,
+	expressaoCapital,
 	parametrizarFiltros,
 	type FiltrosRecorte
 } from './consultas.js'

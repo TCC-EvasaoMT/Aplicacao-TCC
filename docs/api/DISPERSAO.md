@@ -9,10 +9,10 @@ GET /api/v1/analises/dispersao?ano=2023
 GET /api/v1/analises/dispersao?ano=2023&codigo_area_geral=01&modalidade=Presencial
 ```
 
-| Parâmetro          | Regra                                                                                                                                                        |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `ano`              | Obrigatório, inteiro entre 1900 e 9999. Um ano por consulta.                                                                                                 |
-| Filtros de recorte | Os sete filtros opcionais do resumo, com as mesmas regras de validação. O RF10 exige área e modalidade; os demais vêm de graça pela agregação compartilhada. |
+| Parâmetro          | Regra                                                                                                                                                       |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ano`              | Obrigatório, inteiro entre 1900 e 9999. Um ano por consulta.                                                                                                |
+| Filtros de recorte | Os dez filtros opcionais do resumo, com as mesmas regras de validação. O RF10 exige área e modalidade; os demais vêm de graça pela agregação compartilhada. |
 
 Parâmetros desconhecidos, repetidos ou inválidos retornam `400` antes da consulta. Não há `limite`, seleção de grupos nem paginação: a rota devolve todos os cursos do recorte. A Gold real tem cerca de 290 cursos por ano, o que mantém a resposta pequena; o limite de 20 grupos da comparação não se aplica.
 

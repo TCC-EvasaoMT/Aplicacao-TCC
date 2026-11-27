@@ -19,11 +19,11 @@ Os tipos de seleção e resultado são compartilhados pela entrada pública de `
 
 ## Período e filtros
 
-Execute `pnpm dev:demo` e abra `http://127.0.0.1:5173/`. O gráfico fica na aba **Evolução**, a segunda do cabeçalho, acima da [turma de ingresso](COORTE.md), que acompanha uma mesma turma ao longo dos censos; o resumo anual tem aba própria. Sob o título do resumo, uma linha informa quantos cursos com alunos entram no cálculo (`qualidade.registros_com_alunos`; cada registro é um curso no ano) e lembra que os valores são de um único ano do Censo, enquanto a aba Evolução mostra vários. Sem filtros, a faixa do recorte mostra "Todos os cursos". **Atualizar dados** recarrega catálogo, resumo, evolução e comparação; **Limpar filtros** mantém o ano do resumo e o intervalo do gráfico, removendo os sete filtros opcionais.
+Execute `pnpm dev:demo` e abra `http://127.0.0.1:5173/`. O gráfico fica na aba **Evolução**, a segunda do cabeçalho, acima da [turma de ingresso](COORTE.md), que acompanha uma mesma turma ao longo dos censos; o resumo anual tem aba própria. Sob o título do resumo, uma linha informa quantos cursos com alunos entram no cálculo (`qualidade.registros_com_alunos`; cada registro é um curso no ano) e lembra que os valores são de um único ano do Censo, enquanto a aba Evolução mostra vários. Sem filtros, a faixa do recorte mostra "Todos os cursos". **Atualizar dados** recarrega catálogo, resumo, evolução e comparação; **Limpar filtros** mantém o ano do resumo e o intervalo do gráfico, removendo os dez filtros opcionais.
 
 O intervalo inicial vem da URL, quando válido; caso contrário, vai do menor ao maior ano do catálogo, limitado aos últimos 30 anos. Os campos aceitam anos entre 1900 e 9999, inclusive anos sem registros. **Aplicar período** valida ordem e tamanho antes de consultar; editar os campos mantém a série aplicada. O período é preservado ao atualizar os dados e pode ser compartilhado pela URL.
 
-Os sete filtros de recorte são combinados por E. O parâmetro `ano` do resumo não é enviado à consulta temporal e sua alteração não dispara nova consulta da série. Os códigos permanecem como texto, inclusive zeros iniciais. O município da sede não substitui o município de oferta.
+Os dez filtros de recorte são combinados por E. O parâmetro `ano` do resumo não é enviado à consulta temporal e sua alteração não dispara nova consulta da série. Os códigos permanecem como texto, inclusive zeros iniciais. O município da sede não substitui o município de oferta.
 
 A resposta é associada à consulta e à tentativa de atualização. Alterar recorte ou período cancela a requisição anterior com `AbortController`; respostas canceladas são descartadas. Durante a espera, a última série permanece esmaecida, com seu período original. Em caso de erro da API, ela deixa de ser exibida e **Tentar novamente** repete apenas a consulta temporal.
 
@@ -44,7 +44,7 @@ Os anos presentes no catálogo podem ser selecionados no gráfico ou pelos botõ
 
 ## Verificação
 
-`pnpm test` cobre limites do intervalo, catálogo vazio, serialização dos sete filtros, independência do ano do resumo, códigos, percentuais e avisos anuais. `pnpm check` também verifica tipos e build.
+`pnpm test` cobre limites do intervalo, catálogo vazio, serialização dos dez filtros, independência do ano do resumo, códigos, percentuais e avisos anuais. `pnpm check` também verifica tipos e build.
 
 Com `pnpm dev:demo`, confira o período 2022 a 2024:
 

@@ -73,7 +73,7 @@ test('valida intervalo inclusivo, limites, anos ausentes no catálogo e entradas
 		)
 })
 
-test('consulta temporal combina sete filtros, preserva códigos e ignora o ano do resumo', () => {
+test('consulta temporal combina dez filtros, preserva códigos e ignora o ano do resumo', () => {
 	const periodo = { ano_inicial: '2022', ano_final: '2024' }
 	const selecao = {
 		...limparFiltros('2023'),
@@ -83,7 +83,10 @@ test('consulta temporal combina sete filtros, preserva códigos e ignora o ano d
 		categoria_administrativa: 'Pública Federal',
 		organizacao_academica: 'Universidade',
 		codigo_municipio_oferta: '5107909',
-		codigo_municipio_sede: '5103403'
+		codigo_municipio_sede: '5103403',
+		grau_academico: 'Licenciatura',
+		capital: 'Interior',
+		turno: 'Noturno'
 	}
 	const { ano: _ano, ...recorte } = selecao
 	assert.deepEqual(

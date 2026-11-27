@@ -117,20 +117,23 @@ Invoke-RestMethod 'http://127.0.0.1:3000/api/v1/analises/comparacoes?ano=2023&ag
 
 A comparação é pública e usa a conexão de leitura. Consulte [dimensões, seleção de grupos, regras de ausência e truncamento](../docs/api/COMPARACOES.md). A seleção `grupos` é o único parâmetro que aceita repetição nessa rota; os filtros de recorte aceitam um valor cada. O [frontend de comparações](../docs/frontend/COMPARACOES.md) já está integrado ao painel.
 
-| Parâmetro                  | Tipo e significado                                            |
-| -------------------------- | ------------------------------------------------------------- |
-| `ano`                      | Inteiro obrigatório, ano do censo.                            |
-| `codigo_curso`             | Texto, código original do curso.                              |
-| `codigo_area_geral`        | Texto, área geral CINE; preserva zeros iniciais, como `01`.   |
-| `codigo_municipio_oferta`  | Texto, código IBGE do local de oferta presencial.             |
-| `modalidade`               | Texto exatamente como retornado em `modalidades`.             |
-| `categoria_administrativa` | Texto de `categorias_administrativas`.                        |
-| `organizacao_academica`    | Texto de `organizacoes_academicas`.                           |
-| `codigo_municipio_sede`    | Texto, código IBGE da sede institucional, inclusive para EaD. |
+| Parâmetro                  | Tipo e significado                                                 |
+| -------------------------- | ------------------------------------------------------------------ |
+| `ano`                      | Inteiro obrigatório, ano do censo.                                 |
+| `codigo_curso`             | Texto, código original do curso.                                   |
+| `codigo_area_geral`        | Texto, área geral CINE; preserva zeros iniciais, como `01`.        |
+| `codigo_municipio_oferta`  | Texto, código IBGE do local de oferta presencial.                  |
+| `modalidade`               | Texto exatamente como retornado em `modalidades`.                  |
+| `categoria_administrativa` | Texto de `categorias_administrativas`.                             |
+| `organizacao_academica`    | Texto de `organizacoes_academicas`.                                |
+| `codigo_municipio_sede`    | Texto, código IBGE da sede institucional, inclusive para EaD.      |
+| `grau_academico`           | Texto de `graus_academicos`; grau do último ano observado do curso |
+| `capital`                  | `Capital` ou `Interior`; cursos sem município de oferta não entram |
+| `turno`                    | Texto de `turnos`; turno de oferta do curso, não o do aluno        |
 
 Os filtros aceitam um valor por parâmetro e combinam por E. Parâmetros desconhecidos, repetidos ou inválidos retornam `400`. Valores válidos, mas inexistentes, retornam resumo sem dados com `200`. O ano não está restrito ao recorte de pesquisa de 2019 a 2023: novos anos carregados aparecem sem mudar o contrato. A API não aplica automaticamente uma restrição a MT, à graduação ou às IES públicas; a pipeline deve entregar a Gold com o recorte acordado.
 
-O catálogo é independente do recorte atual. Códigos vêm como `{ "codigo": "01", "nome": "Educação" }`; o nome pode ser `null` quando falta referência. Categorias e modalidades são listas de textos. Os anos vêm da fato, evitando anos exclusivos de ingresso das coortes. Códigos nulos não são oferecidos como filtros; essas linhas continuam nos totais quando o respectivo filtro não é aplicado. Município de oferta ausente em EaD nunca é substituído pela sede.
+O catálogo é independente do recorte atual. Códigos vêm como `{ "codigo": "01", "nome": "Educação" }`; o nome pode ser `null` quando falta referência. Categorias, modalidades, graus acadêmicos e turnos são listas de textos; `capitais` traz `Capital` e `Interior` quando existem na fato. Os anos vêm da fato, evitando anos exclusivos de ingresso das coortes. Códigos nulos não são oferecidos como filtros; essas linhas continuam nos totais quando o respectivo filtro não é aplicado. Município de oferta ausente em EaD nunca é substituído pela sede.
 
 Os IDs `id_*` da Gold não fazem parte do contrato: são reconstruídos pela pipeline. Instituições não são identificadas nominalmente; a combinação de filtros institucionais pode representar mais de uma IES.
 

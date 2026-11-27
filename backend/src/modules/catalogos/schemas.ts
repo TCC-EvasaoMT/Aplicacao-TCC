@@ -22,7 +22,10 @@ export const catalogoSchema = {
 		'municipios_sede',
 		'modalidades',
 		'categorias_administrativas',
-		'organizacoes_academicas'
+		'organizacoes_academicas',
+		'graus_academicos',
+		'capitais',
+		'turnos'
 	],
 	properties: {
 		anos: { type: 'array', items: { type: 'integer' } },
@@ -32,6 +35,9 @@ export const catalogoSchema = {
 		municipios_sede: opcoesCodigo,
 		modalidades: opcoesTexto,
 		categorias_administrativas: opcoesTexto,
-		organizacoes_academicas: opcoesTexto
+		organizacoes_academicas: opcoesTexto,
+		graus_academicos: opcoesTexto,
+		capitais: opcoesTexto,
+		turnos: opcoesTexto
 	}
 }
