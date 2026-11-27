@@ -7,7 +7,11 @@ import { promisify } from 'node:util'
 import { fileURLToPath } from 'node:url'
 import { Pool } from 'pg'
 import { migrarApp } from '../../src/database/migracoes.js'
-import { criarAdministrador } from '../../src/database/administradores.js'
+import {
+	criarAdministrador,
+	criarLeitor,
+	desativarConta
+} from '../../src/database/administradores.js'
 import { buildApp } from '../../src/app.js'
 import {
 	criarRepositorioAutenticacao,
@@ -77,7 +81,7 @@ test(
 				await migrarApp(owner)
 				assert.equal(
 					(await db.query('SELECT * FROM app.migracoes')).rowCount,
-					1
+					2
 				)
 				await criarAdministrador(owner, email.toUpperCase(), senha)
 				await assert.rejects(criarAdministrador(owner, email, senha), {
@@ -86,7 +90,7 @@ test(
 				assert.equal((await db.query('SELECT * FROM app.usuarios')).rowCount, 1)
 				assert.equal(
 					(await db.query('SELECT * FROM app.usuario_permissoes')).rowCount,
-					2
+					3
 				)
 			}
 		)
@@ -183,11 +187,26 @@ test(
 					)
 				)
 				assert.equal((await db.query('SELECT * FROM app.usuarios')).rowCount, 1)
+				// Desativar um e-mail inexistente falha sem alterar nada.
+				const desativar = [
+					'--import',
+					'tsx',
+					'src/database/cli.ts',
+					'desativar'
+				]
+				await assert.rejects(
+					promisify(execFile)(
+						process.execPath,
+						[...desativar, 'ninguem@example.com'],
+						options
+					),
+					(erro: { stdout?: string }) => /Nenhuma conta/.test(erro.stdout ?? '')
+				)
 				await db.query('UPDATE app.usuarios SET ativo = true WHERE id = $1', [
 					antes.id
 				])
 				await db.query(
-					"INSERT INTO app.usuario_permissoes (usuario_id, permissao) VALUES ($1, 'etl:consultar'), ($1, 'etl:reprocessar')",
+					"INSERT INTO app.usuario_permissoes (usuario_id, permissao) VALUES ($1, 'etl:consultar'), ($1, 'etl:reprocessar'), ($1, 'painel:consultar')",
 					[antes.id]
 				)
 			}
