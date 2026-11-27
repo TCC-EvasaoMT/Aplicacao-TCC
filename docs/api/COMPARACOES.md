@@ -9,13 +9,13 @@ GET /api/v1/analises/comparacoes?ano=2023&agrupar_por=categoria_administrativa
 GET /api/v1/analises/comparacoes?ano=2023&agrupar_por=curso&grupos=001&grupos=002
 ```
 
-| Parâmetro          | Regra                                                                                                                                                                                             |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ano`              | Obrigatório, inteiro entre 1900 e 9999. Um ano por comparação.                                                                                                                                    |
-| `agrupar_por`      | Obrigatório; uma das sete dimensões abaixo.                                                                                                                                                       |
-| `limite`           | Inteiro de 1 a 20; padrão 20. Limita a quantidade de grupos retornados, não os registros somados.                                                                                                 |
-| `grupos`           | Seleção opcional de até 20 valores distintos da dimensão. Repita o parâmetro para selecionar mais de um; uma única ocorrência também é aceita.                                                    |
-| Filtros de recorte | Os sete filtros opcionais do resumo: `codigo_curso`, `codigo_area_geral`, `codigo_municipio_oferta`, `modalidade`, `categoria_administrativa`, `organizacao_academica` e `codigo_municipio_sede`. |
+| Parâmetro          | Regra                                                                                                                                                                                                                                  |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ano`              | Obrigatório, inteiro entre 1900 e 9999. Um ano por comparação.                                                                                                                                                                         |
+| `agrupar_por`      | Obrigatório; uma das dez dimensões abaixo.                                                                                                                                                                                             |
+| `limite`           | Inteiro de 1 a 20; padrão 20. Limita a quantidade de grupos retornados, não os registros somados.                                                                                                                                      |
+| `grupos`           | Seleção opcional de até 20 valores distintos da dimensão. Repita o parâmetro para selecionar mais de um; uma única ocorrência também é aceita.                                                                                         |
+| Filtros de recorte | Os dez filtros opcionais do resumo: `codigo_curso`, `codigo_area_geral`, `codigo_municipio_oferta`, `modalidade`, `categoria_administrativa`, `organizacao_academica`, `codigo_municipio_sede`, `grau_academico`, `capital` e `turno`. |
 
 | `agrupar_por`              | Valor utilizado em `grupos` e retornado em `grupo.valor` | Rótulo em `grupo.nome`      |
 | -------------------------- | -------------------------------------------------------- | --------------------------- |
@@ -26,6 +26,11 @@ GET /api/v1/analises/comparacoes?ano=2023&agrupar_por=curso&grupos=001&grupos=00
 | `modalidade`               | Texto da modalidade                                      | Mesmo texto                 |
 | `categoria_administrativa` | Texto da categoria                                       | Mesmo texto                 |
 | `organizacao_academica`    | Texto da organização                                     | Mesmo texto                 |
+| `grau_academico`           | Texto do grau do último ano observado do curso           | Mesmo texto                 |
+| `capital`                  | `Capital` ou `Interior`; `null` sem município de oferta  | Mesmo texto                 |
+| `turno`                    | Texto do turno de oferta do curso                        | Mesmo texto                 |
+
+Cada dimensão corresponde a um filtro do recorte com o mesmo valor, o que permite à interface aplicar o grupo clicado como filtro. Em `capital`, a coluna booleana `dim_localidade.eh_capital` vira `Capital` ou `Interior`; cursos sem município de oferta, como os de EaD, ficam no grupo `null`, que não é filtrável. `grau_academico` é o grau do último ano observado de cada curso, aplicado a todos os anos, e `turno` é o turno de oferta do curso, diferente do fator "turno do aluno" do [perfil](PERFIL.md). O ranking continua só com área geral e modalidade.
 
 Use os códigos e textos retornados por `/api/v1/filtros`. Códigos permanecem strings, incluindo zeros iniciais. Na seleção por código, cada valor deve conter somente dígitos, com até 32 caracteres. Textos devem ter de 1 a 200 caracteres e não podem conter apenas espaços. Não há comparação nominal entre IES: as características institucionais podem reunir várias instituições.
 
@@ -93,6 +98,6 @@ Resultados esperados com as fixtures:
 
 `test/comparacoes.test.ts` cobre entradas inválidas, seleção única/múltipla, códigos com zeros, erros controlados, contrato Swagger e parametrização. A suíte de segurança inclui a nova rota na verificação de acesso público e cabeçalhos.
 
-`test/integration/comparacoes.ts`, executado pela suíte PostgreSQL existente, compara as sete dimensões com os resumos anuais equivalentes. Também verifica taxas sobre somas, qualidade, seleção de grupos, filtros combinados, EaD, identificadores nulos, rótulos divergentes/ausentes e truncamento com 33 grupos sintéticos. O teste de reconstrução da Gold confere a recuperação da comparação após reaplicar grants e mudar IDs internos.
+`test/integration/comparacoes.ts`, executado pela suíte PostgreSQL existente, compara as dez dimensões com os resumos anuais equivalentes. Também verifica taxas sobre somas, qualidade, seleção de grupos, filtros combinados, EaD, identificadores nulos, rótulos divergentes/ausentes e truncamento com 33 grupos sintéticos. O teste de reconstrução da Gold confere a recuperação da comparação após reaplicar grants e mudar IDs internos.
 
 Execute `pnpm test:integration` com `TEST_DATABASE_URL` apontando para o banco isolado de testes. A suíte eleva somente sua cota HTTP para comportar os recortes comparados em sequência; o padrão da aplicação continua em 120 chamadas/minuto. A medição da comparação sintética ficou abaixo de três segundos, mas desempenho e resultados reais ainda precisam ser validados com a Gold da pipeline.

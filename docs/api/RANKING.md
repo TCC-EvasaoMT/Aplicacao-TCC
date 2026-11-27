@@ -9,12 +9,12 @@ GET /api/v1/analises/ranking?ano=2023&dimensao=area_geral
 GET /api/v1/analises/ranking?ano=2023&dimensao=modalidade&taxa=evasao_ies&categoria_administrativa=Pública%20Federal
 ```
 
-| Parâmetro          | Regra                                                                                     |
-| ------------------ | ----------------------------------------------------------------------------------------- |
-| `ano`              | Obrigatório, inteiro entre 1900 e 9999. Um ano por consulta.                              |
-| `dimensao`         | Obrigatório: `area_geral` ou `modalidade`. Uma dimensão por consulta.                     |
-| `taxa`             | Taxa usada na ordem: `evasao_curso` (padrão) ou `evasao_ies`.                             |
-| Filtros de recorte | Os sete filtros opcionais do resumo, com as mesmas regras de validação e o mesmo sentido. |
+| Parâmetro          | Regra                                                                                    |
+| ------------------ | ---------------------------------------------------------------------------------------- |
+| `ano`              | Obrigatório, inteiro entre 1900 e 9999. Um ano por consulta.                             |
+| `dimensao`         | Obrigatório: `area_geral` ou `modalidade`. Uma dimensão por consulta.                    |
+| `taxa`             | Taxa usada na ordem: `evasao_curso` (padrão) ou `evasao_ies`.                            |
+| Filtros de recorte | Os dez filtros opcionais do resumo, com as mesmas regras de validação e o mesmo sentido. |
 
 Parâmetros desconhecidos, repetidos ou inválidos retornam `400` antes da consulta. As outras dimensões da comparação, como `curso` e `municipio`, também: o RF12 trata só de áreas e modalidades. Não há `limite` nem seleção de grupos: a rota devolve todas as categorias com registros no recorte. A CINE tem 11 áreas gerais, e as modalidades são poucas; a resposta é pequena.
 

@@ -9,10 +9,10 @@ GET /api/v1/analises/coorte?ano_ingresso=2019
 GET /api/v1/analises/coorte?ano_ingresso=2019&codigo_area_geral=01&modalidade=Presencial
 ```
 
-| Parâmetro          | Regra                                                                                       |
-| ------------------ | ------------------------------------------------------------------------------------------- |
-| `ano_ingresso`     | Obrigatório, inteiro entre 1900 e 9999.                                                     |
-| Filtros de recorte | Os sete filtros opcionais do resumo, aplicados aos atributos do curso em cada ano do censo. |
+| Parâmetro          | Regra                                                                                      |
+| ------------------ | ------------------------------------------------------------------------------------------ |
+| `ano_ingresso`     | Obrigatório, inteiro entre 1900 e 9999.                                                    |
+| Filtros de recorte | Os dez filtros opcionais do resumo, aplicados aos atributos do curso em cada ano do censo. |
 
 O ano do censo não é parâmetro: a série cobre todos os anos carregados a partir do ingresso. Parâmetros desconhecidos, repetidos ou inválidos, inclusive `ano`, retornam `400` antes da consulta.
 

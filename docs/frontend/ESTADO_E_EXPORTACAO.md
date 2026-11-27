@@ -6,7 +6,7 @@ O painel permite compartilhar o estado da tela pela URL e exportar os dados carr
 
 Sem ano escolhido e sem filtros, o painel abre no ano mais recente com dados de alunos. Se o último ano do catálogo só tem docentes, a tela recua e informa o ano pulado. Escolher um ano desliga esse ajuste. Recortes sem alunos mostram uma explicação e ações para voltar ao ano anterior, desfazer a última mudança ou limpar filtros, quando aplicáveis.
 
-Em qualquer largura de tela, os sete filtros ficam numa gaveta aberta pelo botão **Filtros**, que mostra a contagem. As seleções ficam na faixa do recorte, descrita em [interatividade](INTERATIVIDADE.md).
+Em qualquer largura de tela, os dez filtros ficam numa gaveta aberta pelo botão **Filtros**, que mostra a contagem. As seleções ficam na faixa do recorte, descrita em [interatividade](INTERATIVIDADE.md).
 
 Ano, filtros, período, comparação aplicada e aba ativa ficam na URL. Recarregar restaura a seleção; **Copiar link**, no fim da gaveta de filtros, copia o endereço. Cada tabela oferece **Baixar CSV**, gerado no navegador com os dados já carregados.
 
@@ -18,7 +18,7 @@ Os rótulos seguem o formato `Nome (código)`, e os textos distinguem singular e
 
 | Parâmetro                          | Painel     | Observação                                                                   |
 | ---------------------------------- | ---------- | ---------------------------------------------------------------------------- |
-| `ano` e os sete filtros de recorte | Resumo     | Saneados pelo catálogo, como em **Atualizar dados**                          |
+| `ano` e os dez filtros de recorte  | Resumo     | Saneados pelo catálogo, como em **Atualizar dados**                          |
 | `ano_inicial`, `ano_final`         | Evolução   | Só quando um período foi aplicado; inválido é ignorado                       |
 | `agrupar_por`, `grupos` (repetido) | Comparação | Só quando difere do padrão; até 20 grupos, sem repetir                       |
 | `taxa_dispersao`                   | Dispersão  | `evasao_ies`; a evasão do curso é o padrão e não é gravada                   |

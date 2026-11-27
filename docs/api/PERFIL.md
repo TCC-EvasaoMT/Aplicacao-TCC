@@ -13,7 +13,7 @@ GET /api/v1/analises/perfil?ano=2023&fator=sexo&codigo_area_geral=01&modalidade=
 | ------------------ | --------------------------------------------------------------------------------------- |
 | `ano`              | Obrigatório, inteiro entre 1900 e 9999.                                                 |
 | `fator`            | Obrigatório. Um dos 12 fatores de prioridade 1 da tabela abaixo; um fator por consulta. |
-| Filtros de recorte | Os sete filtros opcionais do resumo, com as mesmas regras de validação.                 |
+| Filtros de recorte | Os dez filtros opcionais do resumo, com as mesmas regras de validação.                  |
 
 | `fator`                     | Nome em `dim_perfil.fator`                                                        |
 | --------------------------- | --------------------------------------------------------------------------------- |

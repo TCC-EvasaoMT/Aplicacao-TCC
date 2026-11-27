@@ -8,19 +8,22 @@ O módulo `backend/src/modules/analises` consulta a evolução anual de um recor
 GET /api/v1/analises/evolucao-temporal?ano_inicial=2022&ano_final=2024&codigo_curso=001
 ```
 
-| Parâmetro                  | Regra                                                            |
-| -------------------------- | ---------------------------------------------------------------- |
-| `ano_inicial`              | Inteiro obrigatório entre 1900 e 9999                            |
-| `ano_final`                | Inteiro obrigatório entre 1900 e 9999, maior ou igual ao inicial |
-| `codigo_curso`             | Código original como texto                                       |
-| `codigo_area_geral`        | Código CINE como texto; mantém zeros iniciais                    |
-| `codigo_municipio_oferta`  | Código do local de oferta, sem substituição pela sede            |
-| `modalidade`               | Texto retornado pelo catálogo                                    |
-| `categoria_administrativa` | Texto retornado pelo catálogo                                    |
-| `organizacao_academica`    | Texto retornado pelo catálogo                                    |
-| `codigo_municipio_sede`    | Código da sede institucional                                     |
+| Parâmetro                  | Regra                                                              |
+| -------------------------- | ------------------------------------------------------------------ |
+| `ano_inicial`              | Inteiro obrigatório entre 1900 e 9999                              |
+| `ano_final`                | Inteiro obrigatório entre 1900 e 9999, maior ou igual ao inicial   |
+| `codigo_curso`             | Código original como texto                                         |
+| `codigo_area_geral`        | Código CINE como texto; mantém zeros iniciais                      |
+| `codigo_municipio_oferta`  | Código do local de oferta, sem substituição pela sede              |
+| `modalidade`               | Texto retornado pelo catálogo                                      |
+| `categoria_administrativa` | Texto retornado pelo catálogo                                      |
+| `organizacao_academica`    | Texto retornado pelo catálogo                                      |
+| `codigo_municipio_sede`    | Código da sede institucional                                       |
+| `grau_academico`           | Texto de `graus_academicos`; grau do último ano observado do curso |
+| `capital`                  | `Capital` ou `Interior`; cursos sem município de oferta não entram |
+| `turno`                    | Texto de `turnos`; turno de oferta do curso, não o do aluno        |
 
-O intervalo é inclusivo e aceita de 1 a 30 anos. De 2000 a 2029 é válido; de 2000 a 2030 excede o limite. O limite controla o tamanho da resposta; o desempenho precisa ser medido com a base real. Os sete filtros opcionais combinam por E e aceitam um valor por parâmetro. Parâmetros desconhecidos, repetidos, vazios ou inválidos retornam `400`; o parâmetro `ano` do resumo anual não é aceito nesta rota.
+O intervalo é inclusivo e aceita de 1 a 30 anos. De 2000 a 2029 é válido; de 2000 a 2030 excede o limite. O limite controla o tamanho da resposta; o desempenho precisa ser medido com a base real. Os dez filtros opcionais combinam por E e aceitam um valor por parâmetro. Parâmetros desconhecidos, repetidos, vazios ou inválidos retornam `400`; o parâmetro `ano` do resumo anual não é aceito nesta rota.
 
 É permitido solicitar anos que não aparecem em `/api/v1/filtros`: eles serão representados como lacunas, sem inventar medidas. As rotas atuais de catálogo e resumo permanecem inalteradas.
 
