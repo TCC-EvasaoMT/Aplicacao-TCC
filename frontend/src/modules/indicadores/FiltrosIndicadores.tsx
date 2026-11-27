@@ -121,9 +121,12 @@ export function FiltrosIndicadores({
 								filterInputAutoFocus
 								resetFilterOnHide
 								aria-describedby={
-									campo.chave.includes('municipio')
+									campo.chave.includes('municipio') || campo.chave === 'capital'
 										? 'municipios-ajuda'
-										: undefined
+										: campo.chave === 'grau_academico' ||
+											  campo.chave === 'turno'
+											? 'atributos-ajuda'
+											: undefined
 								}
 								onChange={(valor) => onChange(campo.chave, valor)}
 							/>
@@ -133,7 +136,12 @@ export function FiltrosIndicadores({
 			</div>
 			<Ajuda id="municipios-ajuda">
 				Oferta é o local do curso; sede é o local da instituição. Em EaD, a sede
-				não substitui a oferta ausente.
+				não substitui a oferta ausente, e o curso não entra em capital nem em
+				interior.
+			</Ajuda>
+			<Ajuda id="atributos-ajuda">
+				O grau acadêmico é o do último ano observado do curso. O turno é o de
+				oferta do curso, não o turno do aluno do perfil.
 			</Ajuda>
 			<div className="mt-6 flex flex-wrap gap-2 border-t border-panel-line pt-4">
 				<Button label="Ver resultados" onClick={onFechar} />

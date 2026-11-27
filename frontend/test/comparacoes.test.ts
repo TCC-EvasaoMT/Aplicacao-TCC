@@ -24,7 +24,10 @@ const catalogo: Catalogo = {
 	municipios_sede: [{ codigo: '5108402', nome: 'Várzea Grande' }],
 	modalidades: ['A distância'],
 	categorias_administrativas: ['Pública Federal'],
-	organizacoes_academicas: ['Universidade']
+	organizacoes_academicas: ['Universidade'],
+	graus_academicos: ['Licenciatura'],
+	capitais: ['Capital', 'Interior'],
+	turnos: ['Noturno']
 }
 
 test('serializa ano, filtros e grupos sem perder zeros; omite só o filtro da dimensão agrupada', () => {
@@ -36,7 +39,10 @@ test('serializa ano, filtros e grupos sem perder zeros; omite só o filtro da di
 		codigo_municipio_sede: '5108402',
 		modalidade: 'A distância',
 		categoria_administrativa: 'Pública Federal',
-		organizacao_academica: 'Universidade'
+		organizacao_academica: 'Universidade',
+		grau_academico: 'Licenciatura',
+		capital: 'Capital',
+		turno: 'Noturno'
 	}
 	const query = new URLSearchParams(
 		serializarComparacao(
@@ -77,7 +83,7 @@ test('seleção vazia consulta todos os grupos limitados; filtros vazios são om
 	)
 })
 
-test('sete dimensões usam o catálogo correto, distinguindo oferta e sede', () => {
+test('dez dimensões usam o catálogo correto, distinguindo oferta e sede', () => {
 	for (const dimensao of Object.keys(
 		dimensoesComparacao
 	) as (keyof typeof dimensoesComparacao)[]) {
@@ -99,6 +105,26 @@ test('sete dimensões usam o catálogo correto, distinguindo oferta e sede', () 
 	assert.deepEqual(opcoesComparacao(catalogo, 'modalidade'), [
 		{ valor: 'A distância', rotulo: 'A distância' }
 	])
+	assert.deepEqual(
+		opcoesComparacao(catalogo, 'capital').map((o) => o.valor),
+		['Capital', 'Interior']
+	)
+})
+
+test('grupo sem município de oferta tem rótulo próprio em capital ou interior', () => {
+	const vazio = { valor: null, nome: null }
+	assert.equal(
+		rotuloGrupo(vazio, 'capital'),
+		'Sem município de oferta (EaD ou não informado)'
+	)
+	assert.equal(rotuloGrupo(vazio, 'turno'), 'Não informado (sem identificador)')
+	assert.equal(rotuloGrupo(vazio), 'Não informado (sem identificador)')
+	const selecao = limparFiltros('2023')
+	assert.equal(alternarFiltroGrupo(selecao, 'capital', null), selecao)
+	assert.equal(
+		alternarFiltroGrupo(selecao, 'capital', 'Interior').capital,
+		'Interior'
+	)
 })
 
 test('limita a seleção a 20 grupos, permite desmarcar e preserva a entrada', () => {

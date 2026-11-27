@@ -33,7 +33,7 @@ import {
 	Tabela
 } from './Celulas'
 import { csvComparacao, descreverRecorte } from './exportacao'
-import { rotuloGrupo } from './comparacoes'
+import { rotuloGrupo, type DimensaoComparacao } from './comparacoes'
 
 const encurtar = (texto: string, limite: number) =>
 	texto.length > limite ? `${texto.slice(0, limite - 1)}…` : texto
@@ -53,6 +53,7 @@ interface Props {
 	parametros: Record<string, string>
 	// Valor do grupo usado como filtro ('' quando nenhum).
 	destaque: string
+	dimensao: DimensaoComparacao
 	onSelecionar: (valor: string) => void
 }
 
@@ -60,6 +61,7 @@ export function GraficoComparacoes({
 	grupos,
 	parametros,
 	destaque,
+	dimensao,
 	onSelecionar
 }: Props) {
 	// Grupo sob o ponteiro ou com foco na tabela; liga gráfico e tabela.
@@ -130,7 +132,7 @@ export function GraficoComparacoes({
 	}
 	const dados = grupos.map((grupo) => ({
 		...grupo,
-		rotulo: rotuloGrupo(grupo.grupo)
+		rotulo: rotuloGrupo(grupo.grupo, dimensao)
 	}))
 	const temTaxas = grupos.some(
 		({ taxas }) => taxas.evasao_curso !== null || taxas.evasao_ies !== null
@@ -289,7 +291,7 @@ export function GraficoComparacoes({
 				</thead>
 				<tbody>
 					{grupos.map((grupo, indice) => {
-						const rotulo = rotuloGrupo(grupo.grupo)
+						const rotulo = rotuloGrupo(grupo.grupo, dimensao)
 						const valor = grupo.grupo.valor
 						return (
 							<tr

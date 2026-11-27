@@ -7,7 +7,13 @@ export const camposFiltro = [
 		catalogo: 'areas_gerais',
 		rotulo: 'Área geral CINE'
 	},
+	{
+		chave: 'grau_academico',
+		catalogo: 'graus_academicos',
+		rotulo: 'Grau acadêmico'
+	},
 	{ chave: 'modalidade', catalogo: 'modalidades', rotulo: 'Modalidade' },
+	{ chave: 'turno', catalogo: 'turnos', rotulo: 'Turno do curso' },
 	{
 		chave: 'categoria_administrativa',
 		catalogo: 'categorias_administrativas',
@@ -23,6 +29,7 @@ export const camposFiltro = [
 		catalogo: 'municipios_oferta',
 		rotulo: 'Município de oferta'
 	},
+	{ chave: 'capital', catalogo: 'capitais', rotulo: 'Capital ou interior' },
 	{
 		chave: 'codigo_municipio_sede',
 		catalogo: 'municipios_sede',
@@ -40,10 +47,13 @@ export function limparFiltros(ano = ''): SelecaoFiltros {
 		ano,
 		codigo_curso: '',
 		codigo_area_geral: '',
+		grau_academico: '',
 		modalidade: '',
+		turno: '',
 		categoria_administrativa: '',
 		organizacao_academica: '',
 		codigo_municipio_oferta: '',
+		capital: '',
 		codigo_municipio_sede: ''
 	}
 }

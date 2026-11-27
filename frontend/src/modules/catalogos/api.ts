@@ -14,6 +14,9 @@ export interface Catalogo {
 	modalidades: string[]
 	categorias_administrativas: string[]
 	organizacoes_academicas: string[]
+	graus_academicos: string[]
+	capitais: string[]
+	turnos: string[]
 }
 
 export function consultarCatalogo(signal: AbortSignal) {

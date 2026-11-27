@@ -15,6 +15,7 @@ import { gravarUrl, lerUrl } from '../../lib/url'
 import {
 	alternarFiltroGrupo,
 	comparacaoPadrao,
+	avisosDimensao,
 	dimensoesComparacao,
 	grupoEmDestaque,
 	gruposAusentes,
@@ -287,11 +288,14 @@ export function PainelComparacoes({
 								: `${dados.grupos.length} de ${plural(dados.total_grupos, 'grupo', 'grupos')}`}
 						</h3>
 						<Ajuda>Ordem por código ou atributo, sem ranking de evasão.</Ajuda>
+						{avisosDimensao[dimensaoExibida] && (
+							<Ajuda>{avisosDimensao[dimensaoExibida]}</Ajuda>
+						)}
 						{destaque && (
 							<Ajuda>
 								{dimensao.rotulo} {rotuloDestaque} em destaque. Os demais grupos
-								seguem visíveis para comparar; resumo e evolução mostram só esse
-								grupo.
+								seguem visíveis para comparar; o restante do painel mostra só
+								esse grupo.
 							</Ajuda>
 						)}
 						{destaqueAusente && (
@@ -340,6 +344,7 @@ export function PainelComparacoes({
 								grupos={dados.grupos}
 								parametros={parametrosCsv(exibida.query)}
 								destaque={destaque}
+								dimensao={dimensaoExibida}
 								onSelecionar={(valor) =>
 									onSelecaoChange(
 										alternarFiltroGrupo(selecao, dimensaoExibida, valor)

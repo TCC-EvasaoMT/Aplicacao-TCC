@@ -14,10 +14,13 @@ const catalogo = {
 	categorias_administrativas: ['Pública Federal'],
 	organizacoes_academicas: ['Universidade'],
 	municipios_oferta: [{ codigo: '5107909', nome: 'Sinop' }],
-	municipios_sede: [{ codigo: '5103403', nome: 'Cuiabá' }]
+	municipios_sede: [{ codigo: '5103403', nome: 'Cuiabá' }],
+	graus_academicos: ['Licenciatura'],
+	capitais: ['Capital', 'Interior'],
+	turnos: ['Noturno']
 }
 
-test('serializa os oito filtros preservando zeros, acentos e a distinção entre sede e oferta', () => {
+test('serializa os onze filtros preservando zeros, acentos e a distinção entre sede e oferta', () => {
 	const filtros = {
 		ano: '2023',
 		codigo_curso: '001',
@@ -26,7 +29,10 @@ test('serializa os oito filtros preservando zeros, acentos e a distinção entre
 		categoria_administrativa: 'Pública Federal',
 		organizacao_academica: 'Universidade',
 		codigo_municipio_oferta: '5107909',
-		codigo_municipio_sede: '5103403'
+		codigo_municipio_sede: '5103403',
+		grau_academico: 'Licenciatura',
+		capital: 'Interior',
+		turno: 'Noturno'
 	}
 	assert.deepEqual(
 		Object.fromEntries(new URLSearchParams(serializarFiltros(filtros))),
