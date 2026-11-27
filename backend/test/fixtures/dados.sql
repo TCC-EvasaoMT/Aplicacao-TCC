@@ -5,14 +5,17 @@ VALUES (0, 'Não informado', 'Não informado', NULL, NULL),
   (1, 'Pública Federal', 'Universidade', '5103403', 'Cuiabá'),
   (2, 'Pública Estadual', 'Universidade', '5102504', 'Cáceres'),
   (3, 'Pública Municipal', 'Faculdade', '5107909', 'Sinop');
-INSERT INTO gold.dim_curso (id_curso, codigo_curso, nome_curso)
-VALUES (0, NULL, 'Não informado'), (1, '001', 'Pedagogia'), (2, '002', 'Computação'),
-  (3, '003', 'Somente docentes'), (4, '004', 'Base zero'), (5, '005', 'Ruído'),
-  (6, '006', 'Medida ausente'), (7, '007', 'Grupo pequeno A'), (8, '008', 'Grupo pequeno B');
+INSERT INTO gold.dim_curso (id_curso, codigo_curso, nome_curso, grau_academico)
+VALUES (0, NULL, 'Não informado', NULL), (1, '001', 'Pedagogia', 'Licenciatura'),
+  (2, '002', 'Computação', 'Bacharelado'), (3, '003', 'Somente docentes', NULL),
+  (4, '004', 'Base zero', 'Licenciatura'), (5, '005', 'Ruído', 'Licenciatura'),
+  (6, '006', 'Medida ausente', 'Licenciatura'), (7, '007', 'Grupo pequeno A', 'Bacharelado'),
+  (8, '008', 'Grupo pequeno B', 'Tecnológico');
 INSERT INTO gold.dim_area_conhecimento (id_area_conhecimento, codigo_rotulo_cine, codigo_area_geral, area_geral)
 VALUES (0, NULL, NULL, NULL), (1, '0113', '01', 'Educação'), (2, '0613', '06', 'Computação');
-INSERT INTO gold.dim_localidade (id_localidade, codigo_municipio, municipio)
-VALUES (0, NULL, 'Não se aplica / não informado'), (1, '5103403', 'Cuiabá'), (2, '5107909', 'Sinop');
+INSERT INTO gold.dim_localidade (id_localidade, codigo_municipio, municipio, eh_capital)
+VALUES (0, NULL, 'Não se aplica / não informado', NULL), (1, '5103403', 'Cuiabá', true),
+  (2, '5107909', 'Sinop', false);
 INSERT INTO gold.dim_oferta (id_oferta, modalidade_ensino, turno)
 VALUES (0, 'Não informado', 'Não informado'), (1, 'Presencial', 'Noturno'), (2, 'A distância', 'Não se aplica (EaD)');
 -- ingressantes_total e matriculas_total trazem ruído proposital, como na carga real:

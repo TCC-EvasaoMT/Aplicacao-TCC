@@ -213,3 +213,71 @@ test('SQL parametriza filtros, seleção e limite, e usa apenas agrupamentos da 
 		/Agrupamento inválido/
 	)
 })
+
+test('grau, capital e turno agrupam por expressões internas e filtram por parâmetro', () => {
+	const { text, values } = consultaComparacao({
+		ano: 2023,
+		agrupar_por: 'capital',
+		limite: MAX_GRUPOS,
+		grupos: ['Interior'],
+		grau_academico: 'Licenciatura',
+		turno: "Noturno'; DROP"
+	})
+	assert.deepEqual(values, [
+		2023,
+		'Licenciatura',
+		"Noturno'; DROP",
+		['Interior'],
+		MAX_GRUPOS
+	])
+	assert.ok(!text.includes('DROP'))
+	assert.match(text, /c\.grau_academico = \$2/)
+	assert.match(text, /o\.turno = \$3/)
+	// eh_capital vira texto: Capital, Interior ou null sem município de oferta.
+	assert.match(
+		text,
+		/CASE WHEN l\.eh_capital THEN 'Capital' WHEN NOT l\.eh_capital THEN 'Interior' END = ANY\(\$4::text\[\]\)/
+	)
+})
+
+test('capital aceita só Capital e Interior; grau e turno, textos do catálogo', async (t) => {
+	const recebidos: FiltrosComparacao[] = []
+	const unused = async (): Promise<never> => {
+		throw new Error('Dependência inesperada')
+	}
+	const app = await buildApp({
+		health: unused,
+		indicadores: { resumo: unused },
+		catalogos: { filtros: unused },
+		analises: {
+			evolucao: unused,
+			comparacao: async (filtros) => {
+				recebidos.push({ ...filtros })
+				return []
+			},
+			dispersao: unused,
+			ranking: unused,
+			perfil: unused,
+			coorte: unused
+		}
+	})
+	t.after(() => app.close())
+	for (const query of [
+		'agrupar_por=capital&capital=capital',
+		'agrupar_por=capital&grupos=Litoral',
+		'agrupar_por=turno&turno=%20',
+		'agrupar_por=grau'
+	])
+		assert.equal(
+			(await app.inject(`${base}?ano=2023&${query}`)).statusCode,
+			400,
+			query
+		)
+	assert.equal(recebidos.length, 0)
+	const response = await app.inject(
+		`${base}?ano=2023&agrupar_por=grau_academico&capital=Capital&turno=Noturno`
+	)
+	assert.equal(response.statusCode, 200, response.body)
+	assert.equal(recebidos[0]!.capital, 'Capital')
+	assert.equal(recebidos[0]!.turno, 'Noturno')
+})

@@ -16,7 +16,10 @@ const catalogo = {
 	municipios_sede: [],
 	modalidades: [],
 	categorias_administrativas: [],
-	organizacoes_academicas: []
+	organizacoes_academicas: [],
+	graus_academicos: [],
+	capitais: [],
+	turnos: []
 }
 function fakeConsultas(): Dependencias {
 	return {
