@@ -39,7 +39,7 @@ try {
 			console.log('Conta já existe. Senha, estado e permissões preservados.')
 		} else {
 			const senha = await senhaOculta(
-				'Senha (15 a 128 caracteres, entrada oculta): '
+				'Senha (8 a 64 caracteres, entrada oculta): '
 			)
 			if (senha !== (await senhaOculta('Confirme a senha: ')))
 				throw new Error('As senhas não conferem')
@@ -51,7 +51,7 @@ try {
 	}
 } catch {
 	console.error(
-		'Operação não concluída. Confira comando, configuração, permissões, migrações, e-mail único e senha de 15 a 128 caracteres.'
+		'Operação não concluída. Confira comando, configuração, permissões, migrações, e-mail único e senha de 8 a 64 caracteres.'
 	)
 	process.exitCode = 1
 } finally {

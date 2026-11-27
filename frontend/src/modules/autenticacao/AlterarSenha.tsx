@@ -6,7 +6,7 @@ import { ErroHttp } from '../../lib/http'
 import { Ajuda, classes } from '../../lib/ui'
 import {
 	LIMITES_SENHA,
-	MAX_UTF16_SENHA,
+	MAX_UTF16_SENHA_ATUAL,
 	mensagemTrocaSenha,
 	validarNovaSenha,
 	type ErroNovaSenha
@@ -108,7 +108,7 @@ function Formulario() {
 					type="password"
 					autoComplete={autoComplete}
 					required
-					maxLength={MAX_UTF16_SENHA}
+					maxLength={id === 'atual' ? MAX_UTF16_SENHA_ATUAL : undefined}
 					value={valores[id]}
 					invalid={invalido}
 					aria-invalid={invalido}

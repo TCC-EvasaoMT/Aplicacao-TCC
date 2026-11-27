@@ -27,7 +27,7 @@ export function mensagemLogin(status: number | null): string {
 export function mensagemTrocaSenha(status: number | null): string {
 	switch (status) {
 		case 400:
-			return 'A nova senha deve ter entre 15 e 128 caracteres.'
+			return 'A nova senha deve ter entre 8 e 64 caracteres.'
 		case 401:
 			return 'Sua sessão terminou. Entre novamente para alterar a senha.'
 		case 422:
@@ -41,13 +41,14 @@ export function mensagemTrocaSenha(status: number | null): string {
 	}
 }
 
-export const LIMITES_SENHA = { minimo: 15, maximo: 128 }
+export const LIMITES_SENHA = { minimo: 8, maximo: 64 }
 
 // Como o servidor: um emoji é 1 caractere, não 2 unidades UTF-16 de `length`.
 export const contarCaracteres = (texto: string) => [...texto].length
 
-// `maxLength` do HTML conta UTF-16; o limite real é validado à parte.
-export const MAX_UTF16_SENHA = LIMITES_SENHA.maximo * 2
+// O login e a confirmação da senha atual aceitam credenciais anteriores de até
+// 128 pontos de código. O atributo maxLength do HTML conta unidades UTF-16.
+export const MAX_UTF16_SENHA_ATUAL = 128 * 2
 
 export interface ErroNovaSenha {
 	campo: 'nova' | 'confirmacao'

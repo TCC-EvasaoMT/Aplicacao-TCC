@@ -4,7 +4,7 @@ import { InputText } from 'primereact/inputtext'
 import { Sidebar } from 'primereact/sidebar'
 import { ErroHttp } from '../../lib/http'
 import { Ajuda, classes } from '../../lib/ui'
-import { MAX_UTF16_SENHA, mensagemLogin } from './regras'
+import { MAX_UTF16_SENHA_ATUAL, mensagemLogin } from './regras'
 import { encerrarSessao, iniciarSessao } from './sessao'
 import { useSessao } from './useSessao'
 import { usePaginaInerte } from './usePaginaInerte'
@@ -163,7 +163,7 @@ function FormularioLogin({
 						type="password"
 						autoComplete="current-password"
 						required
-						maxLength={MAX_UTF16_SENHA}
+						maxLength={MAX_UTF16_SENHA_ATUAL}
 						value={senha}
 						invalid={!!erro}
 						aria-invalid={!!erro}
