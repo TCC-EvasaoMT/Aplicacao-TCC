@@ -49,6 +49,8 @@ docker run --rm --env-file "$HOME/evasao-mt-manutencao.env" evasao-mt:ensaio-01 
 docker run --rm -it --env-file "$HOME/evasao-mt-manutencao.env" evasao-mt:ensaio-01 node dist/database/cli.js criar-admin admin@example.com
 ```
 
+Para restringir o painel a contas autorizadas, acrescente também `PAINEL_PUBLICO=false` no arquivo do servidor; sem `AUTH_ENABLED=true`, o servidor não inicia. Crie as contas leitoras com `node dist/database/cli.js criar-leitor pessoa@example.com` (com `-it`, como o administrador) e bloqueie com `node dist/database/cli.js desativar pessoa@example.com`. Para um teste de carga com painel restrito, o gerador precisa fazer login e enviar o Bearer.
+
 Entre os dois comandos, aplique `backend/sql/permissoes-app.sql` com `psql` a partir de um checkout, como descrito na [preparação do schema app](../arquitetura/BANCO_APLICACAO.md). No arquivo do servidor, acrescente `AUTH_ENABLED=true`, `AUTH_JWT_SECRET`, `AUTH_ORIGIN`, `APP_POSTGRES_USER` e `APP_POSTGRES_PASSWORD`.
 
 ## Iniciar e verificar

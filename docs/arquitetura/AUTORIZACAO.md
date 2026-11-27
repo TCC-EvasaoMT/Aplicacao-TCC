@@ -1,6 +1,6 @@
 # Acesso ao painel e à administração
 
-O painel é público. A autenticação administrativa do backend usa credenciais locais, JWT no cabeçalho `Authorization: Bearer <token>` e sessões no schema `app` do mesmo PostgreSQL. Não depende de provedor externo. O painel tem login no cabeçalho; a administração do ETL ainda não foi implementada.
+O painel é público por padrão; com `PAINEL_PUBLICO=false`, as consultas exigem login de uma conta com `painel:consultar`. A autenticação do backend usa credenciais locais, JWT no cabeçalho `Authorization: Bearer <token>` e sessões no schema `app` do mesmo PostgreSQL. Não depende de provedor externo. O painel tem login no cabeçalho; a administração do ETL ainda não foi implementada.
 
 ## Preparação
 
@@ -9,6 +9,7 @@ Siga [Banco da aplicação](BANCO_APLICACAO.md) para criar as roles e o schema, 
 | Variável                                      | Uso                                                                                                                                    |
 | --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
 | `AUTH_ENABLED`                                | `true` ativa as cinco rotas de autenticação. Padrão `false`, mantendo a demonstração pública existente. Não libera rotas protegidas.   |
+| `PAINEL_PUBLICO`                              | `false` restringe as consultas a contas com `painel:consultar`; exige `AUTH_ENABLED=true`. Padrão `true`.                              |
 | `AUTH_JWT_SECRET`                             | Segredo aleatório exclusivo, com pelo menos 64 caracteres hexadecimais. Obrigatório quando habilitado.                                 |
 | `AUTH_ORIGIN`                                 | Origem exata do navegador, sem barra final ou caminho. `http://127.0.0.1:5173` no `pnpm dev`; `http://127.0.0.1:3000` no `pnpm start`. |
 | `APP_POSTGRES_USER` / `APP_POSTGRES_PASSWORD` | Credenciais da role restrita de autenticação. Host, porta e banco são os mesmos `POSTGRES_*` usados pela Gold.                         |
@@ -20,6 +21,16 @@ node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"
 ```
 
 Com `AUTH_ENABLED=true`, configuração incompleta impede a inicialização. Banco ou schema indisponível impede login e acesso protegido, com erro controlado; não há fallback que conceda acesso. `/health` continua verificando somente a Gold e não comprova a disponibilidade da autenticação.
+
+## Painel restrito
+
+Com `PAINEL_PUBLICO=false`, as rotas de consulta (catálogo, resumo e todas as análises) passam a exigir uma sessão válida com a permissão `painel:consultar`: sem login, `401`; com login sem a permissão, `403`. Continuam públicas `/health`, que não expõe dados, as rotas de login e `GET /api/v1/configuracao`, que informa `painel_restrito` e `autenticacao` para a interface decidir o que mostrar. As respostas restritas saem com `Cache-Control: no-store`.
+
+`PAINEL_PUBLICO=false` exige `AUTH_ENABLED=true`: sem autenticação, todas as consultas seriam negadas, e o servidor não inicia. O valor aceita só `true` ou `false`.
+
+As rotas de consulta declaram `acesso: 'painel'`, que o controle de acesso resolve como `publico` ou `painel:consultar` conforme a configuração. Assim, uma rota nova do painel segue o modo escolhido sem ser lembrada caso a caso. O CSV continua funcionando, porque é gerado no navegador com os dados já carregados.
+
+Contas leitoras recebem só `painel:consultar` e não acessam rotas administrativas. Administradores recebem também essa permissão (a migração `002` a concede aos administradores existentes). A criação e a desativação de contas estão em [Banco da aplicação](BANCO_APLICACAO.md).
 
 Para acesso por Vite e seu proxy, use `AUTH_ORIGIN=http://127.0.0.1:5173`, inclusive ao abrir `/docs/` através do Vite. `localhost` e `127.0.0.1` são origens diferentes. Em produção a origem deve usar HTTPS, e o servidor deve ficar atrás de um ingresso HTTPS configurado, seja em loopback (padrão) ou no container, que escuta em `0.0.0.0` ([imagem Docker](../operacao/DOCKER_EC2.md)). Não há CORS para origens externas.
 
@@ -49,7 +60,7 @@ Credenciais incorretas, usuário inexistente e conta desativada recebem o mesmo 
 
 ## Troca de senha
 
-`POST /senha` exige sessão válida (Bearer), proteção CSRF e a senha atual. A nova senha segue os mesmos limites do cadastro (15 a 128 caracteres) e é gravada como novo hash Argon2id. Senha atual incorreta retorna `422` (`SENHA_ATUAL_INCORRETA`), e não `401`, porque a sessão continua válida. A rota permite cinco tentativas por minuto por conta autenticada, para que um JWT roubado não sirva para testar senhas.
+`POST /senha` exige sessão válida (Bearer), proteção CSRF e a senha atual. A nova senha segue os mesmos limites do cadastro (8 a 64 caracteres) e é gravada como novo hash Argon2id. Quem já usava uma senha com mais de 64 caracteres pode usá-la para entrar e confirmar a troca. Senha atual incorreta retorna `422` (`SENHA_ATUAL_INCORRETA`), e não `401`, porque a sessão continua válida. A rota permite cinco tentativas por minuto por conta autenticada, para que um JWT roubado não sirva para testar senhas.
 
 A troca atualiza o hash e revoga, na mesma transação, todas as outras sessões da conta; a sessão que fez a troca continua. A atualização só ocorre se o hash ainda for o conferido pela rota: de duas trocas simultâneas, uma vence e a outra recebe `422`. A role HTTP recebeu `UPDATE` apenas na coluna `senha_hash`; continua sem poder ativar contas, trocar e-mails ou conceder permissões. Em instalações existentes, reaplique `permissoes-app.sql`.
 
@@ -69,17 +80,18 @@ O logout revoga a sessão identificada pelo cookie e todos os seus JWTs; não en
 
 ## Autorização por rota
 
-| Recurso                                          | Visitante | Conta autenticada                           |
-| ------------------------------------------------ | --------- | ------------------------------------------- |
-| Painel, catálogo, resumo, evolução e comparações | Permitido | Permitido                                   |
-| `/health`                                        | Permitido | Permitido                                   |
-| `/autenticacao/login`, `renovar` e `logout`      | Permitido | Permitido                                   |
-| `/autenticacao/me`                               | `401`     | Permitido com sessão válida                 |
-| `/autenticacao/senha`                            | `401`     | Permitido com sessão válida e a senha atual |
-| Histórico do ETL (futuro)                        | `401`     | Exigirá `etl:consultar`                     |
-| Reprocessamento do ETL (futuro)                  | `401`     | Exigirá `etl:reprocessar`                   |
+| Recurso                                     | Visitante                              | Conta autenticada                                          |
+| ------------------------------------------- | -------------------------------------- | ---------------------------------------------------------- |
+| Painel, catálogo, resumo e análises         | Permitido; `401` com o painel restrito | Permitido; com o painel restrito, exige `painel:consultar` |
+| `/api/v1/configuracao`                      | Permitido                              | Permitido                                                  |
+| `/health`                                   | Permitido                              | Permitido                                                  |
+| `/autenticacao/login`, `renovar` e `logout` | Permitido                              | Permitido                                                  |
+| `/autenticacao/me`                          | `401`                                  | Permitido com sessão válida                                |
+| `/autenticacao/senha`                       | `401`                                  | Permitido com sessão válida e a senha atual                |
+| Histórico do ETL (futuro)                   | `401`                                  | Exigirá `etl:consultar`                                    |
+| Reprocessamento do ETL (futuro)             | `401`                                  | Exigirá `etl:reprocessar`                                  |
 
-`registrarAcesso`, exportado pelo módulo `autenticacao`, instala o controle antes dos módulos. Toda rota sob `/api/` deve declarar `config.acesso`; a ausência ou um valor desconhecido impede seu registro. Valores permitidos: `publico`, `autenticado`, `etl:consultar` e `etl:reprocessar`. As consultas existentes declaram `publico`. Exemplo para uma futura rota:
+`registrarAcesso`, exportado pelo módulo `autenticacao`, instala o controle antes dos módulos. Toda rota sob `/api/` deve declarar `config.acesso`; a ausência ou um valor desconhecido impede seu registro. Valores permitidos: `publico`, `painel`, `autenticado`, `etl:consultar`, `etl:reprocessar` e `painel:consultar`. As consultas declaram `painel`, resolvido como `publico` ou `painel:consultar` conforme `PAINEL_PUBLICO`; as rotas de login declaram `publico`. Exemplo para uma futura rota:
 
 ```ts
 app.get(
@@ -94,7 +106,7 @@ app.get(
 
 Sessão ausente, inválida, expirada ou revogada retorna `401`. Sessão válida sem a permissão exigida retorna `403`. `request.identidade` contém a identidade obtida do banco, e `request.sessaoId`, a sessão do JWT. A configuração de segurança no Swagger apenas documenta o Bearer; a proteção efetiva vem de `config.acesso` e do hook.
 
-O comando de criação de administrador concede explicitamente as duas permissões. Não há rota HTTP para promover usuários. Para bloquear uma conta, use a conexão de manutenção, conferindo o e-mail antes de executar:
+O comando de criação de administrador concede explicitamente as três permissões, e o de leitor, só `painel:consultar`. Não há rota HTTP para promover usuários. Para bloquear uma conta, use `auth:desativar <email>`, que marca a conta como inativa e revoga as sessões abertas na mesma transação; os JWTs ainda dentro dos dez minutos passam a receber `401` na próxima requisição. O equivalente em SQL, pela conexão de manutenção:
 
 ```sql
 BEGIN;

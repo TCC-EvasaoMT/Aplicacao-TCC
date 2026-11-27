@@ -44,6 +44,7 @@ O servidor escuta em `127.0.0.1` por padrão. A imagem Docker define `HTTP_HOST=
 | `POSTGRES_USER`                                 | Obrigatória: login exclusivo de leitura.                                                                                |
 | `POSTGRES_PASSWORD`                             | Obrigatória: senha desse login.                                                                                         |
 | `AUTH_ENABLED`                                  | `true` habilita a autenticação administrativa; padrão `false`.                                                          |
+| `PAINEL_PUBLICO`                                | `false` restringe as consultas a contas com `painel:consultar`; exige `AUTH_ENABLED=true`. Padrão `true`.               |
 | `AUTH_JWT_SECRET`                               | Com autenticação: segredo aleatório de pelo menos 64 caracteres hexadecimais.                                           |
 | `AUTH_ORIGIN`                                   | Com autenticação: origem exata do navegador, como `http://127.0.0.1:5173` no `pnpm dev`.                                |
 | `APP_POSTGRES_USER` / `APP_POSTGRES_PASSWORD`   | Com autenticação: role restrita ao schema `app` usada pelo servidor.                                                    |
@@ -51,12 +52,15 @@ O servidor escuta em `127.0.0.1` por padrão. A imagem Docker define `HTTP_HOST=
 
 Credenciais ausentes ou portas inválidas impedem a inicialização. Uma conexão indisponível mantém o HTTP ativo, mas as consultas respondem `503`. O pool de leitura da Gold tem até cinco conexões, espera de conexão de dois segundos e limite SQL de 2,5 segundos; com autenticação, o pool de `app` tem até três conexões e os mesmos limites. Esses limites não substituem a medição de desempenho com a carga real.
 
-Consulte a [proteção da API pública](../docs/operacao/SEGURANCA_API.md) para limites HTTP, respostas `429`, cabeçalhos e cuidados com proxy. O painel continua público. Para habilitar a autenticação administrativa, siga [autenticação e autorização](../docs/arquitetura/AUTORIZACAO.md) e [preparação do schema app](../docs/arquitetura/BANCO_APLICACAO.md). Depois de criar as roles e o schema e configurar as credenciais de manutenção, execute na raiz:
+Consulte a [proteção da API pública](../docs/operacao/SEGURANCA_API.md) para limites HTTP, respostas `429`, cabeçalhos e cuidados com proxy. O painel é público por padrão; com `PAINEL_PUBLICO=false`, as consultas exigem login com `painel:consultar`. Para habilitar a autenticação, siga [autenticação e autorização](../docs/arquitetura/AUTORIZACAO.md) e [preparação do schema app](../docs/arquitetura/BANCO_APLICACAO.md). Depois de criar as roles e o schema e configurar as credenciais de manutenção, execute na raiz:
 
 ```sh
 pnpm --filter tcc-evasao-backend db:migrate
 # Aplique sql/permissoes-app.sql como descrito no guia do banco.
 pnpm --filter tcc-evasao-backend auth:criar-admin admin@example.com
+# Painel restrito: contas leitoras e bloqueio.
+pnpm --filter tcc-evasao-backend auth:criar-leitor pessoa@example.com
+pnpm --filter tcc-evasao-backend auth:desativar pessoa@example.com
 ```
 
 Em seguida configure `AUTH_ENABLED=true`, `AUTH_JWT_SECRET`, `AUTH_ORIGIN` e `APP_POSTGRES_USER`/`APP_POSTGRES_PASSWORD` conforme `.env.example` e reinicie o backend. Não use as credenciais de manutenção no servidor. Na base sintética, `pnpm dev:demo:auth` faz toda a preparação.
@@ -93,6 +97,7 @@ Sem cliente local, abra o `psql` dentro do container e execute o conteúdo de `s
 | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
 | `GET /health`                            | Testa a leitura da fato e das dimensões. `200` com `{"status":"ok"}` ou `503`. Uma Gold vazia, mas acessível, é saudável.                      |
 | `GET /api/v1/filtros`                    | Catálogo de todos os anos e opções presentes na fato de cursos. Não recebe parâmetros.                                                         |
+| `GET /api/v1/configuracao`               | Pública. Informa `painel_restrito` e `autenticacao` para a interface.                                                                          |
 | `GET /api/v1/indicadores/resumo`         | Totais, base de risco, taxas e qualidade; exige `ano`.                                                                                         |
 | `GET /api/v1/analises/evolucao-temporal` | Série anual com os mesmos indicadores e filtros; exige `ano_inicial` e `ano_final`, até 30 anos inclusivos.                                    |
 | `GET /api/v1/analises/comparacoes`       | Totais, taxas e qualidade por grupo no mesmo ano; exige `ano` e `agrupar_por`. Até 20 grupos, com seleção opcional e aviso de truncamento.     |

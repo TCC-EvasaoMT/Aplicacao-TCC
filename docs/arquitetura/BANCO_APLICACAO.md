@@ -45,9 +45,29 @@ Com as credenciais de migração disponíveis apenas no terminal de manutenção
 pnpm --filter tcc-evasao-backend auth:criar-admin admin@example.com
 ```
 
-O comando pede senha e confirmação com entrada oculta, exige entre 15 e 128 caracteres e armazena um hash Argon2id com salt individual. Concede `etl:consultar` e `etl:reprocessar` em uma transação. E-mail é normalizado para minúsculas; uma conta existente nunca é substituída. Não existe autocadastro público nem senha padrão. Quem executa o comando define a senha inicial; o administrador deve trocá-la no primeiro acesso, em **Alterar senha** no painel, para que só ele a conheça. A troca obrigatória ainda não é imposta pelo sistema.
+O comando pede senha e confirmação com entrada oculta, exige entre 8 e 64 caracteres e armazena um hash Argon2id com salt individual. Concede `etl:consultar`, `etl:reprocessar` e `painel:consultar` em uma transação. E-mail é normalizado para minúsculas; uma conta existente nunca é substituída. Não existe autocadastro público nem senha padrão. Quem executa o comando define a senha inicial; o administrador deve trocá-la no primeiro acesso, em **Alterar senha** no painel, para que só ele a conheça. A troca obrigatória ainda não é imposta pelo sistema.
 
 A opção `--se-ausente`, usada pela demonstração, verifica a existência antes de solicitar senha. Se a conta existir, encerra sem alterar senha, estado ou permissões, inclusive quando estiver desativada ou sem privilégios. Se não existir, exige o mesmo cadastro interativo; nunca inventa uma senha. Exemplo: `pnpm --filter tcc-evasao-backend auth:criar-admin admin@example.com --se-ausente`.
+
+## Leitores e desativação
+
+Para o painel restrito (`PAINEL_PUBLICO=false`), crie contas leitoras, que só recebem `painel:consultar`:
+
+```sh
+pnpm --filter tcc-evasao-backend auth:criar-leitor pessoa@example.com
+```
+
+O cadastro segue as mesmas regras do administrador: senha interativa de 8 a 64 caracteres, e-mail normalizado, conta existente nunca substituída e `--se-ausente` disponível. A pessoa troca a senha em **Alterar senha** depois de entrar.
+
+Para bloquear uma conta, administrador ou leitora:
+
+```sh
+pnpm --filter tcc-evasao-backend auth:desativar pessoa@example.com
+```
+
+O comando marca a conta como inativa e revoga as sessões abertas, sem apagar dados. Com e-mail inexistente, informa e termina com erro. Reativar ainda é feito por SQL na conexão de manutenção.
+
+A migração `002_permissao_painel.sql` amplia o `CHECK` de `app.usuario_permissoes` com `painel:consultar` e concede essa permissão às contas que já tinham `etl:reprocessar`, para que os administradores existentes continuem vendo o painel quando ele for restrito.
 
 ## Relação com a pipeline e manutenção
 
