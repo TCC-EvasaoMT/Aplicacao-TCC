@@ -83,3 +83,26 @@ export function validarNovaSenha(
 		}
 	return null
 }
+
+export const PERMISSAO_PAINEL = 'painel:consultar'
+
+export type EstadoAcesso =
+	'carregando' | 'erro' | 'liberado' | 'login' | 'sem_permissao'
+
+// O que mostrar antes das abas. Painel público: sempre liberado. Restrito:
+// login sem sessão e aviso de permissão quando a conta não tem painel:consultar
+// (o servidor também nega com 403).
+export function estadoAcesso(
+	configuracao: { painel_restrito: boolean } | null | 'erro',
+	usuario: { permissoes: string[] } | null,
+	verificandoSessao: boolean
+): EstadoAcesso {
+	if (configuracao === 'erro') return 'erro'
+	if (configuracao === null) return 'carregando'
+	if (!configuracao.painel_restrito) return 'liberado'
+	if (verificandoSessao) return 'carregando'
+	if (!usuario) return 'login'
+	return usuario.permissoes.includes(PERMISSAO_PAINEL)
+		? 'liberado'
+		: 'sem_permissao'
+}

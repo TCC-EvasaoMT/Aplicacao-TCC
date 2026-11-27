@@ -3,11 +3,18 @@ import { Accordion, AccordionTab } from 'primereact/accordion'
 import { TabMenu } from 'primereact/tabmenu'
 import { gravarUrl, lerUrl } from './lib/url'
 import { abasPainel, lerAba, PainelIndicadores } from './modules/indicadores'
-import { AcessoAdministrativo } from './modules/autenticacao'
+import {
+	AcessoAdministrativo,
+	TelaAcesso,
+	useAcessoPainel
+} from './modules/autenticacao'
 
 const notaLeitura = 'mt-3 max-w-[78ch] text-sm text-panel-muted'
 
 export function App() {
+	// Painel restrito: login antes das abas; público: liberado direto.
+	const acesso = useAcessoPainel()
+	const liberado = acesso.estado === 'liberado'
 	const [aba, setAba] = useState(() => lerAba(lerUrl()))
 	const indice = abasPainel.findIndex((item) => item.id === aba)
 	useEffect(() => {
@@ -40,7 +47,7 @@ export function App() {
 							<span className="hidden text-sm text-white/80 lg:inline">
 								Ensino superior público
 							</span>
-							<AcessoAdministrativo />
+							{liberado && <AcessoAdministrativo />}
 						</div>
 					</div>
 					<h1 className="mt-6 mb-2">Evasão no ensino superior</h1>
@@ -49,21 +56,23 @@ export function App() {
 					</p>
 					{/* O TabMenu se declara menu de navegação; aqui ele controla os
 					    painéis da página, então segue o padrão de abas. */}
-					<TabMenu
-						className="mt-6 sm:mt-8"
-						model={[...abasPainel]}
-						activeIndex={indice}
-						onTabChange={(evento) => setAba(abasPainel[evento.index]!.id)}
-						pt={{
-							menu: { role: 'tablist', 'aria-label': 'Seções do painel' },
-							action: (opcoes) => ({
-								role: 'tab',
-								id: `aba-${opcoes?.context.item.id}`,
-								'aria-selected': opcoes?.context.index === indice,
-								'aria-controls': `painel-${opcoes?.context.item.id}`
-							})
-						}}
-					/>
+					{liberado && (
+						<TabMenu
+							className="mt-6 sm:mt-8"
+							model={[...abasPainel]}
+							activeIndex={indice}
+							onTabChange={(evento) => setAba(abasPainel[evento.index]!.id)}
+							pt={{
+								menu: { role: 'tablist', 'aria-label': 'Seções do painel' },
+								action: (opcoes) => ({
+									role: 'tab',
+									id: `aba-${opcoes?.context.item.id}`,
+									'aria-selected': opcoes?.context.index === indice,
+									'aria-controls': `painel-${opcoes?.context.item.id}`
+								})
+							}}
+						/>
+					)}
 				</div>
 			</header>
 			<main
@@ -71,7 +80,16 @@ export function App() {
 				tabIndex={-1}
 				className="mx-auto max-w-[1440px] px-[4%] pt-4 pb-10"
 			>
-				<PainelIndicadores aba={aba} />
+				{acesso.estado === 'liberado' ? (
+					<PainelIndicadores aba={aba} />
+				) : (
+					<TelaAcesso
+						estado={acesso.estado}
+						email={acesso.usuario?.email}
+						sessaoExpirou={acesso.sessaoExpirou}
+						onTentarNovamente={acesso.tentarNovamente}
+					/>
+				)}
 				<Accordion className="mt-10 rounded-lg border border-panel-line bg-panel-surface px-4 py-3 sm:px-6">
 					<AccordionTab header="Como interpretar os dados">
 						<p className={notaLeitura}>

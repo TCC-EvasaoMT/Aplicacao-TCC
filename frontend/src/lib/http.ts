@@ -6,14 +6,38 @@ export class ErroHttp extends Error {
 	}
 }
 
+// Credencial da sessão, registrada pelo módulo de autenticação. Com o painel
+// restrito, as consultas levam o Bearer; num 401, renovam uma vez e repetem.
+interface Credencial {
+	token: () => Promise<string | null>
+	renovar: () => Promise<string | null>
+}
+let credencial: Credencial | null = null
+
+export function definirCredencial(nova: Credencial | null) {
+	credencial = nova
+}
+
+async function buscar(path: string, signal: AbortSignal, token: string | null) {
+	return fetch(path, {
+		signal,
+		headers: {
+			Accept: 'application/json',
+			...(token ? { Authorization: `Bearer ${token}` } : {})
+		}
+	})
+}
+
 export async function consultar<T>(
 	path: string,
 	signal: AbortSignal
 ): Promise<T> {
-	const response = await fetch(path, {
-		signal,
-		headers: { Accept: 'application/json' }
-	})
+	const token = (await credencial?.token()) ?? null
+	let response = await buscar(path, signal, token)
+	if (response.status === 401 && credencial) {
+		const novo = await credencial.renovar()
+		if (novo) response = await buscar(path, signal, novo)
+	}
 	if (!response.ok) throw new ErroHttp(response.status)
 	return response.json() as Promise<T>
 }
