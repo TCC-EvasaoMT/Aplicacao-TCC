@@ -21,7 +21,7 @@ export function App() {
 		gravarUrl(['aba'], aba === abasPainel[0].id ? [] : [['aba', aba]])
 	}, [aba])
 	return (
-		<>
+		<div className="flex min-h-dvh flex-col">
 			<a
 				className="fixed top-2 left-4 z-50 -translate-y-[150%] rounded bg-panel-surface px-4 py-3 font-semibold text-panel-green shadow-lg focus:translate-y-0"
 				href="#conteudo"
@@ -78,7 +78,7 @@ export function App() {
 			<main
 				id="conteudo"
 				tabIndex={-1}
-				className="mx-auto max-w-[1440px] px-[4%] pt-4 pb-10"
+				className="mx-auto w-full max-w-[1440px] flex-1 px-[4%] pt-4 pb-10"
 			>
 				{acesso.estado === 'liberado' ? (
 					<PainelIndicadores aba={aba} />
@@ -123,6 +123,6 @@ export function App() {
 					)}
 				</div>
 			</footer>
-		</>
+		</div>
 	)
 }
