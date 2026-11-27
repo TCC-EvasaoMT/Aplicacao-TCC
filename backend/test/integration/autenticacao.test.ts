@@ -218,7 +218,7 @@ test(
 		}
 		const csrf = { origin: config.origin, 'x-csrf-protection': '1' }
 		const logs: string[] = []
-		async function servidor(secure = false) {
+		async function servidor(secure = false, painelPublico = true) {
 			const app = await buildApp(
 				{
 					health: async () => {},
@@ -232,6 +232,7 @@ test(
 				},
 				{
 					docs: true,
+					painelPublico,
 					logger: true,
 					logStream: {
 						write: (line) => {
@@ -772,6 +773,101 @@ test(
 				]) {
 					assert.equal((await app.inject(url)).statusCode, 200)
 				}
+			}
+		)
+		await t.test(
+			'painel restrito exige login com painel:consultar e respeita conta desativada',
+			async () => {
+				const consultas = [
+					'/api/v1/filtros',
+					'/api/v1/indicadores/resumo?ano=2023',
+					'/api/v1/analises/evolucao-temporal?ano_inicial=2022&ano_final=2023',
+					'/api/v1/analises/comparacoes?ano=2023&agrupar_por=curso',
+					'/api/v1/analises/dispersao?ano=2023',
+					'/api/v1/analises/ranking?ano=2023&dimensao=area_geral',
+					'/api/v1/analises/perfil?ano=2023&fator=sexo',
+					'/api/v1/analises/coorte?ano_ingresso=2022'
+				]
+				const leitor = { email: 'leitor@example.com', senha }
+				const semPermissao = { email: 'sem@example.com', senha }
+				await criarLeitor(owner, leitor.email, leitor.senha)
+				await criarLeitor(owner, semPermissao.email, semPermissao.senha)
+				await db.query(
+					`DELETE FROM app.usuario_permissoes WHERE usuario_id =
+            (SELECT id FROM app.usuarios WHERE email = $1)`,
+					[semPermissao.email]
+				)
+				assert.deepEqual(
+					(
+						await db.query(
+							`SELECT permissao FROM app.usuario_permissoes p
+               JOIN app.usuarios u ON u.id = p.usuario_id WHERE u.email = $1`,
+							[leitor.email]
+						)
+					).rows,
+					[{ permissao: 'painel:consultar' }]
+				)
+				const app = await servidor(false, false)
+				assert.deepEqual((await app.inject('/api/v1/configuracao')).json(), {
+					painel_restrito: true,
+					autenticacao: true
+				})
+				assert.equal((await app.inject('/health')).statusCode, 200)
+				for (const url of consultas) {
+					const resposta = await app.inject(url)
+					assert.equal(resposta.statusCode, 401, url)
+					assert.equal(resposta.headers['cache-control'], 'no-store')
+				}
+				// Login continua público; sem a permissão, 403.
+				const negado = await login(app, semPermissao, '10.0.0.21')
+				assert.equal(negado.statusCode, 200, negado.body)
+				assert.equal(
+					(
+						await app.inject({
+							url: consultas[0]!,
+							headers: bearer(negado)
+						})
+					).statusCode,
+					403
+				)
+				const entrada = await login(app, leitor, '10.0.0.22')
+				assert.equal(entrada.statusCode, 200, entrada.body)
+				for (const url of consultas)
+					assert.equal(
+						(await app.inject({ url, headers: bearer(entrada) })).statusCode,
+						200,
+						url
+					)
+				// Leitor não acessa rotas administrativas.
+				assert.equal(
+					(
+						await app.inject({
+							url: '/api/teste/etl',
+							headers: bearer(entrada)
+						})
+					).statusCode,
+					403
+				)
+				// Desativar revoga as sessões: o token ainda válido passa a 401.
+				assert.equal(await desativarConta(owner, leitor.email), true)
+				assert.equal(await desativarConta(owner, 'nao@example.com'), false)
+				assert.equal(
+					(await app.inject({ url: consultas[0]!, headers: bearer(entrada) }))
+						.statusCode,
+					401
+				)
+				assert.equal(
+					(await post(app, 'renovar', cookie(entrada))).statusCode,
+					401
+				)
+				assert.equal((await login(app, leitor, '10.0.0.23')).statusCode, 401)
+				// O administrador recebe painel:consultar na criação.
+				const adm = await login(app, { email, senha }, '10.0.0.24')
+				assert.equal(
+					(await app.inject({ url: consultas[1]!, headers: bearer(adm) }))
+						.statusCode,
+					200
+				)
 			}
 		)
 	}

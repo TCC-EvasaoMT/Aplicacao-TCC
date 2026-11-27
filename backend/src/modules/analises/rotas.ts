@@ -30,7 +30,7 @@ export function registrarRotas(
 	app.get<{ Querystring: FiltrosComparacao }>(
 		'/api/v1/analises/comparacoes',
 		{
-			config: { acesso: 'publico' },
+			config: { acesso: 'painel' },
 			preValidation: async (request) => {
 				// O parser entrega uma string quando grupos aparece uma única vez.
 				const grupos: unknown = request.query.grupos
@@ -60,7 +60,7 @@ export function registrarRotas(
 	app.get<{ Querystring: FiltrosCoorte }>(
 		'/api/v1/analises/coorte',
 		{
-			config: { acesso: 'publico' },
+			config: { acesso: 'painel' },
 			schema: {
 				tags: ['Análises'],
 				summary:
@@ -89,7 +89,7 @@ export function registrarRotas(
 	app.get<{ Querystring: FiltrosPerfil }>(
 		'/api/v1/analises/perfil',
 		{
-			config: { acesso: 'publico' },
+			config: { acesso: 'painel' },
 			schema: {
 				tags: ['Análises'],
 				summary: 'Taxas de evasão por categoria de um fator de perfil.',
@@ -117,7 +117,7 @@ export function registrarRotas(
 	app.get<{ Querystring: FiltrosRanking }>(
 		'/api/v1/analises/ranking',
 		{
-			config: { acesso: 'publico' },
+			config: { acesso: 'painel' },
 			schema: {
 				tags: ['Análises'],
 				summary:
@@ -146,7 +146,7 @@ export function registrarRotas(
 	app.get<{ Querystring: FiltrosDispersao }>(
 		'/api/v1/analises/dispersao',
 		{
-			config: { acesso: 'publico' },
+			config: { acesso: 'painel' },
 			schema: {
 				tags: ['Análises'],
 				summary: 'Relaciona matrículas e evasão de cada curso em um ano.',
@@ -171,7 +171,7 @@ export function registrarRotas(
 	app.get<{ Querystring: FiltrosEvolucao }>(
 		'/api/v1/analises/evolucao-temporal',
 		{
-			config: { acesso: 'publico' },
+			config: { acesso: 'painel' },
 			schema: {
 				tags: ['Análises'],
 				summary: 'Consulta a evolução anual de um recorte.',

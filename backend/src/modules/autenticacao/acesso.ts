@@ -10,7 +10,8 @@ import {
 
 declare module 'fastify' {
 	interface FastifyContextConfig {
-		acesso?: 'publico' | 'autenticado' | Permissao
+		// painel: público ou painel:consultar, conforme PAINEL_PUBLICO.
+		acesso?: 'publico' | 'painel' | 'autenticado' | Permissao
 	}
 	interface FastifyRequest {
 		identidade: Identidade | null
@@ -24,8 +25,11 @@ export function erroAcesso(statusCode: number) {
 
 export async function registrarAcesso(
 	app: FastifyInstance,
-	auth?: { config: ConfigAutenticacao; repositorio: RepositorioAutenticacao }
+	auth?: { config: ConfigAutenticacao; repositorio: RepositorioAutenticacao },
+	painelPublico = true
 ) {
+	if (!painelPublico && !auth)
+		throw new Error('Painel restrito exige autenticação habilitada')
 	app.decorateRequest('identidade', null)
 	app.decorateRequest('sessaoId', null)
 	if (auth)
@@ -46,11 +50,20 @@ export async function registrarAcesso(
 	app.addHook('onRoute', (route) => {
 		if (!route.url.startsWith('/api/')) return
 		const acesso = route.config?.acesso
-		if (!acesso || !['publico', 'autenticado', ...permissoes].includes(acesso))
+		if (
+			!acesso ||
+			!['publico', 'painel', 'autenticado', ...permissoes].includes(acesso)
+		)
 			throw new Error(`Declare o acesso da rota ${route.url}`)
 	})
 	app.addHook('preHandler', async (request, reply) => {
-		const acesso = request.routeOptions.config.acesso
+		const declarado = request.routeOptions.config.acesso
+		const acesso =
+			declarado === 'painel'
+				? painelPublico
+					? 'publico'
+					: 'painel:consultar'
+				: declarado
 		if (!acesso || acesso === 'publico') return
 		reply.header('Cache-Control', 'no-store')
 		if (
